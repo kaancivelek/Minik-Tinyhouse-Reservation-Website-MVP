@@ -1,0 +1,27 @@
+﻿.grid-list {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr); /* 5 kolonlu grid */
+    grid-gap: 10px; /* Öğeler arasındaki boşluk */
+    list-style-type: none; /* Liste işaretlerini kaldır */
+    padding: 0;
+}
+
+    .grid-list li {
+        background-color: #f0f0f0; /* Öğe arka plan rengi */
+        padding: 10px;
+        text-align: center; /* Öğelerin merkezlenmesi */
+        border: 1px solid #ccc; /* Öğelere kenarlık ekleyebilirsiniz */
+    }
+
+.listing-page {
+    padding: 20px;
+}
+
+.card-img-top {
+    object-fit: cover;
+    height: 200px;
+}
+
+.card {
+    min-height: 100%;
+}
