@@ -1,0 +1,275 @@
+Tiny House Reservation and Management System Project Specification
+Date: March 13, 2025Institution: HFTTF Software Engineering DepartmentCourse: Introduction to Database Systems, Spring 2024-2025Prepared by: Research Assistant Tuğba ÇELİKTEN  
+
+1. Project Overview
+1.1 Project Name
+Tiny House Reservation and Management System
+1.2 Project Description
+This project involves designing and implementing a reservation and management system for Tiny House rentals. The system enables:
+
+Users (Tenants) to browse, book, and pay for Tiny House listings online, as well as provide reviews.
+Hosts to manage their Tiny House listings, set pricing and availability, and handle bookings.
+Administrators to oversee user accounts, listings, reservations, and financial transactions.
+
+The project aims to provide hands-on experience in:
+
+Database design and SQL query development.
+Backend and frontend development.
+Real-world software engineering practices addressing structured problems.
+
+1.3 Project Objectives
+
+Facilitate a seamless and secure reservation process for Tiny House hosts and tenants.
+Maintain real-time availability tracking for Tiny Houses.
+Enhance user experience through a review and rating system.
+Manage financial transactions via an integrated online payment system.
+
+
+2. User Roles and Functional Requirements
+2.1 User Roles
+
+Tenant:
+Browse and filter active Tiny House listings.
+Make reservations and process online payments.
+Cancel bookings and view booking history.
+Submit reviews and ratings for rented Tiny Houses.
+
+
+Host:
+Create, edit, deactivate, or delete Tiny House listings.
+Update pricing and availability.
+Accept or reject reservation requests.
+View tenant reviews and booking history.
+
+
+Admin:
+Manage user accounts (create, edit, deactivate, delete).
+Monitor and cancel reservations.
+Review and moderate listings for compliance.
+Track payment history and financial transactions.
+
+
+
+2.2 Role-Based Functional Requirements
+Admin
+
+User Management:
+View, add, edit, deactivate, or delete user accounts (fields: name, surname, email, role).
+Search users based on criteria (e.g., name, email, role).
+
+
+Reservation Management:
+View all reservations with details (start/end dates, payment status, user info).
+Cancel reservations as needed.
+
+
+Listing Management:
+View all Tiny House listings with details (host, price, dates, location).
+Remove or edit non-compliant listings.
+
+
+Financial Management:
+Access payment history and financial reports.
+
+
+Statistics and Reporting:
+Generate reports on user activity, reservations, and system trends (e.g., active users, new registrations).
+Visualize data with charts/graphs for system overview.
+
+
+
+Host
+
+Listing Management:
+Create, edit, deactivate, or delete Tiny House listings (fields: price, description, photos, availability).
+Update listing status (active, inactive, deleted).
+
+
+Reservation Management:
+View, accept, or reject reservation requests.
+Access reservation details (tenant info, dates, payment status).
+
+
+Review Management:
+View and respond to tenant reviews.
+
+
+Financial Management:
+Track payments and generate income reports for their listings.
+
+
+
+Tenant
+
+Account Management:
+Register and log in to the system.
+
+
+Listing Exploration:
+Browse and filter active listings by price, location, dates, or house type.
+View listing details (price, description, features, photos, availability calendar).
+
+
+Reservation Management:
+Select dates, check availability, and make reservations.
+Process online payments and receive booking confirmations.
+View and cancel past or upcoming reservations.
+
+
+Review Management:
+Submit reviews and ratings for rented Tiny Houses.
+
+
+
+
+3. Technical Requirements
+3.1 Database Requirements
+
+Database System: MSSQL, PostgreSQL, or another relational database.
+Database Design:
+Adhere to normalization rules (up to 3NF).
+Use consistent naming conventions for tables and columns (e.g., camelCase or snake_case).
+
+
+Required Database Features:
+Stored Procedures: At least 2, actively used (e.g., for reservation creation or user management).
+Functions: At least 2, actively used (e.g., for calculating booking costs or checking availability).
+Triggers: At least 2, actively used (e.g., for logging reservation changes or enforcing constraints).
+Constraints:
+Primary Key, Foreign Key, Unique, Check, and Not Null constraints on all relevant tables.
+
+
+
+
+Entity-Relationship (ER) Diagram: Must represent all entities, relationships, and constraints.
+
+3.2 Development Requirements
+
+Programming Language: Any language of choice for backend and frontend.
+Backend: Implement business logic and database interactions (API documentation required if APIs are used).
+Frontend: Develop user interfaces for all roles with a focus on usability.
+
+3.3 Interface Requirements
+The system must provide role-specific interfaces with intuitive navigation and responsive design.
+Admin Interface
+
+Dashboard:
+Display system overview (active users, reservations, payment status) with charts/graphs.
+Provide quick access to user, reservation, and listing management.
+
+
+User Management:
+List all users with details (name, surname, email, role).
+Support adding, editing, deactivating, or deleting users.
+Include search/filter functionality.
+
+
+Reservation Management:
+List all reservations with details (dates, payment status, user info).
+Allow cancellation of reservations.
+
+
+Listing Management:
+List all listings with details (host, price, location, dates).
+Enable moderation (edit or delete non-compliant listings).
+
+
+Financial Management:
+Display payment history and financial reports.
+
+
+Statistics and Reporting:
+Show user stats (total users, active users, new registrations).
+Visualize system trends (reservations, payments, reviews) with graphs.
+
+
+
+Host Interface
+
+Dashboard:
+Summarize listing status, reservations, payments, and reviews with visuals.
+
+
+Listing Management:
+List all host-owned listings with details (price, description, photos, dates).
+Support adding, editing, or deactivating listings.
+
+
+Reservation Management:
+Display reservation requests with details (tenant info, dates, payment status).
+Allow accepting or rejecting requests.
+
+
+Review Management:
+Show tenant reviews with options to respond.
+
+
+Financial Management:
+Provide payment history and income reports.
+
+
+
+Tenant Interface
+
+Dashboard:
+Allow searching and filtering listings by price, location, dates, or house type.
+Highlight popular or highly rated Tiny Houses.
+
+
+Listing Details:
+Display listing details (price, description, features, photos).
+Show availability calendar for reservations.
+
+
+Reservation Management:
+Enable date selection, availability checks, and online payments.
+Show booking confirmations and cancellation options.
+List past and upcoming reservations.
+
+
+Review Management:
+Allow submitting reviews and ratings for rented Tiny Houses.
+
+
+
+3.4 General Interface Features
+
+User-Friendly Design: Simple, intuitive navigation with visual cues and guidance.
+Notification System: Notify users about reservations, payments, and reviews (via email, SMS, or in-app notifications, based on preference).
+Responsive Design: Ensure compatibility across devices (desktop, tablet, mobile).
+
+
+4. Deliverables
+
+Database:
+ER diagram (visual and documented).
+SQL scripts for schema creation, stored procedures, functions, triggers, and sample data.
+
+
+Backend:
+Source code for business logic and database interactions.
+API documentation (if applicable).
+
+
+Frontend:
+Interface designs (mockups or implemented screens).
+Source code for role-specific interfaces.
+
+
+Testing:
+Test scenarios covering key functionalities (e.g., reservation creation, payment processing).
+Test results documenting outcomes.
+
+
+Documentation:
+Comprehensive project report detailing system design, implementation, and usage instructions.
+
+
+
+
+5. Additional Notes
+
+Contact: For questions, reach out to Research Assistant Tuğba ÇELİKTEN.
+Success Criteria: The system must meet all functional and technical requirements, with clear documentation and tested functionality.
+Optional Features: Consider adding cancellation fees or advanced filtering for tenant searches to enhance functionality.
+

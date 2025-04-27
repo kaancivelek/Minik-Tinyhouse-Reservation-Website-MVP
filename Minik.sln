@@ -1,0 +1,33 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.13.35931.197 d17.13
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{54A90642-561A-4BB1-A94E-469ADEE60C69}") = "minik.client", "minik.client\minik.client.esproj", "{F3551F2D-3AA1-6B2B-2409-3DC9970155DF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Minik.Server", "Minik.Server\Minik.Server.csproj", "{B87CEC55-B49C-4E75-982F-7C59843B4141}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{F3551F2D-3AA1-6B2B-2409-3DC9970155DF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F3551F2D-3AA1-6B2B-2409-3DC9970155DF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F3551F2D-3AA1-6B2B-2409-3DC9970155DF}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{F3551F2D-3AA1-6B2B-2409-3DC9970155DF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F3551F2D-3AA1-6B2B-2409-3DC9970155DF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F3551F2D-3AA1-6B2B-2409-3DC9970155DF}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{B87CEC55-B49C-4E75-982F-7C59843B4141}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B87CEC55-B49C-4E75-982F-7C59843B4141}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B87CEC55-B49C-4E75-982F-7C59843B4141}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B87CEC55-B49C-4E75-982F-7C59843B4141}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {F25CA167-A343-4846-B42E-163D5A810EB9}
+	EndGlobalSection
+EndGlobal

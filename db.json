@@ -1,0 +1,94 @@
+{
+  "tinyHouses": [
+    {
+      "id": 1,
+      "name": "Lavanta Evi",
+      "description": "Doğa içinde lavanta kokulu bir tiny house.",
+      "location_id": 1,
+      "price_per_night": 1200,
+      "max_guests": 2,
+      "amenities": "wifi,klima,barbekü"
+    },
+    {
+      "id": 2,
+      "name": "Begonvil Evi",
+      "description": "Deniz manzaralı konforlu tiny house.",
+      "location_id": 2,
+      "price_per_night": 1500,
+      "max_guests": 3,
+      "amenities": "wifi,jakuzi,mutfak"
+    },
+    {
+      "id": 3,
+      "name": "Zeytin Bahçesi",
+      "description": "Zeytin ağaçları arasında huzurlu bir kaçamak.",
+      "location_id": 3,
+      "price_per_night": 1100,
+      "max_guests": 2,
+      "amenities": "wifi,şömine,mutfak"
+    },
+    {
+      "id": 4,
+      "name": "Saklı Vadi",
+      "description": "Doğayla iç içe, sessiz ve sakin bir ev.",
+      "location_id": 4,
+      "price_per_night": 1350,
+      "max_guests": 4,
+      "amenities": "wifi,klima,jakuzi"
+    },
+    {
+      "id": 5,
+      "name": "Ahşap Yuvam",
+      "description": "Rustik tasarımlı sevimli bir tiny house.",
+      "location_id": 5,
+      "price_per_night": 1250,
+      "max_guests": 2,
+      "amenities": "wifi,barbekü,şömine"
+    },
+    {
+      "id": 6,
+      "name": "Deniz Kabuğu",
+      "description": "Denize sıfır, romantik bir tatil evi.",
+      "location_id": 6,
+      "price_per_night": 1600,
+      "max_guests": 3,
+      "amenities": "wifi,jakuzi,mutfak"
+    },
+    {
+      "id": 7,
+      "name": "Orman Evi",
+      "description": "Ağaçlar arasında doğal yaşam deneyimi.",
+      "location_id": 7,
+      "price_per_night": 1150,
+      "max_guests": 2,
+      "amenities": "wifi,şömine,klima"
+    },
+    {
+      "id": 8,
+      "name": "Gökçeada Kaçamağı",
+      "description": "Ada havasında farklı bir deneyim.",
+      "location_id": 8,
+      "price_per_night": 1450,
+      "max_guests": 2,
+      "amenities": "wifi,mutfak,klima"
+    },
+    {
+      "id": 9,
+      "name": "Lav Evi",
+      "description": "Lav tarlalarının ortasında fotoğraflık bir tiny house.",
+      "location_id": 9,
+      "price_per_night": 1300,
+      "max_guests": 3,
+      "amenities": "wifi,jakuzi,barbekü"
+    },
+    {
+      "id": 10,
+      "name": "Çamlık Ev",
+      "description": "Çam ormanları içinde kuş sesleriyle uyan.",
+      "location_id": 10,
+      "price_per_night": 1400,
+      "max_guests": 4,
+      "amenities": "wifi,şömine,klima"
+    }
+  ]
+}
