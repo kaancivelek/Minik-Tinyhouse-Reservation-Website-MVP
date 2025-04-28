@@ -1,10 +1,12 @@
-import React, { useState, useEffect } from 'react';
-import { getAllTinyHouses, deleteTinyHouse } from '../services/tinyHouseService'
+﻿import React, { useState, useEffect } from "react";
+import { Row, Col, Card, CardBody, CardSubtitle, CardText, CardTitle, Button } from 'reactstrap';
+import './ListingPage.css';
+import { getAllTinyHouses } from "../services/tinyHouseService";
 
 const ListingPage = () => {
     const [listings, setListings] = useState([]);
     const [loading, setLoading] = useState(false);
-    const [error, setError] = useState('');
+    const [error, setError] = useState("");
 
     const fetchListings = async () => {
         setLoading(true);
@@ -22,29 +24,36 @@ const ListingPage = () => {
         fetchListings();
     }, []);
 
-    const handleDelete = async (id) => {
-        try {
-            await deleteTinyHouse(id);
-            setListings((prev) => prev.filter((listing) => listing.id !== id));
-        } catch (err) {
-            console.error(err.message);
-        }
-    };
-
-    if (loading) return <p>Y�kleniyor...</p>;
+    if (loading) return <p>Yükleniyor...</p>;
     if (error) return <p>Hata: {error}</p>;
 
     return (
-        <div>
-            <h1>�lanlar</h1>
-            <ul>
+        <div className="listing-page">
+            <h1 className="text-center mb-4">İlanlar</h1>
+
+            <Row className="justify-content-center">
                 {listings.map((item) => (
-                    <li key={item.id}>
-                        {item.name}
-                        <button onClick={() => handleDelete(item.id)}>Sil</button>
-                    </li>
+                    <Col key={item.id} xs="12" sm="6" md="4" lg="3" className="mb-4 d-flex">
+                        <Card className="flex-fill">
+                            <img
+                                alt={item.name}
+                                src="https://picsum.photos/300/200"
+                                className="card-img-top"
+                            />
+                            <CardBody>
+                                <CardTitle tag="h5">{item.name}</CardTitle>
+                                <CardSubtitle className="mb-2 text-muted" tag="h6">
+                                    {item.amenities}
+                                </CardSubtitle>
+                                <CardText>
+                                    {item.description}
+                                </CardText>
+                                <Button color="secondary" block>İncele</Button>
+                            </CardBody>
+                        </Card>
+                    </Col>
                 ))}
-            </ul>
+            </Row>
         </div>
     );
 };
