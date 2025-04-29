@@ -1,36 +1,32 @@
-using Microsoft.EntityFrameworkCore;
-using Minik.Server.Data; // AppDbContext'ýn doðru namespace'i
+ï»¿using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// CORS politikasýný ekle
+// CORS politikasÄ±nÄ± ekle
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", policy =>
     {
-        policy.AllowAnyOrigin() // Her yerden eriþime izin ver
-              .AllowAnyMethod()  // GET, POST, PUT, DELETE vs. her tür isteðe izin ver
-              .AllowAnyHeader(); // Her türlü header'a izin ver
+        policy.AllowAnyOrigin() // Her yerden eriÅŸime izin ver
+              .AllowAnyMethod()  // GET, POST, PUT, DELETE vs. her tÃ¼r isteÄŸe izin ver
+              .AllowAnyHeader(); // Her tÃ¼rlÃ¼ header'a izin ver
     });
 });
 
-// Veritabaný baðlantýsýný tanýmlýyoruz
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// Controller'larý aktif et
+// Controller'larÄ± aktif et
 builder.Services.AddControllers();
 
-// Swagger (API Dökümantasyonu)
+// Swagger (API DÃ¶kÃ¼mantasyonu)
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-// CORS politikasýný uygula
+// CORS politikasÄ±nÄ± uygula
 app.UseCors("AllowAll");
 
-// Development ortamý için Swagger UI aktif
+// Development ortamÄ± iÃ§in Swagger UI aktif
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -39,12 +35,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-// Veritabaný migration iþlemi
-using (var scope = app.Services.CreateScope())
-{
-    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    db.Database.Migrate(); // Veritabanýný güncelle
-}
+
 
 app.UseAuthorization();
 

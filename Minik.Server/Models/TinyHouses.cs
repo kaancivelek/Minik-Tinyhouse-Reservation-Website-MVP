@@ -29,5 +29,8 @@ namespace Minik.Server.Models
 
         [Column("amenities")]
         public string Amenities { get; set; }
+
+        [Column("country")]
+        public string Country { get; set; }
     }
 }
