@@ -8,7 +8,7 @@ import { Route, Routes } from "react-router-dom";
 
 
 function App() {
-
+   
   const [filterText, setText] = useState("");
   const [routerTinyHouseID,setRouterTinyHouse] = useState(0);
 
@@ -21,7 +21,12 @@ const insertTinyHouse = (tinyHouseId)=>{
     setText(newText);
   };
 
-  return (
+    return (
+        <div style={{
+            margin: 0,
+            padding: 0,
+            overflowX: "hidden"
+        }}>
     <Container fluid className="p-0">
       <Row className="justify-content-center mt-3">
         <Col xs="auto">
@@ -33,14 +38,15 @@ const insertTinyHouse = (tinyHouseId)=>{
         <Col xs="12" md="10" lg="8">
           <div style={{ padding: "20px" }}>
             <Routes>
-                <Route path="/" element={<ListingPage filterText={filterText} insertTinyHouse={insertTinyHouse} />}></Route>
+                                <Route path="/" element={<ListingPage filterText={filterText} insertTinyHouse={insertTinyHouse} routerTinyHouseID={routerTinyHouseID} />}></Route>
             
             <Route path="/TinyHouseDetails" element={<TinyHouseDetails routerTinyHouseID={routerTinyHouseID} />} />
             </Routes>
           </div>
         </Col>
       </Row>
-    </Container>
+            </Container>
+    </div>
   );
 }
 

@@ -1,15 +1,16 @@
-﻿import React, { useState } from "react";
+﻿//import React, { useState } from "react";
 import { Navbar, NavbarBrand } from "reactstrap";
 import logo from "../assets/logo.svg";
 import { useNavigate } from "react-router-dom";
 
+
 function Navi({ onChangeHandler }) {
-    const navigate=useNavigate();
+    const navigate = useNavigate();
 
-  const goBackToHomePage=()=>{ navigate("/");}
+    const goBackToHomePage = () => { navigate("/"); }
 
-  return (
-    <div>
+    return (
+        <div  >
       <Navbar fixed="top">
         <NavbarBrand href="/">
           <img

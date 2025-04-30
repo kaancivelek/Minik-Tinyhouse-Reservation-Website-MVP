@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Minik.Server.Models;
-using System.Data.SqlClient;
+using Microsoft.Data.SqlClient;
 
 namespace Minik.Server.Controllers
 {
@@ -35,11 +35,11 @@ namespace Minik.Server.Controllers
                         Id = reader.GetInt32(0),
                         Name = reader.GetString(1),
                         Description = reader.IsDBNull(2) ? null : reader.GetString(2),
-                        LocationId = reader.GetInt32(3),
+                       LocationId = reader.GetInt32(3),
                         PricePerNight = reader.GetDecimal(4),
                         MaxGuests = reader.GetInt32(5),
                         Amenities = reader.IsDBNull(6) ? null : reader.GetString(6),
-                        Country = reader.GetString(1)
+                        Country = reader.GetString(7)
                     });
                 }
             }
