@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Minik.Server.Data;
+using Microsoft.Extensions.Configuration;
 using Minik.Server.Models;
+using System.Data.SqlClient;
 
 namespace Minik.Server.Controllers
 {
@@ -9,93 +9,147 @@ namespace Minik.Server.Controllers
     [ApiController]
     public class TinyHousesController : ControllerBase
     {
-        private readonly AppDbContext _context;
+        private readonly string _connectionString;
 
-        public TinyHousesController(AppDbContext context)
+        public TinyHousesController(IConfiguration configuration)
         {
-            _context = context;
+            _connectionString = configuration.GetConnectionString("DefaultConnection");
         }
 
         // GET: api/TinyHouses
         [HttpGet]
         public async Task<ActionResult<IEnumerable<TinyHouse>>> GetTinyHouses()
         {
-            return await _context.TinyHouses.ToListAsync();
+            var houses = new List<TinyHouse>();
+
+            using (var conn = new SqlConnection(_connectionString))
+            {
+                await conn.OpenAsync();
+                var cmd = new SqlCommand("SELECT T.*, L.country FROM tiny_houses T,locations L WHERE T.location_id=L.id", conn);
+                var reader = await cmd.ExecuteReaderAsync();
+
+                while (await reader.ReadAsync())
+                {
+                    houses.Add(new TinyHouse
+                    {
+                        Id = reader.GetInt32(0),
+                        Name = reader.GetString(1),
+                        Description = reader.IsDBNull(2) ? null : reader.GetString(2),
+                        LocationId = reader.GetInt32(3),
+                        PricePerNight = reader.GetDecimal(4),
+                        MaxGuests = reader.GetInt32(5),
+                        Amenities = reader.IsDBNull(6) ? null : reader.GetString(6),
+                        Country = reader.GetString(1)
+                    });
+                }
+            }
+
+            return Ok(houses);
         }
 
         // GET: api/TinyHouses/5
         [HttpGet("{id}")]
         public async Task<ActionResult<TinyHouse>> GetTinyHouse(int id)
         {
-            var tinyHouse = await _context.TinyHouses.FindAsync(id);
+            TinyHouse? house = null;
 
-            if (tinyHouse == null)
+            using (var conn = new SqlConnection(_connectionString))
             {
-                return NotFound();
+                await conn.OpenAsync();
+                var cmd = new SqlCommand("SELECT * FROM tiny_houses WHERE id = @id", conn);
+                cmd.Parameters.AddWithValue("@id", id);
+
+                var reader = await cmd.ExecuteReaderAsync();
+
+                if (await reader.ReadAsync())
+                {
+                    house = new TinyHouse
+                    {
+                        Id = reader.GetInt32(0),
+                        Name = reader.GetString(1),
+                        Description = reader.IsDBNull(2) ? null : reader.GetString(2),
+                        LocationId = reader.GetInt32(3),
+                        PricePerNight = reader.GetDecimal(4),
+                        MaxGuests = reader.GetInt32(5),
+                        Amenities = reader.IsDBNull(6) ? null : reader.GetString(6)
+                    };
+                }
             }
 
-            return tinyHouse;
+            return house == null ? NotFound() : Ok(house);
         }
 
         // POST: api/TinyHouses
         [HttpPost]
-        public async Task<ActionResult<TinyHouse>> PostTinyHouse(TinyHouse tinyHouse)
+        public async Task<ActionResult> PostTinyHouse(TinyHouse house)
         {
-            _context.TinyHouses.Add(tinyHouse);
-            await _context.SaveChangesAsync();
+            using (var conn = new SqlConnection(_connectionString))
+            {
+                await conn.OpenAsync();
+                var cmd = new SqlCommand(@"
+                    INSERT INTO tiny_houses 
+                    (name, description, location_id, price_per_night, max_guests, amenities) 
+                    VALUES (@name, @description, @location_id, @price_per_night, @max_guests, @amenities)", conn);
 
-            return CreatedAtAction(nameof(GetTinyHouse), new { id = tinyHouse.Id }, tinyHouse);
+                cmd.Parameters.AddWithValue("@name", house.Name);
+                cmd.Parameters.AddWithValue("@description", (object?)house.Description ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("@location_id", house.LocationId);
+                cmd.Parameters.AddWithValue("@price_per_night", house.PricePerNight);
+                cmd.Parameters.AddWithValue("@max_guests", house.MaxGuests);
+                cmd.Parameters.AddWithValue("@amenities", (object?)house.Amenities ?? DBNull.Value);
+
+                await cmd.ExecuteNonQueryAsync();
+            }
+
+            return Ok();
         }
 
         // PUT: api/TinyHouses/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutTinyHouse(int id, TinyHouse tinyHouse)
+        public async Task<ActionResult> PutTinyHouse(int id, TinyHouse house)
         {
-            if (id != tinyHouse.Id)
-            {
+            if (id != house.Id)
                 return BadRequest();
-            }
 
-            _context.Entry(tinyHouse).State = EntityState.Modified;
-
-            try
+            using (var conn = new SqlConnection(_connectionString))
             {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!TinyHouseExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
+                await conn.OpenAsync();
+                var cmd = new SqlCommand(@"
+                    UPDATE tiny_houses SET
+                        name = @name,
+                        description = @description,
+                        location_id = @location_id,
+                        price_per_night = @price_per_night,
+                        max_guests = @max_guests,
+                        amenities = @amenities
+                    WHERE id = @id", conn);
 
-            return NoContent();
+                cmd.Parameters.AddWithValue("@id", id);
+                cmd.Parameters.AddWithValue("@name", house.Name);
+                cmd.Parameters.AddWithValue("@description", (object?)house.Description ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("@location_id", house.LocationId);
+                cmd.Parameters.AddWithValue("@price_per_night", house.PricePerNight);
+                cmd.Parameters.AddWithValue("@max_guests", house.MaxGuests);
+                cmd.Parameters.AddWithValue("@amenities", (object?)house.Amenities ?? DBNull.Value);
+
+                int rowsAffected = await cmd.ExecuteNonQueryAsync();
+                return rowsAffected == 0 ? NotFound() : NoContent();
+            }
         }
 
         // DELETE: api/TinyHouses/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteTinyHouse(int id)
+        public async Task<ActionResult> DeleteTinyHouse(int id)
         {
-            var tinyHouse = await _context.TinyHouses.FindAsync(id);
-            if (tinyHouse == null)
+            using (var conn = new SqlConnection(_connectionString))
             {
-                return NotFound();
+                await conn.OpenAsync();
+                var cmd = new SqlCommand("DELETE FROM tiny_houses WHERE id = @id", conn);
+                cmd.Parameters.AddWithValue("@id", id);
+
+                int rowsAffected = await cmd.ExecuteNonQueryAsync();
+                return rowsAffected == 0 ? NotFound() : NoContent();
             }
-
-            _context.TinyHouses.Remove(tinyHouse);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
-        }
-
-        private bool TinyHouseExists(int id)
-        {
-            return _context.TinyHouses.Any(e => e.Id == id);
         }
     }
 }
