@@ -94,7 +94,7 @@ This system allows **tenants** to search and reserve Tiny Houses, **hosts** to m
 
 ### ⚙️ Backend Setup (ASP.NET Core API)
 
-> ⚠️ Prerequisite: Visual Studio Installed
+> ⚠️ Prerequisite: Visual Studio, Node.Js Installed
 
 1. Navigate to the project’s backend folder
 2. Open the `.sln` file using Visual Studio
@@ -108,17 +108,3 @@ If not cloned yet:
 - Connect GitHub and paste the provided URL
 - Select a directory and press `Clone`
 
----
-
-### 🌐 Frontend Setup (React)
-
-> ⚠️ Prerequisite: Node.js and npm installed
-
-1. Open **VS Code**
-2. Go to `File > Open Folder…`, and select the `frontend` folder
-3. Open terminal via `Terminal > New Terminal`
-4. Run the following command:
-
-```bash
-npm install
-npm start
