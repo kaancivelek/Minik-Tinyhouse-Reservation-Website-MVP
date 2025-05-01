@@ -25,7 +25,8 @@ namespace Minik.Server.Controllers
             using (var conn = new SqlConnection(_connectionString))
             {
                 await conn.OpenAsync();
-                var cmd = new SqlCommand("SELECT T.*, L.country FROM tiny_houses T,locations L WHERE T.location_id=L.id", conn);
+                var cmd = new SqlCommand(
+                    "SELECT T.*, L.country, L.city FROM tiny_houses T,locations L WHERE T.location_id=L.id", conn);
                 var reader = await cmd.ExecuteReaderAsync();
 
                 while (await reader.ReadAsync())
@@ -35,11 +36,12 @@ namespace Minik.Server.Controllers
                         Id = reader.GetInt32(0),
                         Name = reader.GetString(1),
                         Description = reader.IsDBNull(2) ? null : reader.GetString(2),
-                       LocationId = reader.GetInt32(3),
+                        LocationId = reader.GetInt32(3),
                         PricePerNight = reader.GetDecimal(4),
                         MaxGuests = reader.GetInt32(5),
                         Amenities = reader.IsDBNull(6) ? null : reader.GetString(6),
-                        Country = reader.GetString(7)
+                        Country = reader.GetString(7),
+                        City = reader.GetString(8)
                     });
                 }
             }
@@ -56,7 +58,13 @@ namespace Minik.Server.Controllers
             using (var conn = new SqlConnection(_connectionString))
             {
                 await conn.OpenAsync();
-                var cmd = new SqlCommand("SELECT * FROM tiny_houses WHERE id = @id", conn);
+                var cmd = new SqlCommand(@"
+    SELECT T.id, T.name, T.description, T.location_id, T.price_per_night, 
+           T.max_guests, T.amenities, L.country, L.city 
+    FROM tiny_houses T
+    JOIN locations L ON T.location_id = L.id
+    WHERE T.id = @id", conn);
+
                 cmd.Parameters.AddWithValue("@id", id);
 
                 var reader = await cmd.ExecuteReaderAsync();
@@ -71,7 +79,9 @@ namespace Minik.Server.Controllers
                         LocationId = reader.GetInt32(3),
                         PricePerNight = reader.GetDecimal(4),
                         MaxGuests = reader.GetInt32(5),
-                        Amenities = reader.IsDBNull(6) ? null : reader.GetString(6)
+                        Amenities = reader.IsDBNull(6) ? null : reader.GetString(6),
+                        Country = reader.GetString(7),
+                        City = reader.GetString(8)
                     };
                 }
             }
@@ -79,77 +89,5 @@ namespace Minik.Server.Controllers
             return house == null ? NotFound() : Ok(house);
         }
 
-        // POST: api/TinyHouses
-        [HttpPost]
-        public async Task<ActionResult> PostTinyHouse(TinyHouse house)
-        {
-            using (var conn = new SqlConnection(_connectionString))
-            {
-                await conn.OpenAsync();
-                var cmd = new SqlCommand(@"
-                    INSERT INTO tiny_houses 
-                    (name, description, location_id, price_per_night, max_guests, amenities) 
-                    VALUES (@name, @description, @location_id, @price_per_night, @max_guests, @amenities)", conn);
-
-                cmd.Parameters.AddWithValue("@name", house.Name);
-                cmd.Parameters.AddWithValue("@description", (object?)house.Description ?? DBNull.Value);
-                cmd.Parameters.AddWithValue("@location_id", house.LocationId);
-                cmd.Parameters.AddWithValue("@price_per_night", house.PricePerNight);
-                cmd.Parameters.AddWithValue("@max_guests", house.MaxGuests);
-                cmd.Parameters.AddWithValue("@amenities", (object?)house.Amenities ?? DBNull.Value);
-
-                await cmd.ExecuteNonQueryAsync();
-            }
-
-            return Ok();
-        }
-
-        // PUT: api/TinyHouses/5
-        [HttpPut("{id}")]
-        public async Task<ActionResult> PutTinyHouse(int id, TinyHouse house)
-        {
-            if (id != house.Id)
-                return BadRequest();
-
-            using (var conn = new SqlConnection(_connectionString))
-            {
-                await conn.OpenAsync();
-                var cmd = new SqlCommand(@"
-                    UPDATE tiny_houses SET
-                        name = @name,
-                        description = @description,
-                        location_id = @location_id,
-                        price_per_night = @price_per_night,
-                        max_guests = @max_guests,
-                        amenities = @amenities
-                    WHERE id = @id", conn);
-
-                cmd.Parameters.AddWithValue("@id", id);
-                cmd.Parameters.AddWithValue("@name", house.Name);
-                cmd.Parameters.AddWithValue("@description", (object?)house.Description ?? DBNull.Value);
-                cmd.Parameters.AddWithValue("@location_id", house.LocationId);
-                cmd.Parameters.AddWithValue("@price_per_night", house.PricePerNight);
-                cmd.Parameters.AddWithValue("@max_guests", house.MaxGuests);
-                cmd.Parameters.AddWithValue("@amenities", (object?)house.Amenities ?? DBNull.Value);
-
-                int rowsAffected = await cmd.ExecuteNonQueryAsync();
-                return rowsAffected == 0 ? NotFound() : NoContent();
-            }
-        }
-
-        // DELETE: api/TinyHouses/5
-        [HttpDelete("{id}")]
-        public async Task<ActionResult> DeleteTinyHouse(int id)
-        {
-            using (var conn = new SqlConnection(_connectionString))
-            {
-                await conn.OpenAsync();
-                var cmd = new SqlCommand("DELETE FROM tiny_houses WHERE id = @id", conn);
-                cmd.Parameters.AddWithValue("@id", id);
-
-                int rowsAffected = await cmd.ExecuteNonQueryAsync();
-                return rowsAffected == 0 ? NotFound() : NoContent();
-            }
-        }
     }
 }

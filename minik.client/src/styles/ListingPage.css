@@ -1,0 +1,66 @@
+﻿.grid-list {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr); /* 5 kolonlu grid */
+  grid-gap: 10px; /* Öğeler arasındaki boşluk */
+  list-style-type: none; /* Liste işaretlerini kaldır */
+  padding: 0;
+}
+
+.grid-list li {
+  background: transparent; /* Öğe arka plan rengi */
+  padding: 10px;
+  text-align: center; /* Öğelerin merkezlenmesi */
+  border: 1px solid #ccc; /* Öğelere kenarlık ekleyebilirsiniz */
+}
+
+.errorText {
+  font-size: 100px;
+}
+
+.listing-page {
+  padding: 20px;
+}
+
+.card-img-top {
+  object-fit: cover;
+  height: 200px;
+}
+
+.card {
+  min-height: 100%;
+}
+.card:hover {
+  transform: scale(1.02);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.card-body {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%; /* Kart içeriğinin tam ortalanmasını sağlar */
+}
+
+.loadingText {
+  text-align: center;
+  font-size: 1.5rem;
+  color: #888;
+  margin: 20px 0;
+  animation: pulse 1s infinite ease-in-out;
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.3;
+  }
+}

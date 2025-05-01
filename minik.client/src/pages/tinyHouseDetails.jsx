@@ -81,12 +81,15 @@ function TinyHouseDetails({ routerTinyHouseID }) {
                         )}
 
                         <CardBody>
-                            <CardTitle tag="h2" className="mb-3">{tinyHouse.name}</CardTitle>
+                            <CardTitle tag="h1" className="mb-3">{tinyHouse.name}</CardTitle>
                             <CardSubtitle className="mb-2 text-muted">
                                 {tinyHouse.amenities}
                             </CardSubtitle>
                             <CardText className="mb-2">
                                 {tinyHouse.description}
+                            </CardText>
+                            <CardText>
+                            <h3>{tinyHouse.city},{tinyHouse.country}</h3>
                             </CardText>
                             <CardText>
                                 <strong>Fiyat:</strong> {tinyHouse.pricePerNight} ₺ / gece
