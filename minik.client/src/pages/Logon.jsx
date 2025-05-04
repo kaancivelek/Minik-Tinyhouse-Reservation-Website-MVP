@@ -3,26 +3,23 @@ import { Container, Row, Col } from "reactstrap";
 import { useNavigate } from "react-router-dom";
 
 export default function Logon() {
-  const navigate = useNavigate();
-
-
-
   return (
     <div>
-      <Container style={{ display: "flex", alignItems:"center"}}>
+      <Container style={{ display: "flex" }}>
         <Col style={{ justifyContent: "left", alignItems: "center" }}>
+          <Row></Row>
           <Row>
             <button
               style={{
                 width: `20ch`,
                 border: "none",
+
                 background: "transparent",
                 outline: "none",
                 fontSize: "16px",
                 height: "40px", // tutarlı yükseklik
-                cursor: "pointer",
+                cursor: "pointer"
               }}
-              onClick={ ()=>navigate("/Login")}
             >
               GİRİŞ YAP
             </button>
@@ -38,7 +35,6 @@ export default function Logon() {
                 height: "40px", // tutarlı yükseklik
                 cursor: "pointer",
               }}
-              onClick={ ()=>navigate("/Register")}
             >
               KAYIT OL
             </button>
@@ -46,7 +42,7 @@ export default function Logon() {
         </Col>
         <Col style={{ justifyContent: "right", alignItems: "center" }}>
           <img
-            src="../devs.jpg"
+            src="../public/devs.jpg"
             style={{
               maxWidth: "100%",
               height: "auto",

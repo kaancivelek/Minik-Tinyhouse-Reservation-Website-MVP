@@ -1,8 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.Data.SqlClient;
-using Minik.Server.Data;
+using Microsoft.Extensions.Configuration;
 using Minik.Server.Models;
-
+using Microsoft.Data.SqlClient;
 
 namespace Minik.Server.Controllers
 {
@@ -11,12 +10,10 @@ namespace Minik.Server.Controllers
     public class TinyHousesController : ControllerBase
     {
         private readonly string _connectionString;
-        private readonly ApplicationDbContext _context;
 
-        public TinyHousesController(IConfiguration configuration, ApplicationDbContext context)
+        public TinyHousesController(IConfiguration configuration)
         {
             _connectionString = configuration.GetConnectionString("DefaultConnection");
-            _context = context; // DbContext bağlanıyor
         }
 
         // GET: api/TinyHouses
@@ -29,7 +26,7 @@ namespace Minik.Server.Controllers
             {
                 await conn.OpenAsync();
                 var cmd = new SqlCommand(
-                    "SELECT T.*, L.country, L.city FROM tiny_houses T, locations L WHERE T.location_id=L.id", conn);
+                    "SELECT T.*, L.country, L.city FROM tiny_houses T,locations L WHERE T.location_id=L.id", conn);
                 var reader = await cmd.ExecuteReaderAsync();
 
                 while (await reader.ReadAsync())
@@ -42,11 +39,9 @@ namespace Minik.Server.Controllers
                         LocationId = reader.GetInt32(3),
                         PricePerNight = reader.GetDecimal(4),
                         MaxGuests = reader.GetInt32(5),
-                        property_owner_id = reader.GetInt32(6),
-                        Amenities = reader.IsDBNull(7) ? null : reader.GetString(7),
-                        // Bu iki satır location bilgisi alır
-                        Country = reader.GetString(8),
-                        City = reader.GetString(9)
+                        Amenities = reader.IsDBNull(6) ? null : reader.GetString(6),
+                        Country = reader.GetString(7),
+                        City = reader.GetString(8)
                     });
                 }
             }
@@ -54,7 +49,7 @@ namespace Minik.Server.Controllers
             return Ok(houses);
         }
 
-        // GET: api/TinyHouses/
+        // GET: api/TinyHouses/5
         [HttpGet("{id}")]
         public async Task<ActionResult<TinyHouse>> GetTinyHouse(int id)
         {
@@ -64,11 +59,11 @@ namespace Minik.Server.Controllers
             {
                 await conn.OpenAsync();
                 var cmd = new SqlCommand(@"
-                    SELECT T.id, T.name, T.description, T.location_id, T.price_per_night, 
-                           T.max_guests,T.property_owner_id, T.amenities, L.country, L.city 
-                    FROM tiny_houses T
-                    JOIN locations L ON T.location_id = L.id
-                    WHERE T.id = @id", conn);
+    SELECT T.id, T.name, T.description, T.location_id, T.price_per_night, 
+           T.max_guests, T.amenities, L.country, L.city 
+    FROM tiny_houses T
+    JOIN locations L ON T.location_id = L.id
+    WHERE T.id = @id", conn);
 
                 cmd.Parameters.AddWithValue("@id", id);
 
@@ -84,58 +79,14 @@ namespace Minik.Server.Controllers
                         LocationId = reader.GetInt32(3),
                         PricePerNight = reader.GetDecimal(4),
                         MaxGuests = reader.GetInt32(5),
-                        property_owner_id = reader.GetInt32(6),
-                        Amenities = reader.IsDBNull(7) ? null : reader.GetString(7),
-                        // Bu iki satır location bilgisi alır
-                        Country = reader.GetString(8),
-                        City = reader.GetString(9)
+                        Amenities = reader.IsDBNull(6) ? null : reader.GetString(6),
+                        Country = reader.GetString(7),
+                        City = reader.GetString(8)
                     };
                 }
             }
 
             return house == null ? NotFound() : Ok(house);
-        }
-
-
-
-        // GET: api/TinyHouses/
-        [HttpGet("by-owner/{property_owner_id}")]
-        public async Task<ActionResult<List<TinyHouse>>> GetTinyHouseByPropertyOwnerId(int property_owner_id)
-        {
-            var houses = new List<TinyHouse>();
-
-            using (var conn = new SqlConnection(_connectionString))
-            {
-                await conn.OpenAsync();
-                var cmd = new SqlCommand(@"
-            SELECT T.*, L.country, L.city
-            FROM tiny_houses T
-            JOIN locations L ON T.location_id = L.id
-            WHERE T.property_owner_id = @id", conn);
-
-                cmd.Parameters.AddWithValue("@id", property_owner_id);
-
-                var reader = await cmd.ExecuteReaderAsync();
-
-                while (await reader.ReadAsync())
-                {
-                    houses.Add(new TinyHouse
-                    {
-                        Id = reader.GetInt32(0),
-                        Name = reader.GetString(1),
-                        Description = reader.IsDBNull(2) ? null : reader.GetString(2),
-                        LocationId = reader.GetInt32(3),
-                        PricePerNight = reader.GetDecimal(4),
-                        MaxGuests = reader.GetInt32(5),
-                        property_owner_id = reader.GetInt32(6),
-                        Amenities = reader.IsDBNull(7) ? null : reader.GetString(7),
-                        Country = reader.GetString(8),
-                        City = reader.GetString(9)
-                    });
-                }
-            }
-
-            return houses.Count == 0 ? NotFound() : Ok(houses);
         }
 
     }

@@ -27,10 +27,6 @@ namespace Minik.Server.Models
         [Column("max_guests")]
         public int MaxGuests { get; set; }
 
-        [ForeignKey("Users")]
-        [Column("property_owner_id")]
-        public int property_owner_id { get; set; }
-
         [Column("amenities")]
         public string Amenities { get; set; }
 

@@ -3,8 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Minik.Server.Models
 {
-    [Table("house_images")]
-    public class HouseImages
+    public class house_images
     {
         [Key]
         [Column("id")]
@@ -14,7 +13,7 @@ namespace Minik.Server.Models
         [Column("tiny_house_id")]
         public int Tiny_house_id { get; set; }
         [Column("image_url")]
-        public string Image_url { get; set; }
+        public string image_url { get; set; }
 
     }
 }

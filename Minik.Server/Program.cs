@@ -1,10 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Minik.Server.Data;
+
 var builder = WebApplication.CreateBuilder(args);
-
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-
 
 // CORS politikasını ekle
 builder.Services.AddCors(options =>
@@ -26,7 +22,6 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
-
 
 // CORS politikasını uygula
 app.UseCors("AllowAll");
