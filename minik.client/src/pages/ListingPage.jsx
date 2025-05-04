@@ -36,7 +36,7 @@ function ListingPage({
     const fetched = [];
 
     // İlk başta sadece 8 tane ev yükleyelim (visibleCount kadar)
-    for (let counter = 0; counter <= visibleCount; counter++) {
+    for (let counter = 0; counter < visibleCount; counter++) {
       try {
         const data = await getTinyHouseById(counter);
         fetched.push(data);
@@ -67,6 +67,10 @@ function ListingPage({
 
     const updatedListings = [...listings, ...nextBatch];
     setListings(updatedListings);
+    const unique = Array.from(new Map(updatedListings.map(i => [i.id, i])).values());
+setListings(unique);
+await loadImagesForListings(nextBatch); // sadece yeni gelenler için
+setVisibleCount(unique.length);
     await loadImagesForListings(nextBatch);
     setVisibleCount(visibleCount + 8);
     setLoadingMore(false);

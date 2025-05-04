@@ -4,7 +4,7 @@ import logo from "../assets/logo.svg";
 import { useNavigate } from "react-router-dom";
 import "../styles/Navi.css";
 
-function Navi({userRole,userName}) {
+function Navi({user}) {
   const navigate = useNavigate();
 
   const goBackToHomePage = () => {
@@ -13,7 +13,7 @@ function Navi({userRole,userName}) {
 
 
   function logonAndProfile() {
-    if(!userRole){
+    if(!(user && Object.keys(user).length > 0)){
     return (
       <div className="navbar-right">
       <NavbarText className="navbar-login-text" onClick={() => navigate("/Logon")}>
@@ -24,7 +24,7 @@ function Navi({userRole,userName}) {
       return(
       <div className="navbar-right">
       <NavbarText className="navbar-login-text" onClick={() => navigate("/Profile")}>
-        {userName}
+        {user.full_name}
       </NavbarText>
     </div>)
     }

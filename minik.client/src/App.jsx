@@ -6,32 +6,39 @@ import ListingPage from "./pages/ListingPage";
 import TinyHouseDetails from "./pages/tinyHouseDetails";
 import Register from "./components/Register";
 import Profile from "./pages/Profile";
+import Logout from "./utils/Logout"
 import "./styles/App.css";
 import { Container, Row, Col } from "reactstrap";
 import { useState } from "react";
 import { Route, Routes } from "react-router-dom";
 
 function App() {
- const [user,setUser]=useState({
-  id: 11,
-  role_id: 2,
-  full_name: "Kaan Civelek",
-  email: "kaancivelek17@gmail.com",
-  password: "123321",
-  phone_number: "05397031329"
- }
- ); 
+  const [user, setUser] = useState(null);
+  const [isUserLoading, setIsUserLoading] = useState(true);
+  
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
+    }
+    setIsUserLoading(false);
+  }, []);
+  
+ 
 
   const [userRole,setUserRole]= useState();  //3 admin 1 customer 2 property owner
 const changeUserRole =(userRole)=>{
   setUserRole(userRole);
 }
 
+
 useEffect(() => {
   if (user) {
     changeUserRole(user.role_id);
   }
 }, [user]);
+
+
 
   // Navbarda arama kutusuna girilen harfler onChangeHandler metodu yardımıyla burada tutuluyor.
   const [filterText, setText] = useState("");
@@ -48,11 +55,13 @@ useEffect(() => {
     setRouterTinyHouse(tinyHouseId);
   };
 
+
+
   return (
     <Container fluid className="bodyContainer" >
       <Row>
         <Col xs="auto">
-          <Navi userRole={userRole} userName={user.full_name} />
+        <Navi user={user} />
         </Col>
       </Row>
 
@@ -74,9 +83,10 @@ useEffect(() => {
               ></Route>
 
               <Route path="/Logon" element={<Logon />}></Route>
-              <Route path="/Login" element={<Login />}></Route>
+              <Route path="/Login" element={<Login user={user} setUser={setUser} />}></Route>
               <Route path="/Register" element={<Register />}></Route>
-              <Route path="/Profile" element={<Profile user={user}  /> }></Route>
+              <Route path="/Profile" element={<Profile user={user} setUser={setUser}  /> }></Route>
+              <Route path="/Logout" element={<Logout user={user} setUser={setUser}  /> }></Route>
 
               <Route
                 path="/TinyHouseDetails"
