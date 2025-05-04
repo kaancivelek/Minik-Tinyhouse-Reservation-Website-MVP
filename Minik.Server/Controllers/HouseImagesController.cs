@@ -5,24 +5,22 @@ using Microsoft.Data.SqlClient;
 
 namespace Minik.Server.Controllers
 {
-
     [Route("api/[controller]")]
     [ApiController]
-    public class house_imagesController : Controller
+    public class HouseImagesController : ControllerBase
     {
         private readonly string _connectionString;
 
-        public house_imagesController(IConfiguration configuration)
+        public HouseImagesController(IConfiguration configuration)
         {
             _connectionString = configuration.GetConnectionString("DefaultConnection");
         }
 
-
-        // GET: api/house_images
+        // GET: api/HouseImages
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<house_images>>> Gethouse_images()
+        public async Task<ActionResult<IEnumerable<HouseImages>>> GetHouseImages()
         {
-            var images = new List<house_images>();
+            var images = new List<HouseImages>();
 
             using (var conn = new SqlConnection(_connectionString))
             {
@@ -32,23 +30,23 @@ namespace Minik.Server.Controllers
 
                 while (await reader.ReadAsync())
                 {
-                    images.Add(new house_images
+                    images.Add(new HouseImages
                     {
-                      Id=reader.GetInt32(0),
+                        Id = reader.GetInt32(0),
                         Tiny_house_id = reader.GetInt32(1),
-                        image_url = reader.IsDBNull(2) ? null : reader.GetString(2)
+                        Image_url = reader.IsDBNull(2) ? null : reader.GetString(2)
                     });
                 }
             }
 
-            return Ok(images);
+            return Ok(images); // Response'da durum kodu 200 döndürülecek
         }
 
-        // GET: api/house_images/5
+        // GET: api/HouseImages/tiny_house_id
         [HttpGet("{tiny_house_id}")]
-        public async Task<ActionResult<IEnumerable<house_images>>> GetHouse_imagesByTinyHouseId(int tiny_house_id)
+        public async Task<ActionResult<IEnumerable<HouseImages>>> GetHouseImagesByTinyHouseId(int tiny_house_id)
         {
-            var images = new List<house_images>();
+            var images = new List<HouseImages>();
 
             using (var conn = new SqlConnection(_connectionString))
             {
@@ -60,20 +58,21 @@ namespace Minik.Server.Controllers
 
                 while (await reader.ReadAsync())
                 {
-                    images.Add(new house_images
+                    images.Add(new HouseImages
                     {
                         Id = reader.GetInt32(0),
                         Tiny_house_id = reader.GetInt32(1),
-                        image_url = reader.IsDBNull(2) ? null : reader.GetString(2)
+                        Image_url = reader.IsDBNull(2) ? null : reader.GetString(2)
                     });
                 }
             }
 
-            return images.Count == 0 ? NotFound() : Ok(images);
+            if (images.Count == 0)
+            {
+                return NotFound(new { message = "No images found for this Tiny House." }); // 404 ve hata mesajı
+            }
+
+            return Ok(images); // 200 ile images listesi döndürülür
         }
-
-
-
     }
 }
-
