@@ -1,54 +1,97 @@
-﻿.grid-list {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr); /* 5 kolonlu grid */
-  grid-gap: 10px; /* Öğeler arasındaki boşluk */
-  list-style-type: none; /* Liste işaretlerini kaldır */
-  padding: 0;
+﻿:root {
+
+  --text-color: #111111;
+  --accent-color: #000000;
+  --border-radius: 12px;
+  --transition-speed: 0.3s;
+  --shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
 }
 
-.grid-list li {
-  background: transparent; /* Öğe arka plan rengi */
-  padding: 10px;
-  text-align: center; /* Öğelerin merkezlenmesi */
-  border: 1px solid #ccc; /* Öğelere kenarlık ekleyebilirsiniz */
-}
+body {
 
-.errorText {
-  font-size: 100px;
+  color: var(--text-color);
+  font-family: 'Helvetica Neue', sans-serif;
 }
 
 .listing-page {
   padding: 20px;
 }
 
-.card-img-top {
-  object-fit: cover;
-  height: 200px;
+.card {
+
+  color: var(--text-color);
+  border: 1px solid #e0e0e0;
+  border-radius: var(--border-radius);
+  overflow: hidden;
+  transition: transform var(--transition-speed), box-shadow var(--transition-speed);
+  box-shadow: var(--shadow);
 }
 
-.card {
-  min-height: 100%;
-}
 .card:hover {
   transform: scale(1.02);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-  transition: all 0.3s ease;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
   cursor: pointer;
+}
+
+.card-img-top {
+  height: 200px;
+  object-fit: cover;
+  border-bottom: 1px solid #ddd;
 }
 
 .card-body {
   text-align: center;
+  padding: 15px;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 100%; /* Kart içeriğinin tam ortalanmasını sağlar */
+  gap: 10px;
+}
+
+.card-title,
+.card-subtitle,
+.card-text {
+  margin: 0;
+}
+
+.card-title {
+  font-weight: bold;
+  font-size: 1.1rem;
+}
+
+.card-subtitle {
+  color: #555;
+  font-size: 0.9rem;
+}
+
+.card-text {
+  font-size: 0.95rem;
+}
+
+
+
+.filter-fixed {
+  position: fixed;
+  top: 150px;
+  right: 50px;
+background: transparent;
+  border: 1px solid white;
+  border-radius: var(--border-radius);
+  padding: 15px;
+  width: 200px;
+  z-index: 1000;
+  box-shadow: var(--shadow);
+}
+
+.errorText {
+  font-size: 1.5rem;
+  text-align: center;
+  color: red;
 }
 
 .loadingText {
   text-align: center;
   font-size: 1.5rem;
-  color: #888;
+  color: #555;
   margin: 20px 0;
   animation: pulse 1s infinite ease-in-out;
 }
