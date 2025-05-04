@@ -83,12 +83,9 @@ This system allows **tenants** to search and reserve Tiny Houses, **hosts** to m
    - Replace the **Server Name** with `localhost`
    - Click **Connect**
 
-4. Restore the database:
-   - Right-click on `Databases` > `Restore Database…`
-   - Choose **Device**
-   - Click `...`, then `Add`
-   - Select `minikDB.bak`, click OK
-   - Complete the restore process
+4. Install the database:
+   - Paste script file into ur clean Database.
+ 
 
 ---
 
