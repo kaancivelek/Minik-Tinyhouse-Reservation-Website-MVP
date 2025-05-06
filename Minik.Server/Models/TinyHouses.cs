@@ -39,5 +39,10 @@ namespace Minik.Server.Models
 
         [Column("City")]
         public string City { get; set; }
+
+        [Column("Rating")]
+
+        public int Rating { get; set; }
+
     }
 }

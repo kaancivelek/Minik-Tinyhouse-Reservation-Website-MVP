@@ -64,11 +64,9 @@ namespace Minik.Server.Controllers
             {
                 await conn.OpenAsync();
                 var cmd = new SqlCommand(@"
-                    SELECT T.id, T.name, T.description, T.location_id, T.price_per_night, 
-                           T.max_guests,T.property_owner_id, T.amenities, L.country, L.city 
-                    FROM tiny_houses T
-                    JOIN locations L ON T.location_id = L.id
-                    WHERE T.id = @id", conn);
+SELECT T.*, L.city,L.country, (SELECT CEILING(AVG(rating)) FROM reviews WHERE T.id=reviews.tiny_house_id)
+FROM tiny_houses T, locations L
+WHERE  T.location_id=L.id  AND T.id = @id", conn);
 
                 cmd.Parameters.AddWithValue("@id", id);
 
@@ -88,7 +86,8 @@ namespace Minik.Server.Controllers
                         Amenities = reader.IsDBNull(7) ? null : reader.GetString(7),
                         // Bu iki satır location bilgisi alır
                         Country = reader.GetString(8),
-                        City = reader.GetString(9)
+                        City = reader.GetString(9),
+                        Rating = reader.GetInt32(10)
                     };
                 }
             }
@@ -109,7 +108,7 @@ namespace Minik.Server.Controllers
                 await conn.OpenAsync();
                 var cmd = new SqlCommand(@"
             SELECT T.*, L.country, L.city
-            FROM tiny_houses T
+            FROM tiny_houses T , 
             JOIN locations L ON T.location_id = L.id
             WHERE T.property_owner_id = @id", conn);
 

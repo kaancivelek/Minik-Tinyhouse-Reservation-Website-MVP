@@ -12,5 +12,24 @@ namespace Minik.Server.Data
         // DbSet tanımları burada olacak
         public DbSet<TinyHouse> TinyHouses { get; set; }
         public DbSet<HouseImages> HouseImages { get; set; }
+
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
