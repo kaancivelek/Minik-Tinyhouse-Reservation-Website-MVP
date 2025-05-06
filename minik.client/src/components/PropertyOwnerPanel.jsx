@@ -1,10 +1,18 @@
 import React, { useEffect, useState } from "react";
 import { getTinyHouseByPropertyOwnerId } from "../services/tinyHouseService";
-import { Card, CardBody, CardTitle, CardSubtitle, CardText, Col, Row } from "reactstrap";
+import {
+  Card,
+  CardBody,
+  CardTitle,
+  CardSubtitle,
+  CardText,
+  Col,
+  Row,
+} from "reactstrap";
 import Filter from "../components/Filter"; // varsa
 import { useNavigate } from "react-router-dom";
 
-export default function PropertyOwnerPanel({ user }) {
+export default function PropertyOwnerPanel({ user, insertTinyHouse }) {
   const [tinyHousesOfPropertyOwner, setTinyHouseOfUser] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -33,10 +41,10 @@ export default function PropertyOwnerPanel({ user }) {
       alert("Kullanıcı bilgisi yok. Giriş yapılmamış olabilir.");
     }
   }, [user]);
-  
 
   const goTinyHouseDetails = (id) => {
-    navigate(`/TinyHouseDetails`);
+    insertTinyHouse(id);
+    navigate("/TinyHouseDetails");
   };
 
   const searchBarOnChangeHandler = (e) => {
@@ -45,13 +53,12 @@ export default function PropertyOwnerPanel({ user }) {
   };
 
   return (
-    <div className="listing-page" style={{ padding: '1rem' }}>
+    <div className="listing-page" style={{ padding: "1rem" }}>
       {loading && <div>Yükleniyor...</div>}
-      {error && <div style={{ color: 'red' }}>Hata: {error}</div>}
-
+      {error && <div style={{ color: "red" }}>Hata: {error}</div>}
+      <h2>Ev Sahibi Paneli </h2>
       <Row>
         {tinyHousesOfPropertyOwner.map((item) => (
-          
           <Col
             key={item.id}
             xs="12"
@@ -60,9 +67,15 @@ export default function PropertyOwnerPanel({ user }) {
             lg="3"
             className="mb-4 d-flex"
           >
-            <Card className="flex-fill" onClick={() => goTinyHouseDetails(item.id)} style={{ cursor: 'pointer' }}>
+            <Card
+              className="flex-fill"
+              onClick={() => goTinyHouseDetails(item.id)}
+              style={{ cursor: "pointer" }}
+            >
               <CardBody>
-                <h5>{item.city}, {item.country}</h5>
+                <h5>
+                  {item.city}, {item.country}
+                </h5>
                 <CardTitle tag="h5">
                   {item.name} ★ {Math.floor(Math.random() * 5) + 1}
                 </CardTitle>

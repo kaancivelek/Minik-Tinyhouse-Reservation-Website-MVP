@@ -85,14 +85,14 @@ useEffect(() => {
               <Route path="/Logon" element={<Logon />}></Route>
               <Route path="/Login" element={<Login user={user} setUser={setUser} />}></Route>
               <Route path="/Register" element={<Register />}></Route>
-              <Route path="/Profile" element={<Profile user={user} setUser={setUser}  /> }></Route>
-              <Route path="/Logout" element={<Logout user={user} setUser={setUser}  /> }></Route>
+              <Route path="/Profile" element={<Profile user={user} setUser={setUser} insertTinyHouse={insertTinyHouse} /> }></Route>
+              <Route path="/Logout" element={<Logout user={user} setUser={setUser} /> }></Route>
 
               <Route
                 path="/TinyHouseDetails"
                 element={
                   //İlan detalyarını getirecek TinyHouseDetails bileşenini seçen rota
-                  <TinyHouseDetails routerTinyHouseID={routerTinyHouseID} />
+                  <TinyHouseDetails routerTinyHouseID={routerTinyHouseID} user={user} />
                 }
               />
             </Routes>

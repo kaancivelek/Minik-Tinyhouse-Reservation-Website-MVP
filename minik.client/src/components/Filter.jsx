@@ -31,8 +31,10 @@ export default function Filter({searchBarOnChangeHandler, sortOrder, setSortOrde
       <NavItem>
         <select value={sortOrder} onChange={(e) => setSortOrder(e.target.value)}>
           <option value="">Sırala</option>
-          <option value="asc">Fiyata Göre Artan</option>
-          <option value="desc">Fiyata Göre Azalan</option>
+          <option value="asc">En Düşük Fiyat</option>
+          <option value="desc">En Yüksek Fiyat</option>
+          <option value="desc">Yüksek Puanlılar</option>
+
         </select>
       </NavItem>
     </Nav>
