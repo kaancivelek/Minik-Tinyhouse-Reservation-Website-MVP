@@ -45,9 +45,9 @@ namespace Minik.Server.Controllers
                         property_owner_id = reader.GetInt32(6),
                         Amenities = reader.IsDBNull(7) ? null : reader.GetString(7),
                         // Bu iki satır location bilgisi alır
-                        Country = reader.GetString(8),
-                        City = reader.GetString(9),
-                        Rating=reader.GetInt32(10)
+                        City = reader.GetString(8),
+                        Country = reader.GetString(9),
+                     
                     });
                 }
             }
@@ -86,9 +86,10 @@ WHERE  T.location_id=L.id  AND T.id = @id", conn);
                         property_owner_id = reader.GetInt32(6),
                         Amenities = reader.IsDBNull(7) ? null : reader.GetString(7),
                         // Bu iki satır location bilgisi alır
-                        Country = reader.GetString(8),
-                        City = reader.GetString(9),
-                        Rating = reader.GetInt32(10)
+                        City = reader.GetString(8),
+                        Country = reader.GetString(9),
+                        Rating = reader.IsDBNull(10) ? 0 : reader.GetInt32(10)
+
                     };
                 }
             }
@@ -130,8 +131,7 @@ WHERE  T.location_id=L.id  AND T.id = @id", conn);
                         property_owner_id = reader.GetInt32(6),
                         Amenities = reader.IsDBNull(7) ? null : reader.GetString(7),
                         Country = reader.GetString(8),
-                        City = reader.GetString(9),
-                        Rating=reader.GetInt32(10)
+                        City = reader.GetString(9)
                     });
                 }
             }

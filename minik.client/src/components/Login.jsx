@@ -43,11 +43,10 @@ export default function Login({setUser, user}) {
   onClick={() => {
     const dummyUser = {
       id: 11,
-      role_id: 2,
+      role_id: 1,
       full_name: "Kaan Civelek",
       email: "kaancivelek17@gmail.com",
-      password: "123321",
-      phone_number: "05397031329"
+      phone_number: "539-703-1329"
     };
 
   

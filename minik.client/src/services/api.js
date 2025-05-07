@@ -5,7 +5,7 @@ const request = async (endpoint, method = 'GET', body = null) => {
         method,
         headers: {
             'Content-Type': 'application/json',
-            // 'Authorization': `Bearer ${token}` // Ýstersen token da ekleyebilirsin
+            // 'Authorization': `Bearer ${token}` // ï¿½stersen token da ekleyebilirsin
         },
     };
 
@@ -20,17 +20,17 @@ const request = async (endpoint, method = 'GET', body = null) => {
     if (!response.ok) {
         if (contentType && contentType.includes('application/json')) {
             const errorData = await response.json();
-            throw new Error(errorData.message || 'Bir hata oluþtu.');
+            throw new Error(errorData.message || 'Bir hata oluï¿½tu.');
         } else {
             const errorText = await response.text();
-            throw new Error(errorText || 'Bir hata oluþtu.');
+            throw new Error(errorText || 'Bir hata oluï¿½tu.');
         }
     }
 
     if (contentType && contentType.includes('application/json')) {
         return response.json();
     } else {
-        return response.text(); // Success gibi bir text dönerse
+        return response.text(); // Success gibi bir text dï¿½nerse
     }
 };
 

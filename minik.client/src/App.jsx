@@ -15,6 +15,7 @@ import { Route, Routes } from "react-router-dom";
 function App() {
   const [user, setUser] = useState(null);
   const [isUserLoading, setIsUserLoading] = useState(true);
+  const [sortOrder, setSortOrder] = useState("");
   
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
@@ -58,49 +59,58 @@ useEffect(() => {
 
 
   return (
-    <Container fluid className="bodyContainer" >
-      <Row>
-        <Col xs="auto">
-        <Navi user={user} />
-        </Col>
-      </Row>
-
-      <Row className="justify-content-center">
-        <Col xs="12" md="10" lg="8">
-          <div style={{ padding: "12px" }}>
-            <Routes>
-              <Route
-                path="/"
-                element={
-                  //EV İLANLARINI LİSTELEYECEK ListingPage bileşenini seçen rota
-                  <ListingPage
-                    filterText={filterText}
-                    insertTinyHouse={insertTinyHouse}
-                    routerTinyHouseID={routerTinyHouseID}
-                    searchBarOnChangeHandler={searchBarOnChangeHandler}
-                  />
-                }
-              ></Route>
-
-              <Route path="/Logon" element={<Logon />}></Route>
-              <Route path="/Login" element={<Login user={user} setUser={setUser} />}></Route>
-              <Route path="/Register" element={<Register />}></Route>
-              <Route path="/Profile" element={<Profile user={user} setUser={setUser}  /> }></Route>
-              <Route path="/Logout" element={<Logout user={user} setUser={setUser}  /> }></Route>
-
-              <Route
-                path="/TinyHouseDetails"
-                element={
-                  //İlan detalyarını getirecek TinyHouseDetails bileşenini seçen rota
-                  <TinyHouseDetails routerTinyHouseID={routerTinyHouseID} />
-                }
+    <Container fluid className="bodyContainer">
+      <Navi
+        user={user}
+        filterText={filterText}
+        searchBarOnChangeHandler={searchBarOnChangeHandler}
+        sortOrder={sortOrder}
+        setSortOrder={setSortOrder}
+      />
+  
+      <div className="page-wrapper">
+        <Routes>
+          <Route
+            path="/"
+            element={
+              <ListingPage
+                filterText={filterText}
+                insertTinyHouse={insertTinyHouse}
+                routerTinyHouseID={routerTinyHouseID}
+                searchBarOnChangeHandler={searchBarOnChangeHandler}
+                sortOrder={sortOrder}
+                setSortOrder={setSortOrder}
               />
-            </Routes>
-          </div>
-        </Col>
-      </Row>
+            }
+          />
+          <Route path="/Logon" element={<Logon />} />
+          <Route path="/Login" element={<Login user={user} setUser={setUser} />} />
+          <Route path="/Register" element={<Register />} />
+          <Route
+            path="/Profile"
+            element={
+              <Profile
+                user={user}
+                setUser={setUser}
+                insertTinyHouse={insertTinyHouse}
+              />
+            }
+          />
+          <Route path="/Logout" element={<Logout user={user} setUser={setUser} />} />
+          <Route
+            path="/TinyHouseDetails"
+            element={
+              <TinyHouseDetails
+                routerTinyHouseID={routerTinyHouseID}
+                user={user}
+              />
+            }
+          />
+        </Routes>
+      </div>
     </Container>
   );
+  
 }
 
 export default App;

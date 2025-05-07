@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { getTinyHouseImagesByTinyHouseId } from "../services/houseImages";
 import { getTinyHouseById } from "../services/tinyHouseService";
 import "../styles/ListingPage.css";
-import Filter from "../components/Filter";
+
 import {
   Row,
   Col,
@@ -15,16 +15,18 @@ import {
   Button,
 } from "reactstrap";
 
+// Accept sortOrder and setSortOrder as props in ListingPage
 function ListingPage({
   searchBarOnChangeHandler,
   filterText,
   insertTinyHouse,
+  sortOrder,
+  setSortOrder
 }) {
   const [listings, setListings] = useState([]); // Tüm çekilen evleri tutan dizi
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [filteredListings, setFilteredListings] = useState([]); // Arama sonrası filtrelenen evleri tutan dizi
-  const [sortOrder, setSortOrder] = useState(""); // "asc" ya da "desc"
   const [imagesMap, setImagesMap] = useState({}); // { tinyHouseId: imageUrl } Ev idsine göre resimleri getiren dizi
   const [amountOfListings, setAmountOfListings] = useState(100); // Toplam ev sayısı
   const [visibleCount, setVisibleCount] = useState(8); // Görüntülenecek ev sayısı
@@ -67,10 +69,12 @@ function ListingPage({
 
     const updatedListings = [...listings, ...nextBatch];
     setListings(updatedListings);
-    const unique = Array.from(new Map(updatedListings.map(i => [i.id, i])).values());
-setListings(unique);
-await loadImagesForListings(nextBatch); // sadece yeni gelenler için
-setVisibleCount(unique.length);
+    const unique = Array.from(
+      new Map(updatedListings.map((i) => [i.id, i])).values()
+    );
+    setListings(unique);
+    await loadImagesForListings(nextBatch); // sadece yeni gelenler için
+    setVisibleCount(unique.length);
     await loadImagesForListings(nextBatch);
     setVisibleCount(visibleCount + 8);
     setLoadingMore(false);
@@ -104,11 +108,14 @@ setVisibleCount(unique.length);
     let filtered = listings;
 
     if (text) {
+
       filtered = listings.filter(
         (listing) =>
+          
           listing.name.toLowerCase().includes(text.toLowerCase()) ||
           listing.city.toLowerCase().includes(text.toLowerCase())
       );
+
     }
 
     const sorted = sortListings(filtered, sortOrder);
@@ -116,12 +123,17 @@ setVisibleCount(unique.length);
   };
 
   const sortListings = (list, order) => {
-    if (order === "asc") {
-      return [...list].sort((a, b) => a.pricePerNight - b.pricePerNight);
-    } else if (order === "desc") {
-      return [...list].sort((a, b) => b.pricePerNight - a.pricePerNight);
+    switch (order) {
+      case "asc":
+        return [...list].sort((a, b) => a.pricePerNight - b.pricePerNight);
+      case "desc":
+        return [...list].sort((a, b) => b.pricePerNight - a.pricePerNight);
+      case "rate":
+        return [...list].sort((a, b) => b.rating - a.rating);
+
+      default:
+        return [...list].sort((a, b) => b.rating - a.rating);
     }
-    return list;
   };
 
   useEffect(() => {
@@ -139,7 +151,7 @@ setVisibleCount(unique.length);
     <div className="listing-page">
       <Col>
         <Row>
-          {filteredListings.map((item) => (
+          {filteredListings.map((item) => ( console.log(item),
             <Col
               key={item.id}
               xs="12"
@@ -188,7 +200,7 @@ setVisibleCount(unique.length);
                     {item.city},{item.country}
                   </h5>
                   <CardTitle tag="h5">
-                    {item.name} ★ {Math.floor(Math.random() * 5) + 1}{" "}
+                    {item.name} ★ {item.rating}
                   </CardTitle>
                   <CardSubtitle className="mb-2 text-muted" tag="h6">
                     {item.amenities}
@@ -222,13 +234,7 @@ setVisibleCount(unique.length);
           </div>
         )}
       </Col>
-      <div className="filter-fixed">
-        <Filter
-          searchBarOnChangeHandler={searchBarOnChangeHandler}
-          sortOrder={sortOrder}
-          setSortOrder={setSortOrder}
-        />
-      </div>
+
     </div>
   );
 }
