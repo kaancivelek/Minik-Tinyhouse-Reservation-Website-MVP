@@ -110,7 +110,7 @@ WHERE  T.location_id=L.id  AND T.id = @id", conn);
                 await conn.OpenAsync();
                 var cmd = new SqlCommand(@"
             SELECT T.*, L.country, L.city
-            FROM tiny_houses T  
+            FROM tiny_houses T
             JOIN locations L ON T.location_id = L.id
             WHERE T.property_owner_id = @id", conn);
 
@@ -130,14 +130,15 @@ WHERE  T.location_id=L.id  AND T.id = @id", conn);
                         MaxGuests = reader.GetInt32(5),
                         property_owner_id = reader.GetInt32(6),
                         Amenities = reader.IsDBNull(7) ? null : reader.GetString(7),
-                        City = reader.GetString(8),
-                        Country = reader.GetString(9),
+                        Country = reader.GetString(8),
+                        City = reader.GetString(9)
                     });
                 }
             }
 
             return houses.Count == 0 ? NotFound() : Ok(houses);
         }
+
 
     }
 }
