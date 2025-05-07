@@ -6,7 +6,8 @@ import ListingPage from "./pages/ListingPage";
 import TinyHouseDetails from "./pages/tinyHouseDetails";
 import Register from "./components/Register";
 import Profile from "./pages/Profile";
-import Logout from "./utils/Logout"
+import ProfileEditings from "./pages/ProfileEditings";
+import Logout from "./utils/Logout";
 import "./styles/App.css";
 import { Container, Row, Col } from "reactstrap";
 import { useState } from "react";
@@ -16,7 +17,7 @@ function App() {
   const [user, setUser] = useState(null);
   const [isUserLoading, setIsUserLoading] = useState(true);
   const [sortOrder, setSortOrder] = useState("");
-  
+
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
     if (storedUser) {
@@ -24,20 +25,6 @@ function App() {
     }
     setIsUserLoading(false);
   }, []);
-  
- 
-
-  const [userRole,setUserRole]= useState();  //3 admin 1 customer 2 property owner
-const changeUserRole =(userRole)=>{
-  setUserRole(userRole);
-}
-
-
-useEffect(() => {
-  if (user) {
-    changeUserRole(user.role_id);
-  }
-}, [user]);
 
 
 
@@ -56,8 +43,6 @@ useEffect(() => {
     setRouterTinyHouse(tinyHouseId);
   };
 
-
-
   return (
     <Container fluid className="bodyContainer">
       <Navi
@@ -67,7 +52,7 @@ useEffect(() => {
         sortOrder={sortOrder}
         setSortOrder={setSortOrder}
       />
-  
+
       <div className="page-wrapper">
         <Routes>
           <Route
@@ -84,7 +69,10 @@ useEffect(() => {
             }
           />
           <Route path="/Logon" element={<Logon />} />
-          <Route path="/Login" element={<Login user={user} setUser={setUser} />} />
+          <Route
+            path="/Login"
+            element={<Login user={user} setUser={setUser} />}
+          />
           <Route path="/Register" element={<Register />} />
           <Route
             path="/Profile"
@@ -96,7 +84,19 @@ useEffect(() => {
               />
             }
           />
-          <Route path="/Logout" element={<Logout user={user} setUser={setUser} />} />
+          <Route
+            path="/EditProfile"
+            element={
+              <ProfileEditings
+      user={user}
+      setUser={setUser}
+             />} ></Route>
+            
+
+          <Route
+            path="/Logout"
+            element={<Logout user={user} setUser={setUser} />}
+          />
           <Route
             path="/TinyHouseDetails"
             element={
@@ -110,7 +110,6 @@ useEffect(() => {
       </div>
     </Container>
   );
-  
 }
 
 export default App;

@@ -33,12 +33,16 @@ export default function PropertyOwnerPanel({ user, insertTinyHouse }) {
     }
   };
 
+
+  
+
+
   useEffect(() => {
     console.log("User verisi:", user);
-    if (user?.id) {
+    if (user.id!==null) {
       fetchTinyHousesOfPropertyOwner();
     } else {
-      alert("Kullanıcı bilgisi yok. Giriş yapılmamış olabilir.");
+      console.log("Kullanıcı bilgisi yok. Giriş yapılmamış olabilir.");
     }
   }, [user]);
 

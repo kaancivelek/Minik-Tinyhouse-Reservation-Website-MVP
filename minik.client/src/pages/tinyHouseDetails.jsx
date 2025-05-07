@@ -26,7 +26,7 @@ function TinyHouseDetails({ routerTinyHouseID, user }) {
 
   function showPanel(user, routingFrom) {
     if (
-      (user.role_id === 1 || user.role_id === 3) &&
+      (user.role_id === "1" || user.role_id === "3") &&
       routingFrom !== "customerPanel"
     ) {
       return tinyHouse && <MakeReservation tinyHouse={tinyHouse} />;

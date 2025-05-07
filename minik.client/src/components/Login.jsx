@@ -3,6 +3,7 @@ import { Form, FormGroup, Input, Label, Button } from "reactstrap";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/Login.css";
+import { Password } from "@mui/icons-material";
 
 export default function Login({setUser, user}) {
   const navigate = useNavigate();
@@ -43,10 +44,11 @@ export default function Login({setUser, user}) {
   onClick={() => {
     const dummyUser = {
       id: 11,
-      role_id: 1,
+      role_id: "1",
       full_name: "Kaan Civelek",
       email: "kaancivelek17@gmail.com",
-      phone_number: "539-703-1329"
+      phone_number: "539-703-1329",
+      password:"123"
     };
 
   

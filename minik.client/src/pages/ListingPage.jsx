@@ -21,7 +21,7 @@ function ListingPage({
   filterText,
   insertTinyHouse,
   sortOrder,
-  setSortOrder
+  setSortOrder,
 }) {
   const [listings, setListings] = useState([]); // Tüm çekilen evleri tutan dizi
   const [loading, setLoading] = useState(false);
@@ -76,7 +76,7 @@ function ListingPage({
     await loadImagesForListings(nextBatch); // sadece yeni gelenler için
     setVisibleCount(unique.length);
     await loadImagesForListings(nextBatch);
-    setVisibleCount(visibleCount + 8);
+    setVisibleCount(visibleCount + 15);
     setLoadingMore(false);
   };
 
@@ -108,14 +108,11 @@ function ListingPage({
     let filtered = listings;
 
     if (text) {
-
       filtered = listings.filter(
         (listing) =>
-          
           listing.name.toLowerCase().includes(text.toLowerCase()) ||
           listing.city.toLowerCase().includes(text.toLowerCase())
       );
-
     }
 
     const sorted = sortListings(filtered, sortOrder);
@@ -151,67 +148,72 @@ function ListingPage({
     <div className="listing-page">
       <Col>
         <Row>
-          {filteredListings.map((item) => ( console.log(item),
-            <Col
-              key={item.id}
-              xs="12"
-              sm="6"
-              md="4"
-              lg="3"
-              className="mb-4 d-flex"
-            >
-              <Card
-                className="flex-fill"
-                onClick={() => goTinyHouseDetails(item.id)}
-              >
-                <img
-                  alt={item.name}
-                  src={
-                    imagesMap[item.id]
-                      ? `${imagesMap[item.id]}?w=300&h=200&fit=crop`
-                      : `https://dummyimage.com/300x200/cccccc/000000&text=Resim+Yok`
-                  }
-                  className="card-img-top"
-                  style={{ height: "200px", objectFit: "cover" }}
-                  data-retry="0"
-                  onError={(e) => {
-                    const target = e.target;
-                    let retryCount = parseInt(
-                      target.getAttribute("data-retry") || "0",
-                      10
-                    );
+          {filteredListings.map(
+            (item) => (
+          
+              (
+                <Col
+                  key={item.id}
+                  xs="12"
+                  sm="6"
+                  md="4"
+                  lg="3"
+                  className="mb-4 d-flex"
+                >
+                  <Card
+                    className="flex-fill"
+                    onClick={() => goTinyHouseDetails(item.id)}
+                  >
+                    <img
+                      alt={item.name}
+                      src={
+                        imagesMap[item.id]
+                          ? `${imagesMap[item.id]}?w=300&h=200&fit=crop`
+                          : `https://dummyimage.com/300x200/cccccc/000000&text=Resim+Yok`
+                      }
+                      className="card-img-top"
+                      style={{ height: "200px", objectFit: "cover" }}
+                      data-retry="0"
+                      onError={(e) => {
+                        const target = e.target;
+                        let retryCount = parseInt(
+                          target.getAttribute("data-retry") || "0",
+                          10
+                        );
 
-                    if (retryCount < 2) {
-                      // 3 defaya kadar tekrar dene
-                      target.setAttribute("data-retry", retryCount + 1);
-                      target.src =
-                        imagesMap[item.id] + `?retry=${retryCount + 1}`; // cache bypass için
-                    } else {
-                      // 3 denemeden sonra fallback image
-                      target.src =
-                        "https://dummyimage.com/300x200/ff0000/ffffff&text=Resim+Yüklenemedi";
-                      target.onerror = null;
-                    }
-                  }}
-                />
+                        if (retryCount < 2) {
+                          // 3 defaya kadar tekrar dene
+                          target.setAttribute("data-retry", retryCount + 1);
+                          target.src =
+                            imagesMap[item.id] + `?retry=${retryCount + 1}`; // cache bypass için
+                        } else {
+                          // 3 denemeden sonra fallback image
+                          target.src =
+                            "https://dummyimage.com/300x200/ff0000/ffffff&text=Resim+Yüklenemedi";
+                          target.onerror = null;
+                        }
+                      }}
+                    />
 
-                <CardBody className="card-body">
-                  <h5>
-                    {item.city},{item.country}
-                  </h5>
-                  <CardTitle tag="h5">
-                    {item.name} ★ {item.rating}
-                  </CardTitle>
-                  <CardSubtitle className="mb-2 text-muted" tag="h6">
-                    {item.amenities}
-                  </CardSubtitle>
-                  <CardText>
-                    <strong>Fiyat:</strong> {item.pricePerNight} ₺ / gece
-                  </CardText>
-                </CardBody>
-              </Card>
-            </Col>
-          ))}
+                    <CardBody className="card-body">
+                      <h5>
+                        {item.city},{item.country}
+                      </h5>
+                      <CardTitle tag="h5">
+                        {item.name} ★ {item.rating}
+                      </CardTitle>
+                      <CardSubtitle className="mb-2 text-muted" tag="h6">
+                        {item.amenities}
+                      </CardSubtitle>
+                      <CardText>
+                        <strong>Fiyat:</strong> {item.pricePerNight} ₺ / gece
+                      </CardText>
+                    </CardBody>
+                  </Card>
+                </Col>
+              )
+            )
+          )}
         </Row>
 
         {/* Daha fazla yükle butonu */}
@@ -234,7 +236,6 @@ function ListingPage({
           </div>
         )}
       </Col>
-
     </div>
   );
 }

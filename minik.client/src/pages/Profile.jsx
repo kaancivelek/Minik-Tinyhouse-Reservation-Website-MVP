@@ -25,11 +25,11 @@ export default function Profile({ user, setUser, insertTinyHouse }) {
 
   const getRoleName = (roleId) => {
     switch (roleId) {
-      case 3:
+      case "3":
         return "Admin";
-      case 1:
+      case "1":
         return "Müşteri";
-      case 2:
+      case "2":
         return "Emlak Sahibi";
       default:
         return "Bilinmeyen Rol";
@@ -38,11 +38,13 @@ export default function Profile({ user, setUser, insertTinyHouse }) {
 
   const getPanelByRole = (roleId) => {
     switch (roleId) {
-      case 1:
-        return <CustomerPanel user={user} insertTinyHouse={insertTinyHouse}/>;
-      case 2:
-        return <PropertyOwnerPanel user={user} insertTinyHouse={insertTinyHouse} />;
-      case 3:
+      case "1":
+        return <CustomerPanel user={user} insertTinyHouse={insertTinyHouse} />;
+      case "2":
+        return (
+          <PropertyOwnerPanel user={user} insertTinyHouse={insertTinyHouse} />
+        );
+      case "3":
         return <AdminPanel />;
       default:
         return <div>Panel bulunamadı</div>;
@@ -50,7 +52,11 @@ export default function Profile({ user, setUser, insertTinyHouse }) {
   };
 
   if (isUserLoading || !user) {
-    return <div style={{ textAlign: "center", marginTop: "100px" }}>Yükleniyor...</div>;
+    return (
+      <div style={{ textAlign: "center", marginTop: "100px" }}>
+        Yükleniyor...
+      </div>
+    );
   }
 
   return (
@@ -87,8 +93,16 @@ export default function Profile({ user, setUser, insertTinyHouse }) {
             navigate("/logout");
           }}
         >
-          ÇIKIŞ YAP
+          Çıkış Yap
         </Button>
+        <Button
+          color="info"
+          style={{ background: "transparent", border: "1px solid #ccc" }}
+          onClick={() => {
+  
+            navigate("/EditProfile");
+          }}
+        > Bilgilerini Düzenle</Button>
       </div>
 
       <div>{getPanelByRole(user.role_id)}</div>

@@ -18,7 +18,6 @@ body {
 }
 
 .card {
-
   color: var(--text-color);
   border: 1px solid #e0e0e0;
   border-radius: var(--border-radius);
@@ -40,11 +39,11 @@ body {
 }
 
 .card-body {
-  text-align: center;
-  padding: 15px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
+    text-align: center;
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
 }
 
 .card-title,
@@ -69,18 +68,7 @@ body {
 
 
 
-.filter-fixed {
-  position: fixed;
-  top: 150px;
-  right: 50px;
-background: transparent;
-  border: 1px solid white;
-  border-radius: var(--border-radius);
-  padding: 15px;
-  width: 200px;
-  z-index: 1000;
-  box-shadow: var(--shadow);
-}
+
 
 .errorText {
   font-size: 1.5rem;
