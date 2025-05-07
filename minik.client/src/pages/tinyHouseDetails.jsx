@@ -11,7 +11,7 @@ import {
   CardSubtitle,
 } from "reactstrap";
 import MakeReservation from "../components/MakeReservation";
-import Comment from "../components/MakeReservation"
+import Comment from "../components/Comment";
 import { getTinyHouseImagesByTinyHouseId } from "../services/houseImages";
 import { useLocation } from "react-router-dom";
 function TinyHouseDetails({ routerTinyHouseID, user }) {
@@ -21,16 +21,18 @@ function TinyHouseDetails({ routerTinyHouseID, user }) {
   const [imagesLoading, setImagesLoading] = useState(false);
   const [error, setError] = useState("");
 
-
   const location = useLocation();
   const routingFrom = location.state?.from;
 
-  function showPanel(user,routingFrom) {
-    if ((user.role_id === 1 || user.role_id === 3) && routingFrom !== "customerPanel") {
-
-      
-        return tinyHouse && <MakeReservation tinyHouse={tinyHouse} />;
-    }else {return <></>}
+  function showPanel(user, routingFrom) {
+    if (
+      (user.role_id === 1 || user.role_id === 3) &&
+      routingFrom !== "customerPanel"
+    ) {
+      return tinyHouse && <MakeReservation tinyHouse={tinyHouse} />;
+    } else {
+      return <></>;
+    }
   }
 
   const fetchTinyHouseDetails = async () => {
@@ -143,7 +145,10 @@ function TinyHouseDetails({ routerTinyHouseID, user }) {
             </CardBody>
           </Card>
         </Col>
-        <Col>{user ? showPanel(user,routingFrom) : <></>}</Col>
+        <Col>
+          {user ? showPanel(user, routingFrom) : <></>}{" "}
+          {tinyHouse && <Comment tinyHouse={tinyHouse} />}
+        </Col>
       </Row>
     </Container>
   );

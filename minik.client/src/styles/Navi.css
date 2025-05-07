@@ -9,6 +9,13 @@
   width: 100%;
 }
 
+.navbar-center {
+  flex: 2;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+}
 
 .navbar-custom * {
   pointer-events: auto;

@@ -15,31 +15,26 @@ export default function Filter({searchBarOnChangeHandler, sortOrder, setSortOrde
 
   return (
     <div>
-    <Navbar className="navbar">
+    <div className={`navbar ${collapsed ? "collapsed" : "expanded"}`}>
   <button onClick={toggleNavbar} className="filter-toggle-btn">
     FİLTRELER
   </button>
-  <Collapse isOpen={!collapsed} navbar>
-    <Nav navbar>
-      <NavItem>
-        <input
-          onChange={searchBarOnChangeHandler}
-          type="text"
-          placeholder="ARA"
-        />
-      </NavItem>
-      <NavItem>
-        <select value={sortOrder} onChange={(e) => setSortOrder(e.target.value)}>
-          <option value="">Sırala</option>
-          <option value="asc">En Düşük Fiyat</option>
-          <option value="desc">En Yüksek Fiyat</option>
-          <option value="desc">Yüksek Puanlılar</option>
 
-        </select>
-      </NavItem>
-    </Nav>
-  </Collapse>
-</Navbar>
+  <div className={`filter-panel ${collapsed ? "hide" : "show"}`}>
+    <input
+      onChange={searchBarOnChangeHandler}
+      type="text"
+      placeholder="ARA"
+    />
+    <select value={sortOrder} onChange={(e) => setSortOrder(e.target.value)}>
+      <option value="">Sırala</option>
+      <option value="asc">En Düşük Fiyat</option>
+      <option value="desc">En Yüksek Fiyat</option>
+      <option value="rate">Yüksek Puanlılar</option>
+    </select>
+  </div>
+</div>
+
 
     </div>
   );

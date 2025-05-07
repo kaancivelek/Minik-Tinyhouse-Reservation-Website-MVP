@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { getTinyHouseImagesByTinyHouseId } from "../services/houseImages";
 import { getTinyHouseById } from "../services/tinyHouseService";
 import "../styles/ListingPage.css";
-import Filter from "../components/Filter";
+
 import {
   Row,
   Col,
@@ -15,16 +15,18 @@ import {
   Button,
 } from "reactstrap";
 
+// Accept sortOrder and setSortOrder as props in ListingPage
 function ListingPage({
   searchBarOnChangeHandler,
   filterText,
   insertTinyHouse,
+  sortOrder,
+  setSortOrder
 }) {
   const [listings, setListings] = useState([]); // Tüm çekilen evleri tutan dizi
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [filteredListings, setFilteredListings] = useState([]); // Arama sonrası filtrelenen evleri tutan dizi
-  const [sortOrder, setSortOrder] = useState(""); // "asc" ya da "desc"
   const [imagesMap, setImagesMap] = useState({}); // { tinyHouseId: imageUrl } Ev idsine göre resimleri getiren dizi
   const [amountOfListings, setAmountOfListings] = useState(100); // Toplam ev sayısı
   const [visibleCount, setVisibleCount] = useState(8); // Görüntülenecek ev sayısı
@@ -106,11 +108,14 @@ function ListingPage({
     let filtered = listings;
 
     if (text) {
+
       filtered = listings.filter(
         (listing) =>
+          
           listing.name.toLowerCase().includes(text.toLowerCase()) ||
           listing.city.toLowerCase().includes(text.toLowerCase())
       );
+
     }
 
     const sorted = sortListings(filtered, sortOrder);
@@ -146,7 +151,7 @@ function ListingPage({
     <div className="listing-page">
       <Col>
         <Row>
-          {filteredListings.map((item) => (
+          {filteredListings.map((item) => ( console.log(item),
             <Col
               key={item.id}
               xs="12"
@@ -229,13 +234,7 @@ function ListingPage({
           </div>
         )}
       </Col>
-      <div className="filter-fixed">
-        <Filter
-          searchBarOnChangeHandler={searchBarOnChangeHandler}
-          sortOrder={sortOrder}
-          setSortOrder={setSortOrder}
-        />
-      </div>
+
     </div>
   );
 }

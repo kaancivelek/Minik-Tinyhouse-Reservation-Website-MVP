@@ -53,33 +53,6 @@ export default function CustomerPanel({ user, insertTinyHouse }) {
       city: "Sakarya",
       reservationStatus: "cancelled",
     },
-    {
-      id: 18,
-      name: "Ada Evi",
-      description: "Küçük bir adada yalnız başına konaklayın.",
-      locationId: 7,
-      pricePerNight: 1600,
-      maxGuests: 2,
-      property_owner_id: 7,
-      amenities: "wifi,balcony,fireplace",
-      country: "Türkiye",
-      city: "Artvin",
-      reservationStatus: "confirmed",
-    },
-    {
-      id: 21,
-      name: "Fırtına Evi",
-      description:
-        "Fırtınalı havalarda bile güvenle kalabileceğiniz bir tiny house.",
-      locationId: 10,
-      pricePerNight: 1500,
-      maxGuests: 3,
-      property_owner_id: 7,
-      amenities: "wifi,fireplace,ac",
-      country: "Türkiye",
-      city: "Sakarya",
-      reservationStatus: "pending",
-    },
   ]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -122,7 +95,6 @@ export default function CustomerPanel({ user, insertTinyHouse }) {
   const goTinyHouseDetails = (id) => {
     insertTinyHouse(id);
     navigate("/TinyHouseDetails", { state: { from: "customerPanel" } });
-
   };
 
   const searchBarOnChangeHandler = (e) => {
@@ -172,13 +144,7 @@ export default function CustomerPanel({ user, insertTinyHouse }) {
         ))}
       </Row>
 
-      <div className="filter-fixed">
-        <Filter
-          searchBarOnChangeHandler={searchBarOnChangeHandler}
-          sortOrder={sortOrder}
-          setSortOrder={setSortOrder}
-        />
-      </div>
+  
     </div>
   );
 }
