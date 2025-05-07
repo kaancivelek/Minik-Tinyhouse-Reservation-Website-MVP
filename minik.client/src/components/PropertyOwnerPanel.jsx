@@ -95,13 +95,7 @@ export default function PropertyOwnerPanel({ user, insertTinyHouse }) {
         ))}
       </Row>
 
-      <div className="filter-fixed">
-        <Filter
-          searchBarOnChangeHandler={searchBarOnChangeHandler}
-          sortOrder={sortOrder}
-          setSortOrder={setSortOrder}
-        />
-      </div>
+  
     </div>
   );
 }

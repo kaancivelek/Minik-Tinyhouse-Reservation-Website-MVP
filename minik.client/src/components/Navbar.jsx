@@ -1,12 +1,13 @@
 ﻿import React from "react";
 import { Navbar, NavbarBrand, NavbarText } from "reactstrap";
 import logo from "/logo.svg";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import "../styles/Navi.css";
 import Filter from "../components/Filter";
 
 function Navi({ user, searchBarOnChangeHandler, sortOrder, setSortOrder }) {
   const navigate = useNavigate();
+  const location = useLocation(); // Mevcut rotayı kontrol etmek için
 
   const goBackToHomePage = () => {
     navigate("/");
@@ -44,11 +45,14 @@ function Navi({ user, searchBarOnChangeHandler, sortOrder, setSortOrder }) {
         <NavbarBrand onClick={goBackToHomePage} style={{ cursor: "pointer" }}>
           <img src={logo} alt="logo" className="logo-img" />
         </NavbarBrand>
-        <Filter className="navbar-center"
-          searchBarOnChangeHandler={searchBarOnChangeHandler}
-          sortOrder={sortOrder}
-          setSortOrder={setSortOrder}
-        />
+        {location.pathname === "/ListingPage" || location.pathname === "/" && ( // Sadece ListingPage veya ana sayfa rotasında göster
+          <Filter
+            className="navbar-center"
+            searchBarOnChangeHandler={searchBarOnChangeHandler}
+            sortOrder={sortOrder}
+            setSortOrder={setSortOrder}
+          />
+        )}
         {logonAndProfile()}
       </div>
     </Navbar>

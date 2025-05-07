@@ -110,7 +110,7 @@ WHERE  T.location_id=L.id  AND T.id = @id", conn);
                 await conn.OpenAsync();
                 var cmd = new SqlCommand(@"
             SELECT T.*, L.country, L.city
-            FROM tiny_houses T , 
+            FROM tiny_houses T  
             JOIN locations L ON T.location_id = L.id
             WHERE T.property_owner_id = @id", conn);
 
