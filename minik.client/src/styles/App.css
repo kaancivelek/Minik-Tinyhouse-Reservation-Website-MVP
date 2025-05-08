@@ -1,5 +1,7 @@
 /* App.css */
-
+:root{
+  --toastify-color-success: #ffffff;
+}
 
 body {
   margin: 0;

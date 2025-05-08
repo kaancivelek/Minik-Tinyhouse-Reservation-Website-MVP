@@ -13,8 +13,9 @@ import {
 import MakeReservation from "../components/MakeReservation";
 import Comment from "../components/Comment";
 import { getTinyHouseImagesByTinyHouseId } from "../services/houseImages";
-import { useLocation } from "react-router-dom";
-function TinyHouseDetails({ routerTinyHouseID, user }) {
+import { useLocation, useParams } from "react-router-dom";
+
+function TinyHouseDetails({ user }) {
   const [tinyHouse, setTinyHouse] = useState(null);
   const [houseImages, setHouseImages] = useState([]);
   const [houseLoading, setHouseLoading] = useState(false);
@@ -23,6 +24,8 @@ function TinyHouseDetails({ routerTinyHouseID, user }) {
 
   const location = useLocation();
   const routingFrom = location.state?.from;
+  const { tinyHouseId } = useParams();
+
 
   function showPanel(user, routingFrom) {
     if (
@@ -38,7 +41,7 @@ function TinyHouseDetails({ routerTinyHouseID, user }) {
   const fetchTinyHouseDetails = async () => {
     setHouseLoading(true);
     try {
-      const data = await getTinyHouseById(routerTinyHouseID);
+      const data = await getTinyHouseById(tinyHouseId);
       setTinyHouse(data);
     } catch (err) {
       setError(err.message);
@@ -50,7 +53,7 @@ function TinyHouseDetails({ routerTinyHouseID, user }) {
   const fetchTinyHouseImages = async () => {
     setImagesLoading(true);
     try {
-      const data = await getTinyHouseImagesByTinyHouseId(routerTinyHouseID);
+      const data = await getTinyHouseImagesByTinyHouseId(tinyHouseId);
       setHouseImages(data);
     } catch (err) {
       console.error("Error loading images:", err);
@@ -63,7 +66,7 @@ function TinyHouseDetails({ routerTinyHouseID, user }) {
   useEffect(() => {
     fetchTinyHouseDetails();
     fetchTinyHouseImages();
-  }, [routerTinyHouseID]);
+  }, [tinyHouseId]);
 
   if (houseLoading) return <p>Konut bilgileri yükleniyor...</p>;
   if (error) return <p>Hata: {error}</p>;
@@ -132,9 +135,7 @@ function TinyHouseDetails({ routerTinyHouseID, user }) {
               </CardSubtitle>
               <CardText className="mb-2">{tinyHouse.description}</CardText>
               <CardText>
-                <h3>
-                  {tinyHouse.city},{tinyHouse.country}
-                </h3>
+                {tinyHouse.city},{tinyHouse.country}
               </CardText>
               <CardText>
                 <strong>Fiyat:</strong> {tinyHouse.pricePerNight} ₺ / gece

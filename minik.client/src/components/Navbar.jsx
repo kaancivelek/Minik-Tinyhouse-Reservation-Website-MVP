@@ -1,6 +1,6 @@
 ﻿import React from "react";
 import { Navbar, NavbarBrand, NavbarText } from "reactstrap";
-import logo from "/logo.svg";
+import logo from "../assets/logo.svg";
 import { useNavigate, useLocation } from "react-router-dom";
 import "../styles/Navi.css";
 import Filter from "../components/Filter";

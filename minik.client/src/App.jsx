@@ -9,7 +9,7 @@ import Profile from "./pages/Profile";
 import ProfileEditings from "./pages/ProfileEditings";
 import Logout from "./utils/Logout";
 import "./styles/App.css";
-import { Container, Row, Col } from "reactstrap";
+import { Container } from "reactstrap";
 import { useState } from "react";
 import { Route, Routes } from "react-router-dom";
 
@@ -26,8 +26,6 @@ function App() {
     setIsUserLoading(false);
   }, []);
 
-
-
   // Navbarda arama kutusuna girilen harfler onChangeHandler metodu yardımıyla burada tutuluyor.
   const [filterText, setText] = useState("");
   //  ListingPage'e yollanıyor.
@@ -43,6 +41,8 @@ function App() {
     setRouterTinyHouse(tinyHouseId);
   };
 
+
+  
   return (
     <Container fluid className="bodyContainer">
       <Navi
@@ -86,27 +86,24 @@ function App() {
           />
           <Route
             path="/EditProfile"
-            element={
-              <ProfileEditings
-      user={user}
-      setUser={setUser}
-             />} ></Route>
-            
+            element={<ProfileEditings user={user} setUser={setUser} />}
+          />
 
           <Route
             path="/Logout"
             element={<Logout user={user} setUser={setUser} />}
           />
           <Route
-            path="/TinyHouseDetails"
+            path="/TinyHouseDetails/:tinyHouseId"
             element={
               <TinyHouseDetails
-                routerTinyHouseID={routerTinyHouseID}
+          
                 user={user}
               />
             }
           />
         </Routes>
+        
       </div>
     </Container>
   );

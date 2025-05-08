@@ -9,14 +9,12 @@ import {
   Col,
   Row,
 } from "reactstrap";
-import Filter from "../components/Filter"; // varsa
 import { useNavigate } from "react-router-dom";
 
-export default function PropertyOwnerPanel({ user, insertTinyHouse }) {
+export default function PropertyOwnerPanel({ user }) {
   const [tinyHousesOfPropertyOwner, setTinyHouseOfUser] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [sortOrder, setSortOrder] = useState("asc");
   const navigate = useNavigate();
 
   const fetchTinyHousesOfPropertyOwner = async () => {
@@ -33,27 +31,17 @@ export default function PropertyOwnerPanel({ user, insertTinyHouse }) {
     }
   };
 
-
-  
-
-
   useEffect(() => {
-    console.log("User verisi:", user);
-    if (user.id!==null) {
+    if (user.id !== null) {
       fetchTinyHousesOfPropertyOwner();
     } else {
       console.log("Kullanıcı bilgisi yok. Giriş yapılmamış olabilir.");
     }
   }, [user]);
 
-  const goTinyHouseDetails = (id) => {
-    insertTinyHouse(id);
-    navigate("/TinyHouseDetails");
-  };
-
-  const searchBarOnChangeHandler = (e) => {
-    console.log("Arama yapılıyor:", e.target.value);
-    // Burada arama filtreleme işlemi yapılabilir
+  const goTinyHouseDetails = (tinyHouseId) => {
+    // ID'yi URL parametresi olarak geçiyoruz
+    navigate(`/TinyHouseDetails/${tinyHouseId}`);
   };
 
   return (
@@ -94,8 +82,6 @@ export default function PropertyOwnerPanel({ user, insertTinyHouse }) {
           </Col>
         ))}
       </Row>
-
-  
     </div>
   );
 }

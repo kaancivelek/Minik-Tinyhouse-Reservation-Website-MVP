@@ -1,0 +1,39 @@
+.date-input {
+  width: 20ch;
+  border: none;
+  border-bottom: 2px solid black;
+}
+
+.guest-counter {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1ch;
+}
+
+.checkout-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.back-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1.5rem;
+  margin-right: 10px;
+}
+
+.input-field {
+  width: 100%;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  padding: 8px;
+}
+
+.payment-button {
+  width: 100%;
+  padding: 10px;
+  border-radius: 5px;
+}
