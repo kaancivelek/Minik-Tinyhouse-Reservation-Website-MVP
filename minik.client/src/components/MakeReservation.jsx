@@ -1,24 +1,27 @@
-﻿import { Card, CardBody, CardText, CardTitle, Button } from "reactstrap";
-import { postReservation } from "../services/reservationService";
-import { useEffect, useState } from "react";
+﻿import { postReservation } from "../services/reservationService";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import ReservationForm from "./ReservationForm";
 import CheckoutForm from "./CheckoutForm";
-import  "../styles/MakeReservation.css";
-import { toast, Slide,ToastContainer } from "react-toastify";
+import "../styles/MakeReservation.css";
+import { toast, Slide, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 function MakeReservation({ tinyHouse }) {
-  const [startDate, setStartDate] = useState("");
-  const [endDate, setEndDate] = useState("");
-  const [guestCount, setGuestCount] = useState(1);
-  const [isClickedMakeReservation, setIsClickedMakeReservation] = useState(0);
-  const [cardNumber, setCardNumber] = useState("");
-  const [expiryDate, setExpiryDate] = useState("");
-  const [cardHolder, setCardHolder] = useState("");
+  const [reservationInfo, setReservationInfo] = useState({
+    startDate: "",
+    endDate: "",
+    guestCount: 1,
+    cardNumber: "",
+    expiryDate: "",
+    cardHolder: "",
+  });
+
+  const [step, setStep] = useState(0); // 0 = form, 1 = ödeme
   const navigate = useNavigate();
 
   const getNightCount = () => {
+    const { startDate, endDate } = reservationInfo;
     if (!startDate || !endDate) return 0;
     const start = new Date(startDate);
     const end = new Date(endDate);
@@ -31,43 +34,33 @@ function MakeReservation({ tinyHouse }) {
 
   const handlePayment = async () => {
     const storedUser = JSON.parse(localStorage.getItem("user"));
+    const { startDate, endDate } = reservationInfo;
+
     const reservationData = {
       userId: storedUser.id,
       tinyHouseId: tinyHouse.id,
       checkIn: startDate,
       checkOut: endDate,
-      totalPrice: totalPrice,
+      totalPrice,
       status: "confirmed",
     };
 
     try {
       const response = await postReservation(reservationData);
       if (response) {
-        toast.success(" Rezervasyon başarıyla oluşturuldu!", {
+        toast.success("Rezervasyon başarıyla oluşturuldu!", {
           position: "top-center",
           autoClose: 2000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
           theme: "dark",
           transition: Slide,
         });
-    setTimeout(() => {
-  navigate("/Profile"); // ya da başka bir işlem
-}, 2500); // autoClose süresi kadar beklet
+        setTimeout(() => navigate("/Profile"), 2500);
       }
     } catch (error) {
       console.error("Rezervasyon oluşturulurken hata:", error);
       toast.error("Rezervasyon oluşturulamadı. Lütfen tekrar deneyin.", {
         position: "top-center",
         autoClose: 2000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
         theme: "dark",
         transition: Slide,
       });
@@ -76,48 +69,27 @@ function MakeReservation({ tinyHouse }) {
 
   return (
     <div>
-      {isClickedMakeReservation === 0 && (
+      {step === 0 ? (
         <ReservationForm
-          startDate={startDate}
-          setStartDate={setStartDate}
-          endDate={endDate}
-          setEndDate={setEndDate}
-          guestCount={guestCount}
-          setGuestCount={setGuestCount}
+          reservationInfo={reservationInfo}
+          setReservationInfo={setReservationInfo}
           nightCount={nightCount}
           totalPrice={totalPrice}
           tinyHouse={tinyHouse}
-          setIsClickedMakeReservation={setIsClickedMakeReservation}
+          setStep={setStep}
         />
-      )}
-      {isClickedMakeReservation === 1 && (
+      ) : (
         <CheckoutForm
-          cardNumber={cardNumber}
-          setCardNumber={setCardNumber}
-          expiryDate={expiryDate}
-          setExpiryDate={setExpiryDate}
-          cardHolder={cardHolder}
-          setCardHolder={setCardHolder}
+          reservationInfo={reservationInfo}
+          setReservationInfo={setReservationInfo}
           totalPrice={totalPrice}
           nightCount={nightCount}
-          guestCount={guestCount}
           handlePayment={handlePayment}
-          setIsClickedMakeReservation={setIsClickedMakeReservation}
+          setStep={setStep}
         />
       )}
-      <ToastContainer
-        position="top-center"
-        autoClose={2000}
-        hideProgressBar={false}
-        newestOnTop
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-        theme="dark"
-        transition={Slide}
-      />
+
+      <ToastContainer autoClose={2000} theme="dark" transition={Slide} />
     </div>
   );
 }

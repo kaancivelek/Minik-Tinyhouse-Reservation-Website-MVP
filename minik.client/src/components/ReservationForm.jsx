@@ -1,32 +1,27 @@
 import { Card, CardBody, CardText, CardTitle, Button } from "reactstrap";
-import  "../styles/MakeReservation.css";
+import "../styles/MakeReservation.css";
 
-function ReservationForm({
-  startDate,
-  setStartDate,
-  endDate,
-  setEndDate,
-  guestCount,
-  setGuestCount,
-  nightCount,
-  totalPrice,
-  tinyHouse,
-  setIsClickedMakeReservation,
-}) {
+function ReservationForm({ reservationInfo, setReservationInfo, nightCount, totalPrice, tinyHouse, setStep }) {
+  const { startDate, endDate, guestCount } = reservationInfo;
+
+  const updateField = (field, value) => {
+    setReservationInfo((prev) => ({ ...prev, [field]: value }));
+  };
+
   const increaseGuests = () => {
     if (guestCount < tinyHouse.maxGuests) {
-      setGuestCount(guestCount + 1);
+      updateField("guestCount", guestCount + 1);
     }
   };
 
   const decreaseGuests = () => {
     if (guestCount > 1) {
-      setGuestCount(guestCount - 1);
+      updateField("guestCount", guestCount - 1);
     }
   };
 
   return (
-    <Card body style={{ width: "100%" }}>
+    <Card body>
       <CardBody>
         <CardTitle tag="h5">Rezervasyon Yap</CardTitle>
 
@@ -36,7 +31,7 @@ function ReservationForm({
             className="date-input"
             type="date"
             value={startDate}
-            onChange={(e) => setStartDate(e.target.value)}
+            onChange={(e) => updateField("startDate", e.target.value)}
           />
         </div>
 
@@ -46,20 +41,16 @@ function ReservationForm({
             className="date-input"
             type="date"
             value={endDate}
-            onChange={(e) => setEndDate(e.target.value)}
+            onChange={(e) => updateField("endDate", e.target.value)}
           />
         </div>
 
         <div className="mb-3">
           <label>Kişi Sayısı: </label>
           <div className="guest-counter">
-            <Button color="secondary" size="sm" onClick={decreaseGuests}>
-              -
-            </Button>
-            <span> {guestCount} </span>
-            <Button color="secondary" size="sm" onClick={increaseGuests}>
-              +
-            </Button>
+            <Button size="sm" onClick={decreaseGuests}>-</Button>
+            <span>{guestCount}</span>
+            <Button size="sm" onClick={increaseGuests}>+</Button>
           </div>
         </div>
 
@@ -69,10 +60,7 @@ function ReservationForm({
           </CardText>
         )}
 
-        <Button
-          disabled={nightCount === 0}
-          onClick={() => setIsClickedMakeReservation(1)}
-        >
+        <Button disabled={nightCount === 0} onClick={() => setStep(1)}>
           Rezervasyonu Onayla
         </Button>
       </CardBody>

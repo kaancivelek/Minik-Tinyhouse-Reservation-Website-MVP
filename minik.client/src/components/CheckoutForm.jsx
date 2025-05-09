@@ -1,30 +1,19 @@
 import { Card, CardBody, CardTitle, Button } from "reactstrap";
 import { formatCardNumber, formatExpiryDate } from "../utils/formUtils";
-import  "../styles/MakeReservation.css";
+import "../styles/MakeReservation.css";
 
-function CheckoutForm({
-  cardNumber,
-  setCardNumber,
-  expiryDate,
-  setExpiryDate,
-  cardHolder,
-  setCardHolder,
-  totalPrice,
-  nightCount,
-  guestCount,
-  handlePayment,
-  setIsClickedMakeReservation,
-}) {
+function CheckoutForm({ reservationInfo, setReservationInfo, totalPrice, nightCount, handlePayment, setStep }) {
+  const { cardNumber, expiryDate, cardHolder, guestCount } = reservationInfo;
+
+  const updateField = (field, value) => {
+    setReservationInfo((prev) => ({ ...prev, [field]: value }));
+  };
+
   return (
-    <Card body style={{ width: "100%" }}>
+    <Card body>
       <CardBody>
         <div className="checkout-header">
-          <button
-            className="back-button"
-            onClick={() => setIsClickedMakeReservation(0)}
-          >
-            ←
-          </button>
+          <button className="back-button" onClick={() => setStep(0)}>←</button>
           <CardTitle tag="h5">Ödeme Gerçekleştir</CardTitle>
         </div>
 
@@ -35,7 +24,7 @@ function CheckoutForm({
             type="text"
             placeholder="0000 0000 0000 0000"
             value={cardNumber}
-            onChange={(e) => setCardNumber(formatCardNumber(e.target.value))}
+            onChange={(e) => updateField("cardNumber", formatCardNumber(e.target.value))}
             maxLength="19"
           />
         </div>
@@ -47,7 +36,7 @@ function CheckoutForm({
             type="text"
             placeholder="Kart Sahibi"
             value={cardHolder}
-            onChange={(e) => setCardHolder(e.target.value)}
+            onChange={(e) => updateField("cardHolder", e.target.value)}
             maxLength="40"
           />
         </div>
@@ -61,28 +50,18 @@ function CheckoutForm({
               placeholder="MM/YY"
               value={expiryDate}
               maxLength="5"
-              onChange={(e) => setExpiryDate(formatExpiryDate(e.target.value))}
+              onChange={(e) => updateField("expiryDate", formatExpiryDate(e.target.value))}
             />
           </div>
           <div style={{ flex: 1 }}>
             <label>CVV:</label>
-            <input
-              className="input-field"
-              type="text"
-              placeholder="123"
-              maxLength="3"
-            />
+            <input className="input-field" type="text" placeholder="123" maxLength="3" />
           </div>
         </div>
 
         <div className="mb-3">
           <label>Posta Kodu:</label>
-          <input
-            className="input-field"
-            type="text"
-            placeholder="Posta Kodu"
-            maxLength="5"
-          />
+          <input className="input-field" type="text" placeholder="Posta Kodu" maxLength="5" />
         </div>
 
         <div className="mb-3">
@@ -105,11 +84,7 @@ function CheckoutForm({
           <strong>Kişi Sayısı:</strong> {guestCount} kişi
         </div>
 
-        <Button
-          color="primary"
-          className="payment-button"
-          onClick={() => handlePayment()}
-        >
+        <Button color="primary" className="payment-button" onClick={handlePayment}>
           Ödemeyi Tamamla
         </Button>
       </CardBody>
