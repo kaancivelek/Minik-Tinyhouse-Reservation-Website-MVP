@@ -12,6 +12,7 @@ import "./styles/App.css";
 import { Container } from "reactstrap";
 import { useState } from "react";
 import { Route, Routes } from "react-router-dom";
+import { ToastContainer, Slide } from "react-toastify";
 
 function App() {
   const [user, setUser] = useState(null);
@@ -41,8 +42,6 @@ function App() {
     setRouterTinyHouse(tinyHouseId);
   };
 
-
-  
   return (
     <Container fluid className="bodyContainer">
       <Navi
@@ -95,16 +94,11 @@ function App() {
           />
           <Route
             path="/TinyHouseDetails/:tinyHouseId"
-            element={
-              <TinyHouseDetails
-          
-                user={user}
-              />
-            }
+            element={<TinyHouseDetails user={user} />}
           />
         </Routes>
-        
       </div>
+      <ToastContainer autoClose={2000} theme="dark" transition={Slide} />
     </Container>
   );
 }

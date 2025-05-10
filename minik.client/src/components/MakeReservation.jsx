@@ -4,8 +4,8 @@ import { useNavigate } from "react-router-dom";
 import ReservationForm from "./ReservationForm";
 import CheckoutForm from "./CheckoutForm";
 import "../styles/MakeReservation.css";
-import { toast, Slide, ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import { toast, Slide } from "react-toastify";
+
 
 function MakeReservation({ tinyHouse }) {
   const [reservationInfo, setReservationInfo] = useState({
@@ -89,7 +89,7 @@ function MakeReservation({ tinyHouse }) {
         />
       )}
 
-      <ToastContainer autoClose={2000} theme="dark" transition={Slide} />
+     
     </div>
   );
 }

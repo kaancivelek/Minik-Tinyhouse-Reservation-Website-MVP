@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import "../styles/Login.css";
 import { validateUser } from "../services/LogonService"; // Kullanıcı doğrulama servisi
 import { getUserByEmail } from "../services/LogonService";
+import { toast, Slide } from "react-toastify"; // Toast bildirimleri için
 export default function Login({ setUser, user }) {
   const navigate = useNavigate();
 
@@ -80,20 +81,31 @@ export default function Login({ setUser, user }) {
           className="animated-button"
         >
           Giriş Yap
-        </Button> 
-        <Button onClick={()=>{
-          const response = {
-            id:11,
-          full_name:"Kaan Civelek",
-          email:"kaancivelek17@gmail.com",
-          role_id:"1",
-          phone_number:"0532 123 4567"
-          }
-  localStorage.setItem("user", JSON.stringify(response)); // Kullanıcı bilgilerini localStorage'a kaydet
-  setUser(response); // Kullanıcıyı state'e ayarla
-  navigate("/"); // Başarılı giriş sonrası anasayfaya yönlendir
+        </Button>
+        <Button
+          onClick={() => {
+            const response = {
+              id: 11,
+              full_name: "Kaan Civelek",
+              email: "kaancivelek17@gmail.com",
+              role_id: "1",
+              phone_number: "0532 123 4567",
+            };
+            toast.success("Rezervasyon başarıyla oluşturuldu!", {
+              position: "top-center",
+              autoClose: 2000,
+              theme: "dark",
+              transition: Slide,
+            });
 
-        }}> DEMO</Button>
+            localStorage.setItem("user", JSON.stringify(response)); // Kullanıcı bilgilerini localStorage'a kaydet
+            setUser(response); // Kullanıcıyı state'e ayarla
+            setTimeout(() => navigate("/"), 2500);
+          }}
+        >
+          {" "}
+          DEMO
+        </Button>
       </Form>
     </div>
   );
