@@ -65,8 +65,8 @@ function TinyHouseDetails({ user }) {
 
   useEffect(() => {
     fetchTinyHouseDetails();
-    fetchTinyHouseImages();
-  }, [tinyHouseId]);
+      fetchTinyHouseImages();
+  }, []);
 
   if (houseLoading) return <p>Konut bilgileri yükleniyor...</p>;
   if (error) return <p>Hata: {error}</p>;

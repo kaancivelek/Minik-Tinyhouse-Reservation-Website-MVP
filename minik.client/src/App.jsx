@@ -16,7 +16,7 @@ import { ToastContainer, Slide } from "react-toastify";
 
 function App() {
   const [user, setUser] = useState(null);
-  const [isUserLoading, setIsUserLoading] = useState(true);
+
   const [sortOrder, setSortOrder] = useState("");
 
   useEffect(() => {
@@ -24,7 +24,6 @@ function App() {
     if (storedUser) {
       setUser(JSON.parse(storedUser));
     }
-    setIsUserLoading(false);
   }, []);
 
   // Navbarda arama kutusuna girilen harfler onChangeHandler metodu yardımıyla burada tutuluyor.
