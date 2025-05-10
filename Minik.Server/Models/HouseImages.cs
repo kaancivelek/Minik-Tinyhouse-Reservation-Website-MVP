@@ -12,9 +12,9 @@ namespace Minik.Server.Models
 
         [ForeignKey("TinyHouse")]
         [Column("tiny_house_id")]
-        public int Tiny_house_id { get; set; }
+        public int TinyHouseId { get; set; }
         [Column("image_url")]
-        public string Image_url { get; set; }
+        public string ImageUrl { get; set; }
 
     }
 }

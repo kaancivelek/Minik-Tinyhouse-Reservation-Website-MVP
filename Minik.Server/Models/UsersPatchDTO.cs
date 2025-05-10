@@ -1,4 +1,4 @@
-﻿namespace Minik.Server.DTOs
+﻿namespace Minik.Server.Models
 {
     public class UsersPatchDTO
     {
