@@ -1,12 +1,11 @@
-﻿using System.Data.SqlClient;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity.Data;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.Data.SqlClient;
+using Minik.Server.Models;
 
 namespace Minik.Server.Controllers
 {
-    [Route("api/[controller]")]
     [ApiController]
+    [Route("api/[controller]")]
     public class LoginController : ControllerBase
     {
         private readonly string _connectionString;
@@ -15,9 +14,15 @@ namespace Minik.Server.Controllers
         {
             _connectionString = configuration.GetConnectionString("DefaultConnection");
         }
+
         [HttpPost("login")]
-        public IActionResult Login([FromBody] LoginRequest loginRequest)
+        public IActionResult Login([FromBody] Login loginRequest)
         {
+            if (string.IsNullOrWhiteSpace(loginRequest.Email) || string.IsNullOrWhiteSpace(loginRequest.PasswordHash))
+            {
+                return BadRequest("E-posta ve şifre gereklidir.");
+            }
+
             string storedHash = null;
 
             using (SqlConnection conn = new SqlConnection(_connectionString))
@@ -42,7 +47,7 @@ namespace Minik.Server.Controllers
                 }
             }
 
-            bool isPasswordValid = BCrypt.Net.BCrypt.Verify(loginRequest.Password, storedHash);
+            bool isPasswordValid = BCrypt.Net.BCrypt.Verify(loginRequest.PasswordHash, storedHash);
             if (!isPasswordValid)
             {
                 return Unauthorized("Şifre hatalı.");
