@@ -3,6 +3,7 @@ using System.Data.SqlClient;
 using Minik.Server.Models;
 using Microsoft.Extensions.Configuration;
 using Microsoft.CodeAnalysis;
+using System.ComponentModel.Design;
 
 namespace Minik.Server.Controllers
 {
@@ -46,7 +47,7 @@ namespace Minik.Server.Controllers
                                 Status = reader["status"].ToString(),
                                 CheckIn = (DateTime)reader["check_in"],
                                 CheckOut = (DateTime)reader["check_out"]
-                             
+                                
                             };
 
                             reservations.Add(reservation);
