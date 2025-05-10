@@ -3,6 +3,7 @@ using System.Data.SqlClient;
 using Minik.Server.Models;
 using Microsoft.Extensions.Configuration;
 using Microsoft.CodeAnalysis;
+using System.ComponentModel.Design;
 
 namespace Minik.Server.Controllers
 {
@@ -43,8 +44,10 @@ namespace Minik.Server.Controllers
                                 UserId = (int)reader["user_id"],
                                 TinyHouseId = (int)reader["tiny_house_id"],
                                 TotalPrice = (decimal)reader["total_price"],
-                                Status = reader["status"].ToString()
-                                // Eğer varsa check_in, check_out gibi alanları da buraya ekleyebilirsin
+                                Status = reader["status"].ToString(),
+                                CheckIn = (DateTime)reader["check_in"],
+                                CheckOut = (DateTime)reader["check_out"]
+                                
                             };
 
                             reservations.Add(reservation);
