@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Collapse,
   Navbar,
@@ -10,11 +10,26 @@ import "../styles/Filter.css"
 
 export default function Filter({searchBarOnChangeHandler, sortOrder, setSortOrder }) {
   const [collapsed, setCollapsed] = useState(true);
+  const [isVisible, setIsVisible] = useState(true);
 
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 50) {
+        setIsVisible(false); // Aşağı kaydırıldığında gizle
+      } else {
+        setIsVisible(true); // Yukarıda görünür yap
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
   const toggleNavbar = () => setCollapsed(!collapsed);
 
   return (
-    <div>
+     <div className={`filter-container ${isVisible ? "visible" : "hidden"}`}>
     <div className={`navbar ${collapsed ? "collapsed" : "expanded"}`}>
   <button onClick={toggleNavbar} className="filter-toggle-btn">
     FİLTRELER

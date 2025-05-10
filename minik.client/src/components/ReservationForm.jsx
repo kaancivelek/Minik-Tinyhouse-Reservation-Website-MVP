@@ -26,7 +26,7 @@ function ReservationForm({ reservationInfo, setReservationInfo, nightCount, tota
         <CardTitle tag="h5">Rezervasyon Yap</CardTitle>
 
         <div className="mb-2">
-          <label>Giriş Tarihi: </label>
+          <label>Giriş Tarihi: &nbsp;</label>
           <input
             className="date-input"
             type="date"
@@ -36,7 +36,7 @@ function ReservationForm({ reservationInfo, setReservationInfo, nightCount, tota
         </div>
 
         <div className="mb-3">
-          <label>Çıkış Tarihi: </label>
+          <label>Çıkış Tarihi:  &nbsp;</label>
           <input
             className="date-input"
             type="date"

@@ -2,6 +2,7 @@
   width: 20ch;
   border: none;
   border-bottom: 2px solid black;
+  text-transform: uppercase;
 }
 
 .guest-counter {

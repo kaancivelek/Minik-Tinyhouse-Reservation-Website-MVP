@@ -1,21 +1,20 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Form, FormGroup, Input, Label, Button } from "reactstrap";
-import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/Login.css";
-import { validateUser } from "../services/LogonService"; // Kullanıcı doğrulama servisi
-import { getUserByEmail } from "../services/LogonService";
-import { toast, Slide } from "react-toastify"; // Toast bildirimleri için
+import { validateUser, getUserByEmail } from "../services/LogonService";
+import { toast, Slide } from "react-toastify";
+
 export default function Login({ setUser, user }) {
   const navigate = useNavigate();
 
-  const getUserByEmail = async (email) => {
+  const fetchUserByEmail = async (email) => {
     try {
-      const response = await getUserByEmail(email); // Kullanıcıyı email ile al
+      const response = await getUserByEmail(email);
       if (response) {
-        localStorage.setItem("user", JSON.stringify(response)); // Kullanıcı bilgilerini localStorage'a kaydet
-        setUser(response); // Kullanıcıyı state'e ayarla
-        navigate("/"); // Başarılı giriş sonrası anasayfaya yönlendir
+        localStorage.setItem("user", JSON.stringify(response));
+        setUser(response);
+        navigate("/");
       } else {
         console.error("Kullanıcı bulunamadı.");
       }
@@ -25,35 +24,67 @@ export default function Login({ setUser, user }) {
   };
 
   const handleLogin = async (event) => {
-    event.preventDefault(); // Formun varsayılan gönderimini engelle
+  event.preventDefault();
 
-    const email = event.target.email.value;
-    const password = event.target.password.value;
+  const formData = new FormData(event.target);
+  const email = formData.get("email");
+  const password = formData.get("password");
 
-    try {
-      const response = await validateUser(email, password); // Kullanıcıyı doğrula
-      if (response) {
-        getUserByEmail(email); // Kullanıcı bilgilerini al
-      } else {
-        alert("Giriş başarısız. Lütfen bilgilerinizi kontrol edin.");
-      }
-    } catch (error) {
-      console.error("Giriş hatası:", error);
-      alert("Giriş sırasında bir hata oluştu. Lütfen tekrar deneyin.");
+  if (!email || !password) {
+    toast.error("Email ve şifre alanları boş olamaz!", {
+      position: "top-center",
+      autoClose: 2000,
+      theme: "dark",
+      transition: Slide,
+    });
+    return;
+  }
+
+  console.log("Giriş yapılmak istenen email:", email); // GÖZLEMLEME AMAÇLI
+
+  const twoFactorCode = "";
+  const twoFactorRecoveryCode = "";
+
+  try {
+    const response = await validateUser(email, password, twoFactorCode, twoFactorRecoveryCode);
+
+    if (response === "Giriş başarılı.") {
+        console.log(email, password)
+      fetchUserByEmail(email); // burada 'email' artık güvenli bir şekilde tanımlı
+       
+    } else if (response === "0") {
+      toast.error("Şifre hatalı!", {
+        position: "top-center",
+        autoClose: 2000,
+        theme: "dark",
+        transition: Slide,
+      });
+    } else if (response === "2") {
+      toast.error("Kullanıcı bulunamadı!", {
+        position: "top-center",
+        autoClose: 2000,
+        theme: "dark",
+        transition: Slide,
+      });
+    } else {
+      console.error("Giriş hatası:", response);
     }
-  };
+  } catch (error) {
+    console.error("Giriş hatası:", error);
+    alert("Giriş sırasında bir hata oluştu. Lütfen tekrar deneyin.");
+  }
+};
+
 
   useEffect(() => {
     if (user !== null) {
-      navigate("/"); // Zaten giriş yapmışsa anasayfaya gönder
+      navigate("/");
     }
-  }, [user]);
+  }, [user, navigate]);
 
   return (
     <div className="login-container">
       <Form className="login-form" onSubmit={handleLogin}>
-        {" "}
-        {/* Formun onSubmit olayını dinle */}
         <FormGroup>
           <Label for="Email">Email</Label>
           <Input
@@ -62,6 +93,7 @@ export default function Login({ setUser, user }) {
             placeholder="example@example.com"
             type="email"
             className="animated-input"
+            required
           />
         </FormGroup>
         <FormGroup>
@@ -72,38 +104,35 @@ export default function Login({ setUser, user }) {
             placeholder="••••••"
             type="password"
             className="animated-input"
+            required
           />
         </FormGroup>
-        <Button
-          color="secondary"
-          block
-          type="submit"
-          className="animated-button"
-        >
+        <Button color="secondary" block type="submit" className="animated-button">
           Giriş Yap
         </Button>
         <Button
+          type="button"
           onClick={() => {
-            const response = {
-              id: 11,
-              full_name: "Kaan Civelek",
-              email: "kaancivelek17@gmail.com",
-              role_id: "1",
-              phone_number: "0532 123 4567",
-            };
-            toast.success("Rezervasyon başarıyla oluşturuldu!", {
-              position: "top-center",
-              autoClose: 2000,
-              theme: "dark",
-              transition: Slide,
-            });
+             const response = {
+               id: 11,
+               full_name: "Kaan Civelek",
+               email: "kaancivelek17@gmail.com",
+               role_id: "1",
+               phone_number: "0532 123 4567",
+             };
+             toast.success("Giriş yapıldı.", {
+               position: "top-center",
+               autoClose: 2000,
+               theme: "dark",
+               transition: Slide,
+             });
 
-            localStorage.setItem("user", JSON.stringify(response)); // Kullanıcı bilgilerini localStorage'a kaydet
-            setUser(response); // Kullanıcıyı state'e ayarla
+             localStorage.setItem("user", JSON.stringify(response));
+             setUser(response);
             setTimeout(() => navigate("/"), 2500);
+         
           }}
         >
-          {" "}
           DEMO
         </Button>
       </Form>

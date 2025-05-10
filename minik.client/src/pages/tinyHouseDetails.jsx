@@ -130,7 +130,7 @@ function TinyHouseDetails({ user }) {
               <CardTitle tag="h1" className="mb-3">
                 {tinyHouse.name}
               </CardTitle>
-              <CardSubtitle className="mb-2 text-muted">
+              <CardSubtitle className="mb-2 text-muted" style ={{textTransform: "capitalize"}}>
                 {tinyHouse.amenities}
               </CardSubtitle>
               <CardText className="mb-2">{tinyHouse.description}</CardText>

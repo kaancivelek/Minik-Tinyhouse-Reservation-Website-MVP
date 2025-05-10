@@ -93,3 +93,19 @@ font-size: 12px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* hafif gölge ile belirginlik */
   }
   
+.filter-container {
+ 
+  transition: transform 0.4s ease, opacity 0.4s ease;
+}
+
+.filter-container.visible {
+  transform: translateY(0); /* Görünür durumda */
+  opacity: 1;
+}
+
+.filter-container.hidden {
+  transform: translateY(-100%); /* Yukarı kaydır */
+  opacity: 0;
+}
+
+

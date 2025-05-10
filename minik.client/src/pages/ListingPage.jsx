@@ -208,7 +208,7 @@ function ListingPage({
                   <CardTitle tag="h5">
                     {item.name} ★ {item.rating}
                   </CardTitle>
-                  <CardSubtitle className="mb-2 text-muted" tag="h6">
+                  <CardSubtitle style ={{textTransform: "capitalize"}} className="capitalize mb-2 text-muted" tag="h6">
                     {item.amenities}
                   </CardSubtitle>
                   <CardText>

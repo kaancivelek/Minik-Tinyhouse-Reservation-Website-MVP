@@ -1,6 +1,7 @@
 /* App.css */
 :root{
-  --toastify-color-success: #ffffff;
+  --toastify-color-success: #000000;
+  --toastify-background-color: rgba(0, 0, 0, 0);
 }
 
 body {
