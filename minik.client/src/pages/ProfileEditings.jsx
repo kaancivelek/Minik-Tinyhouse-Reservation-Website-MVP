@@ -8,28 +8,34 @@ import { getUserByEmail } from "../services/LogonService";
 export default function ProfileEditings({ user, setUser }) {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    full_name: user?.fullName || "",
-    email: user?.email || "",
-    phone_number: user?.phoneNumber || "",
-    role_id: user?.role_id || "",
-    password: "",
+    fullName: user?.fullName || null,
+    email: user?.email || null,
+    phoneNumber: user?.phoneNumber || null,
+    roleId: user?.role_id || null,
+    passwordHash: null,
   });
 
   const fetchUserData = async () => {
     try {
-      const response = await updateUser(user.email, formData); // direkt veri geliyor artık
-      if (response === "Kullanıcı başarıyla güncellendi.") {
-        toast.success(response, {
+      const cleanedData = {
+        ...formData,
+        roleId: formData.roleId === "" ? null : parseInt(formData.roleId, 10),
+      };
+
+      const response = await updateUser(user.email, cleanedData);
+
+      if (response.message === "Kullanıcı başarıyla güncellendi.") {
+        toast.success(response.message, {
           position: "top-center",
           autoClose: 2000,
           theme: "dark",
         });
-        getUserByEmail(user.email)
-          .then((response) => {
-            if (response) {
-              localStorage.setItem("user", JSON.stringify(response));
-              setUser(response);
 
+        +getUserByEmail(formData.email)
+          .then((res) => {
+            if (res) {
+              localStorage.setItem("user", JSON.stringify(res));
+              setUser(res);
               setTimeout(() => navigate("/Profile"), 2500);
             } else {
               console.error("Kullanıcı bulunamadı.");
@@ -39,14 +45,18 @@ export default function ProfileEditings({ user, setUser }) {
             console.error("Kullanıcı bilgileri alınırken hata:", error);
           });
       } else {
-        toast.error(response, {
+        toast.error(response.message, {
           position: "top-center",
           autoClose: 2000,
           theme: "dark",
         });
       }
     } catch (error) {
-      console.error("Error updating user data:", error.message, formData);
+      toast.error(error.message, {
+        position: "top-center",
+        autoClose: 2000,
+        theme: "dark",
+      });
     }
   };
 
@@ -60,7 +70,8 @@ export default function ProfileEditings({ user, setUser }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-     console.log("Form gönderildi"); 
+    console.log("Form verileri:", formData);
+    console.log("Form gönderildi");
     fetchUserData();
   };
 
@@ -85,8 +96,8 @@ export default function ProfileEditings({ user, setUser }) {
           <input
             type="text"
             id="full_name"
-            name="full_name"
-            value={formData.full_name}
+            name="fullName"
+            value={formData.fullName}
             onChange={handleInputChange}
             style={{
               width: "100%",
@@ -117,8 +128,8 @@ export default function ProfileEditings({ user, setUser }) {
           <input
             type="text"
             id="phone_number"
-            name="phone_number"
-            value={formData.phone_number}
+            name="phoneNumber"
+            value={formData.phoneNumber}
             onChange={handleInputChange}
             style={{
               width: "100%",
@@ -133,8 +144,8 @@ export default function ProfileEditings({ user, setUser }) {
           <input
             type="password"
             id="password"
-            name="password"
-            value={formData.password}
+            name="passwordHash"
+            value={formData.passwordHash}
             onChange={handleInputChange}
             style={{
               width: "100%",

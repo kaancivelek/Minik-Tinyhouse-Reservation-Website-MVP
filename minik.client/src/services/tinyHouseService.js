@@ -7,3 +7,4 @@ export const getTinyHouseByPropertyOwnerId = (propertyOwnerId) => request(`/Tiny
 export const createTinyHouse = (data) => request('/TinyHouses', 'POST', data);
 export const updateTinyHouse = (id, data) => request(`/TinyHouses/${id}`, 'PUT', data);
 export const deleteTinyHouse = (id) => request(`/TinyHouses/${id}`, 'DELETE');
+export const getTinyHouseByRange = (offset,limit) => request(`/TinyHouses/paged?offset=${offset}&limit=${limit}`, 'GET');

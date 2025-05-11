@@ -57,14 +57,7 @@ function App() {
           <Route
             path="/"
             element={
-              <ListingPage
-                filterText={filterText}
-                insertTinyHouse={insertTinyHouse}
-                routerTinyHouseID={routerTinyHouseID}
-                searchBarOnChangeHandler={searchBarOnChangeHandler}
-                sortOrder={sortOrder}
-                setSortOrder={setSortOrder}
-              />
+              <ListingPage filterText={filterText} sortOrder={sortOrder} />
             }
           />
           <Route path="/Logon" element={<Logon />} />

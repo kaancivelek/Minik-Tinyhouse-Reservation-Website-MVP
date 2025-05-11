@@ -5,7 +5,7 @@ import "../styles/Login.css";
 import { validateUser, getUserByEmail } from "../services/LogonService";
 import { toast, Slide } from "react-toastify";
 
-export default function Login({ setUser, user }) {
+export default function Login({ setUser }) {
   const navigate = useNavigate();
 
   const fetchUserByEmail = async (email) => {
@@ -14,7 +14,13 @@ export default function Login({ setUser, user }) {
       if (response) {
         localStorage.setItem("user", JSON.stringify(response));
         setUser(response);
-        setTimeout(() => navigate("/"), 2500);
+        toast.success(" Giriş Başarılı!", {
+          position: "top-center",
+          autoClose: 1000,
+          theme: "dark",
+          transition: Slide,
+        });
+        setTimeout(() => navigate("/"), 500);
       } else {
         console.error("Kullanıcı bulunamadı.");
       }
@@ -24,76 +30,66 @@ export default function Login({ setUser, user }) {
   };
 
   const handleLogin = async (event) => {
-  event.preventDefault();
+    event.preventDefault();
 
-  const formData = new FormData(event.target);
-  const email = formData.get("email");
-  const password = formData.get("password");
+    const formData = new FormData(event.target);
+    const email = formData.get("email");
+    const password = formData.get("password");
 
-  if (!email || !password) {
-    toast.error("Email ve şifre alanları boş olamaz!", {
-      position: "top-center",
-      autoClose: 2000,
-      theme: "dark",
-      transition: Slide,
-    });
-    return;
-  }
-
-  //console.log("Giriş yapılmak istenen email:", email); // GÖZLEMLEME AMAÇLI
-
-
-
-  try {
-  const response = await validateUser(email, password);
-
-  if (response === "Giriş başarılı.") {
-    await fetchUserByEmail(email);
-  } else {
-    toast.error(`⚠️ Giriş hatası: ${response}`, {
-      position: "top-center",
-      autoClose: 2000,
-      theme: "dark",
-      transition: Slide,
-    });
-  }
-} catch (error) {
-  console.error("Giriş hatası:", error);
-
-  const msg = error.message;
-
-  if (msg.includes("Şifre hatalı")) {
-    toast.error("❌ Şifre hatalı!", {
-      position: "top-center",
-      autoClose: 2000,
-      theme: "dark",
-      transition: Slide,
-    });
-  } else if (msg.includes("Kullanıcı bulunamadı")) {
-    toast.error("❌ Kullanıcı bulunamadı!", {
-      position: "top-center",
-      autoClose: 2000,
-      theme: "dark",
-      transition: Slide,
-    });
-  } else {
-    toast.error(`🚨 Giriş sırasında hata: ${msg}`, {
-      position: "top-center",
-      autoClose: 2000,
-      theme: "dark",
-      transition: Slide,
-    });
-  }
-}
-
-};
-
-
-  useEffect(() => {
-    if (user !== null) {
-      navigate("/");
+    if (!email || !password) {
+      toast.error("Email ve şifre alanları boş olamaz!", {
+        position: "top-center",
+        autoClose: 2000,
+        theme: "dark",
+        transition: Slide,
+      });
+      return;
     }
-  }, [user, navigate]);
+
+    //console.log("Giriş yapılmak istenen email:", email); // GÖZLEMLEME AMAÇLI
+
+    try {
+      const response = await validateUser(email, password);
+
+      if (response === "Giriş başarılı.") {
+        await fetchUserByEmail(email);
+      } else {
+        toast.error(`⚠️ Giriş hatası: ${response}`, {
+          position: "top-center",
+          autoClose: 2000,
+          theme: "dark",
+          transition: Slide,
+        });
+      }
+    } catch (error) {
+      console.error("Giriş hatası:", error);
+
+      const msg = error.message;
+
+      if (msg.includes("Şifre hatalı")) {
+        toast.error("❌ Şifre hatalı!", {
+          position: "top-center",
+          autoClose: 2000,
+          theme: "dark",
+          transition: Slide,
+        });
+      } else if (msg.includes("Kullanıcı bulunamadı")) {
+        toast.error("❌ Kullanıcı bulunamadı!", {
+          position: "top-center",
+          autoClose: 2000,
+          theme: "dark",
+          transition: Slide,
+        });
+      } else {
+        toast.error(`🚨 Giriş sırasında hata: ${msg}`, {
+          position: "top-center",
+          autoClose: 2000,
+          theme: "dark",
+          transition: Slide,
+        });
+      }
+    }
+  };
 
   return (
     <div className="login-container">
@@ -120,7 +116,12 @@ export default function Login({ setUser, user }) {
             required
           />
         </FormGroup>
-        <Button color="secondary" block type="submit" className="animated-button">
+        <Button
+          color="secondary"
+          block
+          type="submit"
+          className="animated-button"
+        >
           Giriş Yap
         </Button>
         {/* <Button

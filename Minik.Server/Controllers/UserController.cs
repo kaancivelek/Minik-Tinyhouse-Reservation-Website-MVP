@@ -355,8 +355,8 @@ namespace Minik.Server.Controllers
 
 
 
-        [HttpPatch("update/{id}")]
-        public IActionResult PatchUser(int id, [FromBody] UsersPatchDTO update)
+        [HttpPatch("update/{inputEmail}")]
+        public IActionResult PatchUser(string inputEmail, [FromBody] UsersPatchDTO update)
         {
             using (SqlConnection conn = new SqlConnection(_connectionString))
             {
@@ -385,10 +385,10 @@ namespace Minik.Server.Controllers
                     else
                     {
                         // Aynı e-posta başka kullanıcıya ait mi kontrolü
-                        using (SqlCommand checkEmailCmd = new SqlCommand("SELECT COUNT(*) FROM users WHERE email = @Email AND id != @Id", conn))
+                        using (SqlCommand checkEmailCmd = new SqlCommand("SELECT COUNT(*) FROM users WHERE email = @Email AND email != @Id", conn))
                         {
                             checkEmailCmd.Parameters.AddWithValue("@Email", update.Email);
-                            checkEmailCmd.Parameters.AddWithValue("@Id", id);
+                            checkEmailCmd.Parameters.AddWithValue("@Id", inputEmail);
 
                             int count = (int)checkEmailCmd.ExecuteScalar();
                             if (count > 0)
@@ -416,10 +416,10 @@ namespace Minik.Server.Controllers
                     else
                     {
                         // Telefon numarasının başka biri tarafından kullanılıyor olup olmadığını kontrol et
-                        using (SqlCommand checkPhoneCmd = new SqlCommand("SELECT COUNT(*) FROM users WHERE phone_number = @PhoneNumber AND id != @Id", conn))
+                        using (SqlCommand checkPhoneCmd = new SqlCommand("SELECT COUNT(*) FROM users WHERE phone_number = @PhoneNumber AND email != @Id", conn))
                         {
                             checkPhoneCmd.Parameters.AddWithValue("@PhoneNumber", update.PhoneNumber);
-                            checkPhoneCmd.Parameters.AddWithValue("@Id", id);
+                            checkPhoneCmd.Parameters.AddWithValue("@Id", inputEmail);
 
                             int count = (int)checkPhoneCmd.ExecuteScalar();
                             if (count > 0)
@@ -479,8 +479,8 @@ namespace Minik.Server.Controllers
                     return BadRequest("Güncellenecek herhangi bir alan belirtilmedi.");
 
                 // SQL sorgusunu oluştur
-                cmd.CommandText = $"UPDATE users SET {string.Join(", ", setClauses)} WHERE id = @Id";
-                cmd.Parameters.AddWithValue("@Id", id);
+                cmd.CommandText = $"UPDATE users SET {string.Join(", ", setClauses)} WHERE email = @Id";
+                cmd.Parameters.AddWithValue("@Id", inputEmail);
 
                 // Sorguyu çalıştır
                 int affected = cmd.ExecuteNonQuery();
