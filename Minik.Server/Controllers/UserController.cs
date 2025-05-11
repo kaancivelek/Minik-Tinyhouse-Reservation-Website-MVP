@@ -348,9 +348,9 @@ public ActionResult<UserDto> GetUserByEmail([FromRoute] string email)
 
             return Ok(new { Message = $"{columnName} başarıyla güncellendi." });
         }
+        [HttpPatch("update/{originalEmail}")]
+        public IActionResult PatchUser(string originalEmail, [FromBody] UsersPatchDTO update)
 
-        [HttpPatch("update/{id}")]
-        public IActionResult PatchUser(int id, [FromBody] UsersPatchDTO update)
         {
             using (SqlConnection conn = new SqlConnection(_connectionString))
             {
@@ -394,8 +394,9 @@ public ActionResult<UserDto> GetUserByEmail([FromRoute] string email)
                 if (!setClauses.Any())
                     return BadRequest("Güncellenecek herhangi bir alan belirtilmedi.");
 
-                cmd.CommandText = $"UPDATE users SET {string.Join(", ", setClauses)} WHERE id = @id";
-                cmd.Parameters.AddWithValue("@id", id);
+                cmd.CommandText = $"UPDATE users SET {string.Join(", ", setClauses)} WHERE email = @OriginalEmail";
+                cmd.Parameters.AddWithValue("@OriginalEmail", originalEmail);
+
 
                 int affected = cmd.ExecuteNonQuery();
                 if (affected == 0)

@@ -14,7 +14,7 @@ export default function Login({ setUser, user }) {
       if (response) {
         localStorage.setItem("user", JSON.stringify(response));
         setUser(response);
-        navigate("/");
+        setTimeout(() => navigate("/"), 2500);
       } else {
         console.error("Kullanıcı bulunamadı.");
       }
@@ -40,7 +40,7 @@ export default function Login({ setUser, user }) {
     return;
   }
 
-  console.log("Giriş yapılmak istenen email:", email); // GÖZLEMLEME AMAÇLI
+  //console.log("Giriş yapılmak istenen email:", email); // GÖZLEMLEME AMAÇLI
 
 
 
