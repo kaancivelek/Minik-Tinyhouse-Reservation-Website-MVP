@@ -62,6 +62,112 @@ namespace Minik.Server.Controllers
             return Ok(houses);
         }
 
+        [HttpGet("catalog")]
+        public async Task<ActionResult<IEnumerable<TinyHouse>>> GetTinyHousesPaged([FromQuery] int page = 1)
+        {
+            const int pageSize = 8;
+            var houses = new List<TinyHouse>();
+
+            using (var conn = new SqlConnection(_connectionString))
+            {
+                await conn.OpenAsync();
+
+                // Toplam kaç kayıt olduğunu alalım
+                int totalCount = 0;
+                var countCmd = new SqlCommand("SELECT COUNT(*) FROM tiny_houses", conn);
+                totalCount = (int)await countCmd.ExecuteScalarAsync();
+
+                // Sayfalama için sorgu
+                string query = @"
+            SELECT T.*, L.country, L.city 
+            FROM tiny_houses T
+            JOIN locations L ON T.location_id = L.id
+            ORDER BY T.id
+            OFFSET @offset ROWS 
+            FETCH NEXT @pageSize ROWS ONLY";
+
+                var cmd = new SqlCommand(query, conn);
+                cmd.Parameters.AddWithValue("@offset", (page - 1) * pageSize);
+                cmd.Parameters.AddWithValue("@pageSize", pageSize);
+
+                var reader = await cmd.ExecuteReaderAsync();
+                while (await reader.ReadAsync())
+                {
+                    houses.Add(new TinyHouse
+                    {
+                        Id = reader.GetInt32(0),
+                        Name = reader.GetString(1),
+                        Description = reader.IsDBNull(2) ? null : reader.GetString(2),
+                        LocationId = reader.GetInt32(3),
+                        PricePerNight = reader.GetDecimal(4),
+                        MaxGuests = reader.GetInt32(5),
+                        property_owner_id = reader.GetInt32(6),
+                        Amenities = reader.IsDBNull(7) ? null : reader.GetString(7),
+                        Country = reader.GetString(8),
+                        City = reader.GetString(9)
+                    });
+                }
+
+                var result = new
+                {
+                    CurrentPage = page,
+                    PageSize = pageSize,
+                    TotalCount = totalCount,
+                    TotalPages = (int)Math.Ceiling(totalCount / (double)pageSize),
+                    Houses = houses
+                };
+
+                return Ok(result);
+            }
+        }
+
+        [HttpGet("paged")]
+        public async Task<ActionResult<IEnumerable<TinyHouse>>> GetTinyHousesPaged([FromQuery] int offset = 0, [FromQuery] int limit = 8)
+        {
+            var houses = new List<TinyHouse>();
+
+            using (var conn = new SqlConnection(_connectionString))
+            {
+                await conn.OpenAsync();
+
+                string query = @"
+            SELECT T.*, L.country, L.city
+            FROM tiny_houses T
+            INNER JOIN locations L ON T.location_id = L.id
+            WHERE T.id IS NOT NULL
+            ORDER BY T.id
+            OFFSET @offset ROWS FETCH NEXT @limit ROWS ONLY";
+
+                using (var cmd = new SqlCommand(query, conn))
+                {
+                    cmd.Parameters.AddWithValue("@offset", offset);
+                    cmd.Parameters.AddWithValue("@limit", limit);
+
+                    using (var reader = await cmd.ExecuteReaderAsync())
+                    {
+                        while (await reader.ReadAsync())
+                        {
+                            houses.Add(new TinyHouse
+                            {
+                                Id = reader.GetInt32(0),
+                                Name = reader.GetString(1),
+                                Description = reader.IsDBNull(2) ? null : reader.GetString(2),
+                                LocationId = reader.GetInt32(3),
+                                PricePerNight = reader.GetDecimal(4),
+                                MaxGuests = reader.GetInt32(5),
+                                property_owner_id = reader.GetInt32(6),
+                                Amenities = reader.IsDBNull(7) ? null : reader.GetString(7),
+                                Country = reader.GetString(8),
+                                City = reader.GetString(9)
+                            });
+                        }
+                    }
+                }
+            }
+
+            return Ok(houses);
+        }
+
 
         // GET: api/TinyHouses/
         [HttpGet("{id}")]
