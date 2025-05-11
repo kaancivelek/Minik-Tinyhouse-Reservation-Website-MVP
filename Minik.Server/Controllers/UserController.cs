@@ -1,14 +1,19 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Data.SqlClient;
+using System.Text;
 using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-
+using System.Security.Cryptography;
 using Minik.Server.Models;
+
+
+using BCrypt.Net;
 
 namespace Minik.Server.Controllers
 {
-
+    [Route("api/[controller]")]
+    [ApiController]
     public class UserController : ControllerBase
     {
         private readonly string _connectionString;
@@ -88,8 +93,8 @@ namespace Minik.Server.Controllers
             }
         }
 
-        [HttpGet("by-email")]
-        public ActionResult<UserDto> GetUserByEmail([FromQuery] string email)
+        [HttpGet("users/{email}")]
+        public ActionResult<UserDto> GetUserByEmail([FromRoute] string email)
         {
             if (string.IsNullOrWhiteSpace(email))
                 return BadRequest("E-posta adresi belirtilmelidir.");
@@ -347,6 +352,9 @@ namespace Minik.Server.Controllers
             return Ok(new { Message = $"{columnName} başarıyla güncellendi." });
         }
 
+
+
+
         [HttpPatch("update/{id}")]
         public IActionResult PatchUser(int id, [FromBody] UsersPatchDTO update)
         {
@@ -355,53 +363,144 @@ namespace Minik.Server.Controllers
                 conn.Open();
 
                 List<string> setClauses = new List<string>();
+                List<string> skippedFields = new List<string>();  // Güncellenemeyen alanlar
                 SqlCommand cmd = new SqlCommand();
                 cmd.Connection = conn;
 
+                // FullName kontrolü
                 if (update.FullName != null)
                 {
-                    setClauses.Add("full_name = @full_name");
-                    cmd.Parameters.AddWithValue("@full_name", update.FullName);
+                    setClauses.Add("full_name = @FullName");
+                    cmd.Parameters.AddWithValue("@FullName", update.FullName);
                 }
+
+                // E-posta kontrolü
                 if (update.Email != null)
                 {
                     if (!new EmailAddressAttribute().IsValid(update.Email))
-                        return BadRequest("Geçerli bir e-posta adresi girin.");
+                    {
+                        skippedFields.Add("email");
+                        // Geçerli bir e-posta adresi girilmediği için bu alanı güncellemiyoruz
+                    }
+                    else
+                    {
+                        // Aynı e-posta başka kullanıcıya ait mi kontrolü
+                        using (SqlCommand checkEmailCmd = new SqlCommand("SELECT COUNT(*) FROM users WHERE email = @Email AND id != @Id", conn))
+                        {
+                            checkEmailCmd.Parameters.AddWithValue("@Email", update.Email);
+                            checkEmailCmd.Parameters.AddWithValue("@Id", id);
 
-                    setClauses.Add("email = @Email");
-                    cmd.Parameters.AddWithValue("@Email", update.Email);
+                            int count = (int)checkEmailCmd.ExecuteScalar();
+                            if (count > 0)
+                            {
+                                skippedFields.Add("email");
+                                // Başka kullanıcıya ait olduğu için güncellenmez
+                            }
+                            else
+                            {
+                                setClauses.Add("email = @Email");
+                                cmd.Parameters.AddWithValue("@Email", update.Email);
+                            }
+                        }
+                    }
                 }
 
+                // Telefon numarası kontrolü
+                if (update.PhoneNumber != null)
+                {
+                    if (!Regex.IsMatch(update.PhoneNumber, @"^0[1-9]\d{9}$"))
+                    {
+                        skippedFields.Add("phone_number");
+                        // Geçerli değil, bu yüzden güncellenmiyor
+                    }
+                    else
+                    {
+                        // Telefon numarasının başka biri tarafından kullanılıyor olup olmadığını kontrol et
+                        using (SqlCommand checkPhoneCmd = new SqlCommand("SELECT COUNT(*) FROM users WHERE phone_number = @PhoneNumber AND id != @Id", conn))
+                        {
+                            checkPhoneCmd.Parameters.AddWithValue("@PhoneNumber", update.PhoneNumber);
+                            checkPhoneCmd.Parameters.AddWithValue("@Id", id);
+
+                            int count = (int)checkPhoneCmd.ExecuteScalar();
+                            if (count > 0)
+                            {
+                                skippedFields.Add("phone_number");
+                                // Başka kullanıcıya ait olduğu için güncellenmez
+                            }
+                            else
+                            {
+                                setClauses.Add("phone_number = @PhoneNumber");
+                                cmd.Parameters.AddWithValue("@PhoneNumber", update.PhoneNumber);
+                            }
+                        }
+                    }
+                }
+
+                // RoleId kontrolü (sadece 0, 1, 2 değerleri geçerli)
                 if (update.RoleId.HasValue)
                 {
                     if (update.RoleId < 0 || update.RoleId > 2)
-                        return BadRequest("RoleId yalnızca 0, 1 veya 2 olabilir.");
-
-                    setClauses.Add("role_id = @RoleId");
-                    cmd.Parameters.AddWithValue("@RoleId", update.RoleId.Value);
+                    {
+                        skippedFields.Add("roleId");
+                        // Geçersiz RoleId olduğu için bu alan güncellenmiyor
+                    }
+                    else
+                    {
+                        setClauses.Add("role_id = @RoleId");
+                        cmd.Parameters.AddWithValue("@RoleId", update.RoleId.Value);
+                    }
                 }
-                if (update.PhoneNumber != null)
+
+                // Şifre kontrolü ve hashleme
+                if (!string.IsNullOrWhiteSpace(update.PasswordHash))
                 {
-                    if (!System.Text.RegularExpressions.Regex.IsMatch(update.PhoneNumber, @"^0[1-9]\d{9}$"))
-                        return BadRequest("Telefon numarası Türkiye standartlarında geçerli olmalıdır. Örn: 05321234567");
+                    string password = update.PasswordHash;
 
-                    setClauses.Add("phone_number = @PhoneNumber");
-                    cmd.Parameters.AddWithValue("@PhoneNumber", update.PhoneNumber);
+                    // Şifre uzunluğu, büyük harf, rakam ve özel karakter kontrolü
+                    if (password.Length < 8 ||
+                        !Regex.IsMatch(password, @"[A-Z]") ||
+                        !Regex.IsMatch(password, @"[0-9]") ||
+                        !Regex.IsMatch(password, @"[\W_]"))
+                    {
+                        skippedFields.Add("passwordHash");
+                        // Şifre hatalı olduğu için bu alan güncellenmiyor
+                    }
+                    else
+                    {
+                        // BCrypt ile hashle
+                        string hashedPassword = BCrypt.Net.BCrypt.HashPassword(password);
+                        setClauses.Add("password_hash = @PasswordHash");
+                        cmd.Parameters.AddWithValue("@PasswordHash", hashedPassword);
+                    }
                 }
 
+                // Hiçbir alan güncellenmiyorsa hata döndür
                 if (!setClauses.Any())
                     return BadRequest("Güncellenecek herhangi bir alan belirtilmedi.");
 
-                cmd.CommandText = $"UPDATE users SET {string.Join(", ", setClauses)} WHERE id = @id";
-                cmd.Parameters.AddWithValue("@id", id);
+                // SQL sorgusunu oluştur
+                cmd.CommandText = $"UPDATE users SET {string.Join(", ", setClauses)} WHERE id = @Id";
+                cmd.Parameters.AddWithValue("@Id", id);
 
+                // Sorguyu çalıştır
                 int affected = cmd.ExecuteNonQuery();
                 if (affected == 0)
                     return NotFound("Belirtilen ID ile eşleşen kullanıcı bulunamadı.");
-            }
 
-            return Ok(new { Message = "Kullanıcı başarıyla güncellendi." });
+                // Güncellenen alanları bildir
+                return Ok(new
+                {
+                    Message = "Kullanıcı başarıyla güncellendi.",
+                    UpdatedFields = setClauses,
+                    SkippedFields = skippedFields
+                });
+            }
         }
+
+
+
+
+
 
 
     }
