@@ -29,7 +29,7 @@ function TinyHouseDetails({ user }) {
 
   function showPanel(user, routingFrom) {
     if (
-      (user.role_id === "1" || user.role_id === "3") &&
+      (user.roleId === 1 || user.roleId === 3) &&
       routingFrom !== "customerPanel"
     ) {
       return tinyHouse && <MakeReservation tinyHouse={tinyHouse} />;
@@ -102,7 +102,7 @@ function TinyHouseDetails({ user }) {
             ) : houseImages.length > 0 ? (
               <img
                 alt={tinyHouse.name}
-                src={getOptimizedImageUrl(houseImages[0].image_url)}
+                src={getOptimizedImageUrl(houseImages[0].imageUrl)}
                 className="card-img-top mb-3"
                 style={{ height: "400px", objectFit: "cover" }}
                 onError={(e) => {

@@ -8,7 +8,8 @@ using Minik.Server.Models;
 
 namespace Minik.Server.Controllers
 {
-
+    [Route("api/[controller]")]
+    [ApiController]
     public class UserController : ControllerBase
     {
         private readonly string _connectionString;
@@ -50,45 +51,7 @@ namespace Minik.Server.Controllers
 
             return Ok(users);
         }
-        [HttpGet("user/by-email/")]
-        public ActionResult<UserDto> GetUserByEmail([FromQuery] string email)
-        {
-            if (string.IsNullOrWhiteSpace(email))
-                return BadRequest("E-posta adresi belirtilmelidir.");
-
-            using (SqlConnection conn = new SqlConnection(_connectionString))
-            {
-                conn.Open();
-                string query = @"SELECT id, full_name, email, role_id, phone_number 
-                         FROM users WHERE email = @Email";
-
-                using (SqlCommand cmd = new SqlCommand(query, conn))
-                {
-                    cmd.Parameters.AddWithValue("@Email", email);
-
-                    using (SqlDataReader reader = cmd.ExecuteReader())
-                    {
-                        if (reader.Read())
-                        {
-                            var user = new UserDto
-                            {
-                                Id = reader.GetInt32(0),
-                                FullName = reader.GetString(1),
-                                Email = reader.GetString(2),
-                                RoleId = reader.IsDBNull(3) ? null : reader.GetInt32(3),
-                                PhoneNumber = reader.IsDBNull(4) ? null : reader.GetString(4)
-                            };
-
-                            return Ok(user);
-                        }
-                        else
-                        {
-                            return NotFound("Bu e-posta adresiyle eşleşen kullanıcı bulunamadı.");
-                        }
-                    }
-                }
-            }
-        }
+       
 
         [HttpGet("user/{id}")]
         public ActionResult<UserDto> GetUserById(int id)
@@ -126,45 +89,46 @@ namespace Minik.Server.Controllers
             }
         }
 
-        [HttpGet("by-email")]
-        public ActionResult<UserDto> GetUserByEmail([FromQuery] string email)
-        {
-            if (string.IsNullOrWhiteSpace(email))
-                return BadRequest("E-posta adresi belirtilmelidir.");
+       [HttpGet("users/{email}")]
+public ActionResult<UserDto> GetUserByEmail([FromRoute] string email)
+{
+    if (string.IsNullOrWhiteSpace(email))
+        return BadRequest("E-posta adresi belirtilmelidir.");
 
-            using (SqlConnection conn = new SqlConnection(_connectionString))
-            {
-                conn.Open();
-                string query = @"SELECT id, full_name, email, role_id, phone_number 
+    using (SqlConnection conn = new SqlConnection(_connectionString))
+    {
+        conn.Open();
+        string query = @"SELECT id, full_name, email, role_id, phone_number 
                          FROM users WHERE email = @Email";
 
-                using (SqlCommand cmd = new SqlCommand(query, conn))
+        using (SqlCommand cmd = new SqlCommand(query, conn))
+        {
+            cmd.Parameters.AddWithValue("@Email", email);
+
+            using (SqlDataReader reader = cmd.ExecuteReader())
+            {
+                if (reader.Read())
                 {
-                    cmd.Parameters.AddWithValue("@Email", email);
-
-                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    var user = new UserDto
                     {
-                        if (reader.Read())
-                        {
-                            var user = new UserDto
-                            {
-                                Id = reader.GetInt32(0),
-                                FullName = reader.GetString(1),
-                                Email = reader.GetString(2),
-                                RoleId = reader.IsDBNull(3) ? null : reader.GetInt32(3),
-                                PhoneNumber = reader.IsDBNull(4) ? null : reader.GetString(4)
-                            };
+                        Id = reader.GetInt32(0),
+                        FullName = reader.GetString(1),
+                        Email = reader.GetString(2),
+                        RoleId = reader.IsDBNull(3) ? null : reader.GetInt32(3),
+                        PhoneNumber = reader.IsDBNull(4) ? null : reader.GetString(4)
+                    };
 
-                            return Ok(user);
-                        }
-                        else
-                        {
-                            return NotFound("Bu e-posta adresiyle eşleşen kullanıcı bulunamadı.");
-                        }
-                    }
+                    return Ok(user);
+                }
+                else
+                {
+                    return NotFound("Bu e-posta adresiyle eşleşen kullanıcı bulunamadı.");
                 }
             }
         }
+    }
+}
+        
 
 
         [HttpPut("users/{id}")]

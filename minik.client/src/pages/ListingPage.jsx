@@ -97,7 +97,7 @@ function ListingPage({
       try {
         const images = await getTinyHouseImagesByTinyHouseId(listing.id);
         if (images.length > 0) {
-          newImagesMap[listing.id] = images[1].image_url;
+          newImagesMap[listing.id] = images[1].imageUrl;
         }
       } catch (err) {
         console.error(`Resim yüklenirken hata (ID: ${listing.id}):`, err);

@@ -42,37 +42,50 @@ export default function Login({ setUser, user }) {
 
   console.log("Giriş yapılmak istenen email:", email); // GÖZLEMLEME AMAÇLI
 
-  const twoFactorCode = "";
-  const twoFactorRecoveryCode = "";
+
 
   try {
-    const response = await validateUser(email, password, twoFactorCode, twoFactorRecoveryCode);
+  const response = await validateUser(email, password);
 
-    if (response === "Giriş başarılı.") {
-        console.log(email, password)
-      fetchUserByEmail(email); // burada 'email' artık güvenli bir şekilde tanımlı
-       
-    } else if (response === "0") {
-      toast.error("Şifre hatalı!", {
-        position: "top-center",
-        autoClose: 2000,
-        theme: "dark",
-        transition: Slide,
-      });
-    } else if (response === "2") {
-      toast.error("Kullanıcı bulunamadı!", {
-        position: "top-center",
-        autoClose: 2000,
-        theme: "dark",
-        transition: Slide,
-      });
-    } else {
-      console.error("Giriş hatası:", response);
-    }
-  } catch (error) {
-    console.error("Giriş hatası:", error);
-    alert("Giriş sırasında bir hata oluştu. Lütfen tekrar deneyin.");
+  if (response === "Giriş başarılı.") {
+    await fetchUserByEmail(email);
+  } else {
+    toast.error(`⚠️ Giriş hatası: ${response}`, {
+      position: "top-center",
+      autoClose: 2000,
+      theme: "dark",
+      transition: Slide,
+    });
   }
+} catch (error) {
+  console.error("Giriş hatası:", error);
+
+  const msg = error.message;
+
+  if (msg.includes("Şifre hatalı")) {
+    toast.error("❌ Şifre hatalı!", {
+      position: "top-center",
+      autoClose: 2000,
+      theme: "dark",
+      transition: Slide,
+    });
+  } else if (msg.includes("Kullanıcı bulunamadı")) {
+    toast.error("❌ Kullanıcı bulunamadı!", {
+      position: "top-center",
+      autoClose: 2000,
+      theme: "dark",
+      transition: Slide,
+    });
+  } else {
+    toast.error(`🚨 Giriş sırasında hata: ${msg}`, {
+      position: "top-center",
+      autoClose: 2000,
+      theme: "dark",
+      transition: Slide,
+    });
+  }
+}
+
 };
 
 
@@ -110,14 +123,14 @@ export default function Login({ setUser, user }) {
         <Button color="secondary" block type="submit" className="animated-button">
           Giriş Yap
         </Button>
-        <Button
+        {/* <Button
           type="button"
           onClick={() => {
              const response = {
                id: 11,
                full_name: "Kaan Civelek",
                email: "kaancivelek17@gmail.com",
-               role_id: "1",
+               roleId: "1",
                phone_number: "0532 123 4567",
              };
              toast.success("Giriş yapıldı.", {
@@ -134,7 +147,7 @@ export default function Login({ setUser, user }) {
           }}
         >
           DEMO
-        </Button>
+        </Button> */}
       </Form>
     </div>
   );

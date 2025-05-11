@@ -32,15 +32,15 @@ function Navi({ user, searchBarOnChangeHandler, sortOrder, setSortOrder }) {
             className="navbar-login-text"
             onClick={() => navigate("/Profile")}
           >
-            {user.full_name}
+            {user.fullName}
             <br></br>
             {(() => {
-              switch (user.role_id) {
-                case "1":
+              switch (user.roleId) {
+                case 1:
                   return "Müşteri";
-                case "2":
+                case 2:
                   return "Emlak Sahibi";
-                case "3":
+                case 3:
                   return "Admin";
                 default:
                   return "Bilinmeyen Rol";

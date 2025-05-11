@@ -25,11 +25,11 @@ export default function Profile({ user, setUser, insertTinyHouse }) {
 
   const getRoleName = (roleId) => {
     switch (roleId) {
-      case "3":
+      case 3:
         return "Admin";
-      case "1":
+      case 1:
         return "Müşteri";
-      case "2":
+      case 2:
         return "Emlak Sahibi";
       default:
         return "Bilinmeyen Rol";
@@ -38,13 +38,13 @@ export default function Profile({ user, setUser, insertTinyHouse }) {
 
   const getPanelByRole = (roleId) => {
     switch (roleId) {
-      case "1":
+      case 1:
         return <CustomerPanel user={user} insertTinyHouse={insertTinyHouse} />;
-      case "2":
+      case 2:
         return (
           <PropertyOwnerPanel user={user} insertTinyHouse={insertTinyHouse} />
         );
-      case "3":
+      case 3:
         return <AdminPanel />;
       default:
         return <div>Panel bulunamadı</div>;
@@ -73,16 +73,16 @@ export default function Profile({ user, setUser, insertTinyHouse }) {
       >
         <h2>Profil Bilgileri</h2>
         <p>
-          <strong>Ad Soyad:</strong> {user.full_name}
+          <strong>Ad Soyad:</strong> {user.fullName}
         </p>
         <p>
           <strong>Email:</strong> {user.email}
         </p>
         <p>
-          <strong>Telefon:</strong> {user.phone_number}
+          <strong>Telefon:</strong> {user.phoneNumber}
         </p>
         <p>
-          <strong>Rol:</strong> {getRoleName(user.role_id)}
+          <strong>Rol:</strong> {getRoleName(user.roleId)}
         </p>
         <Button
           color="info"
@@ -105,7 +105,7 @@ export default function Profile({ user, setUser, insertTinyHouse }) {
         > Bilgilerini Düzenle</Button>
       </div>
 
-      <div>{getPanelByRole(user.role_id)}</div>
+      <div>{getPanelByRole(user.roleId)}</div>
     </>
   );
 }
