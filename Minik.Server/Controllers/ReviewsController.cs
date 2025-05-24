@@ -73,6 +73,7 @@ namespace Minik.Server.Controllers
                     cmd.ExecuteNonQuery();
                 }
             }
+            // test commit - doğru e-posta ile
 
             return Ok("Yorum başarıyla eklendi.");
         }
