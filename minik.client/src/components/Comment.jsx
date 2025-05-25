@@ -22,6 +22,7 @@ export default function Comment() {
 
   return (
     <div style={{ padding: "20px" }}>
+      <h5 style={{textAlign:"center"}}>Yorumlar</h5>
       {comments.map((c, index) => (
         <div
           key={index}

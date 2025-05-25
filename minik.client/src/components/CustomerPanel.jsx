@@ -53,7 +53,7 @@ export default function CustomerPanel({ user }) {
   };
   const goTinyHouseDetails = (tinyHouseId) => {
     // ID'yi URL parametresi olarak geçiyoruz
-    navigate(`/TinyHouseDetails/${tinyHouseId}`,{ state: { from: "customerPanel" } });
+    navigate(`/TinyHouseDetails/${tinyHouseId}`,{ state: { from: "CustomerPanel" } });
   };
 
 

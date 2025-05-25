@@ -11,10 +11,11 @@ import {
   CardSubtitle,
 } from "reactstrap";
 import MakeReservation from "../components/MakeReservation";
+import TinyHouseEditing from "../components/TinyHouseEditing";
 import Comment from "../components/Comment";
 import { getTinyHouseImagesByTinyHouseId } from "../services/houseImages";
 import { useLocation, useParams } from "react-router-dom";
-
+import "../styles/TinyHouseDetails.css";
 function TinyHouseDetails({ user }) {
   const [tinyHouse, setTinyHouse] = useState(null);
   const [houseImages, setHouseImages] = useState([]);
@@ -26,15 +27,21 @@ function TinyHouseDetails({ user }) {
   const routingFrom = location.state?.from;
   const { tinyHouseId } = useParams();
 
+  const showTinyHouseEditing = (routingFrom) => {
+    if (routingFrom === "PropertyOwnerPanel") {
+      return tinyHouse && <TinyHouseEditing tinyHouse={tinyHouse} />;
+    }
+    return null;
+  };
 
-  function showPanel(user, routingFrom) {
+  function showMakeReservationPanel(user, routingFrom) {
     if (
       (user.roleId === 1 || user.roleId === 3) &&
-      routingFrom !== "customerPanel"
+      routingFrom !== "CustomerPanel"
     ) {
       return tinyHouse && <MakeReservation tinyHouse={tinyHouse} />;
     } else {
-      return <></>;
+      return null;
     }
   }
 
@@ -65,7 +72,7 @@ function TinyHouseDetails({ user }) {
 
   useEffect(() => {
     fetchTinyHouseDetails();
-      fetchTinyHouseImages();
+    fetchTinyHouseImages();
   }, []);
 
   if (houseLoading) return <p>Konut bilgileri yükleniyor...</p>;
@@ -80,75 +87,71 @@ function TinyHouseDetails({ user }) {
     return `${url}${separator}w=600&h=400&fit=crop&auto=format`;
   };
 
-  return (
+ return (
     <Container className="my-5">
       <Row className="justify-content-center">
         <Col xs="12" md="8">
-          <Card className="p-3 shadow">
-            {/* Image section with fallbacks */}
-            {imagesLoading ? (
-              <div
-                className="card-img-top mb-3"
-                style={{
-                  height: "400px",
-                  backgroundColor: "#f5f5f5",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                <p>Resimler yükleniyor...</p>
-              </div>
-            ) : houseImages.length > 0 ? (
-              <img
-                alt={tinyHouse.name}
-                src={getOptimizedImageUrl(houseImages[0].imageUrl)}
-                className="card-img-top mb-3"
-                style={{ height: "400px", objectFit: "cover" }}
-                onError={(e) => {
-                  e.target.src =
-                    "https://via.placeholder.com/600x400?text=Resim+Yüklenemedi";
-                  e.target.onerror = null; // Prevent infinite loop
-                }}
-              />
-            ) : (
-              <div
-                className="card-img-top mb-3"
-                style={{
-                  height: "400px",
-                  backgroundColor: "#f5f5f5",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                <p>Resim bulunamadı</p>
-              </div>
-            )}
+          <div className="tinyhouse-details-flow">
+            {/* 1. Ev Detayları - Üstte büyük şekilde */}
+            <Card className="tinyhouse-card">
+              {imagesLoading ? (
+                <div className="tinyhouse-img-loading">
+                  <p>Resimler yükleniyor...</p>
+                </div>
+              ) : houseImages.length > 0 ? (
+                <img
+                  alt={tinyHouse.name}
+                  src={getOptimizedImageUrl(houseImages[0].imageUrl)}
+                  className="tinyhouse-img"
+                  onError={(e) => {
+                    e.target.src =
+                      "https://via.placeholder.com/600x400?text=Resim+Yüklenemedi";
+                    e.target.onerror = null;
+                  }}
+                />
+              ) : (
+                <div className="tinyhouse-img-notfound">
+                  <p>Resim bulunamadı</p>
+                </div>
+              )}
 
-            <CardBody>
-              <CardTitle tag="h1" className="mb-3">
-                {tinyHouse.name}
-              </CardTitle>
-              <CardSubtitle className="mb-2 text-muted" style ={{textTransform: "capitalize"}}>
-                {tinyHouse.amenities}
-              </CardSubtitle>
-              <CardText className="mb-2">{tinyHouse.description}</CardText>
-              <CardText>
-                {tinyHouse.city},{tinyHouse.country}
-              </CardText>
-              <CardText>
-                <strong>Fiyat:</strong> {tinyHouse.pricePerNight} ₺ / gece
-              </CardText>
-              <CardText>
-                <strong>Maksimum Misafir:</strong> {tinyHouse.maxGuests} kişi
-              </CardText>
-            </CardBody>
-          </Card>
-        </Col>
-        <Col>
-          {user ? showPanel(user, routingFrom) : <></>}{" "}
-          {tinyHouse && <Comment tinyHouse={tinyHouse} />}
+              <CardBody>
+                <CardTitle tag="h1" className="mb-3">
+                  {tinyHouse.name}
+                </CardTitle>
+                <CardSubtitle
+                  className="mb-2 text-muted"
+                  style={{ textTransform: "capitalize" }}
+                >
+                  {tinyHouse.amenities}
+                </CardSubtitle>
+                <CardText className="mb-2">{tinyHouse.description}</CardText>
+                <CardText>
+                  {tinyHouse.city}, {tinyHouse.country}
+                </CardText>
+                <CardText>
+                  <strong>Fiyat:</strong> {tinyHouse.pricePerNight} ₺ / gece
+                </CardText>
+                <CardText>
+                  <strong>Maksimum Misafir:</strong> {tinyHouse.maxGuests} kişi
+                </CardText>
+              </CardBody>
+            </Card>
+            {/* 2. Rezervasyon/Düzenleme ve Yorumlar yan yana */}
+            <div className="tinyhouse-details-sections">
+              <div className="tinyhouse-section-card">
+                {user && (
+                  <>
+                    {showTinyHouseEditing(routingFrom)}
+                    {showMakeReservationPanel(user, routingFrom)}
+                  </>
+                )}
+              </div>
+              <div className="tinyhouse-section-card">
+                {tinyHouse && <Comment tinyHouse={tinyHouse} />}
+              </div>
+            </div>
+          </div>
         </Col>
       </Row>
     </Container>
