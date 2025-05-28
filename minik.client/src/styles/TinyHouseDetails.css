@@ -2,43 +2,40 @@
   display: flex;
   flex-direction: column;
   gap: 2rem;
-
   border-radius: 14px;
   padding: 24px 18px;
-
+  width: 100%;
 }
 
 .tinyhouse-card {
   padding: 1.5rem;
   border-radius: 12px;
-
   margin-bottom: 2rem;
+  width: 100%;
 }
 
 .tinyhouse-details-sections {
   display: flex;
   gap: 2rem;
-  justify-content: stretch;
-  align-items: flex-start;
+  margin: 0;
+  width: 100%;
 }
 
 .tinyhouse-section-card {
-  flex: 1 1 0;
-
-  border-radius: 12px;
   padding: 1.2rem;
   min-width: 0;
+  width: 100%;
 }
 
 .tinyhouse-img-loading,
 .tinyhouse-img-notfound {
   height: 400px;
-
   display: flex;
   align-items: center;
   justify-content: center;
   border-radius: 8px;
   margin-bottom: 1rem;
+  width: 100%;
 }
 
 .tinyhouse-img {
@@ -49,13 +46,39 @@
   margin-bottom: 1rem;
 }
 
+/* Add new grid styles for comments */
+.comments-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.5rem;
+  width: 100%;
+}
+
+.comment-card {
+  background: #fff;
+  border-radius: 8px;
+  padding: 1rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  width: 100%;
+}
+
+@media (max-width: 1200px) {
+  .tinyhouse-details-sections {
+    gap: 1.5rem;
+  }
+}
+
 @media (max-width: 900px) {
   .tinyhouse-details-sections {
-    flex-direction: column;
     gap: 1.2rem;
   }
+  
   .tinyhouse-section-card {
     padding: 0.8rem;
+  }
+  
+  .comments-grid {
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
   }
 }
 
@@ -64,7 +87,13 @@
     padding: 12px 4px;
     gap: 1.2rem;
   }
+  
   .tinyhouse-card {
     padding: 1rem;
   }
+  
+  .comments-grid {
+    grid-template-columns: 1fr;
+  }
 }
+

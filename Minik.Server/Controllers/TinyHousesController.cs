@@ -131,7 +131,7 @@ namespace Minik.Server.Controllers
                 await conn.OpenAsync();
 
                 string query = @"
-            SELECT T.*, L.country, L.city
+            SELECT T.*, L.country, L.city, (SELECT CEILING(AVG(rating)) FROM reviews WHERE T.id = reviews.tiny_house_id) AS average_rating
             FROM tiny_houses T
             INNER JOIN locations L ON T.location_id = L.id
             WHERE T.id IS NOT NULL
@@ -158,7 +158,8 @@ namespace Minik.Server.Controllers
                                 property_owner_id = reader.GetInt32(6),
                                 Amenities = reader.IsDBNull(7) ? null : reader.GetString(7),
                                 Country = reader.GetString(8),
-                                City = reader.GetString(9)
+                                City = reader.GetString(9),
+                                Rating = reader.IsDBNull(10) ? 0 : reader.GetInt32(10)
                             });
                         }
                     }

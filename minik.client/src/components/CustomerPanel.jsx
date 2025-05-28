@@ -46,14 +46,16 @@ export default function CustomerPanel({ user }) {
       case "confirmed":
         return "lightgreen";
       case "pending":
-        return "blue";
+        return "orange";
       case "cancelled":
         return "red";
     }
   };
   const goTinyHouseDetails = (tinyHouseId) => {
     // ID'yi URL parametresi olarak geçiyoruz
-    navigate(`/TinyHouseDetails/${tinyHouseId}`,{ state: { from: "CustomerPanel" } });
+    navigate(`/TinyHouseDetails/${tinyHouseId}`, {
+      state: { from: "CustomerPanel", reservationInfo: reservations.filter((reservation)=>reservation.tinyHouseId === tinyHouseId) },
+    });
   };
 
 

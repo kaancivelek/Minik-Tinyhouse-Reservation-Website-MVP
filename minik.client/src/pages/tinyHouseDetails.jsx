@@ -1,4 +1,5 @@
 ﻿import React, { useEffect, useState } from "react";
+import { addStars } from "../utils/countingStars";
 import { getTinyHouseById } from "../services/tinyHouseService";
 import {
   Container,
@@ -16,6 +17,7 @@ import Comment from "../components/Comment";
 import { getTinyHouseImagesByTinyHouseId } from "../services/houseImages";
 import { useLocation, useParams } from "react-router-dom";
 import "../styles/TinyHouseDetails.css";
+import ReservationDetails from "../components/ReservationDetails";
 function TinyHouseDetails({ user }) {
   const [tinyHouse, setTinyHouse] = useState(null);
   const [houseImages, setHouseImages] = useState([]);
@@ -25,7 +27,13 @@ function TinyHouseDetails({ user }) {
 
   const location = useLocation();
   const routingFrom = location.state?.from;
+  const reservationInfo = location.state?.reservationInfo || [];
   const { tinyHouseId } = useParams();
+
+const showComments = (routingFrom) => {
+  if(routingFrom !=="CustomerPanel"){
+    return tinyHouse && <Comment tinyHouseId={tinyHouse.id}></Comment>
+}}
 
   const showTinyHouseEditing = (routingFrom) => {
     if (routingFrom === "PropertyOwnerPanel") {
@@ -87,7 +95,7 @@ function TinyHouseDetails({ user }) {
     return `${url}${separator}w=600&h=400&fit=crop&auto=format`;
   };
 
- return (
+  return (
     <Container className="my-5">
       <Row className="justify-content-center">
         <Col xs="12" md="8">
@@ -117,7 +125,8 @@ function TinyHouseDetails({ user }) {
 
               <CardBody>
                 <CardTitle tag="h1" className="mb-3">
-                  {tinyHouse.name}
+                  {tinyHouse.name} <br></br>
+                  {addStars(tinyHouse.rating)}
                 </CardTitle>
                 <CardSubtitle
                   className="mb-2 text-muted"
@@ -144,11 +153,13 @@ function TinyHouseDetails({ user }) {
                   <>
                     {showTinyHouseEditing(routingFrom)}
                     {showMakeReservationPanel(user, routingFrom)}
+                    <ReservationDetails reservationInfo={reservationInfo} />
                   </>
                 )}
               </div>
               <div className="tinyhouse-section-card">
-                {tinyHouse && <Comment tinyHouse={tinyHouse} />}
+                
+                {showComments(routingFrom)}
               </div>
             </div>
           </div>
