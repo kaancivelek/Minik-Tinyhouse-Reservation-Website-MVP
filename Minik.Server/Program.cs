@@ -1,25 +1,32 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿
+using System.Text.Json.Serialization;
+using Microsoft.EntityFrameworkCore;
 using Minik.Server.Data;
+
 var builder = WebApplication.CreateBuilder(args);
 
+// Veritabanı bağlantısı
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+// JSON enum ayarı burada! 🎯
+builder.Services
+    .AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+    });
 
-// CORS politikasını ekle
+// CORS politikası
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", policy =>
     {
-        policy.AllowAnyOrigin() // Her yerden erişime izin ver
-              .AllowAnyMethod()  // GET, POST, PUT, DELETE vs. her tür isteğe izin ver
-              .AllowAnyHeader(); // Her türlü header'a izin ver
+        policy.AllowAnyOrigin()
+              .AllowAnyMethod()
+              .AllowAnyHeader();
     });
 });
-
-
-// Controller'ları aktif et
-builder.Services.AddControllers();
 
 // Swagger (API Dökümantasyonu)
 builder.Services.AddEndpointsApiExplorer();
@@ -27,11 +34,10 @@ builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-
-// CORS politikasını uygula
+// CORS'u aktif et
 app.UseCors("AllowAll");
 
-// Development ortamı için Swagger UI aktif
+// Geliştirme ortamında Swagger UI
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -39,11 +45,9 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
-
-
 app.UseAuthorization();
 
+// Controller endpoint'lerini tanıt
 app.MapControllers();
 
 app.Run();

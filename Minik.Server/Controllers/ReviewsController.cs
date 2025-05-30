@@ -17,8 +17,9 @@ namespace Minik.Server.Controllers
         }
 
         // 1. GET: api/reviews
-        [HttpGet]
-        public IActionResult GetAllReviews()
+        // Kullanıcıya göre yorumları getir
+        [HttpGet("user/{userId}")]
+        public IActionResult GetReviewsByUser(int userId)
         {
             string connectionString = _configuration.GetConnectionString("DefaultConnection");
             List<Review> reviews = new List<Review>();
@@ -26,28 +27,70 @@ namespace Minik.Server.Controllers
             using (SqlConnection conn = new SqlConnection(connectionString))
             {
                 conn.Open();
-                string query = "SELECT * FROM reviews";
+                string query = "SELECT * FROM reviews WHERE user_id = @UserId";
 
                 using (SqlCommand cmd = new SqlCommand(query, conn))
-                using (SqlDataReader reader = cmd.ExecuteReader())
                 {
-                    while (reader.Read())
+                    cmd.Parameters.AddWithValue("@UserId", userId);
+
+                    using (SqlDataReader reader = cmd.ExecuteReader())
                     {
-                        reviews.Add(new Review
+                        while (reader.Read())
                         {
-                            Id = (int)reader["id"],
-                            UserId = (int)reader["user_id"],
-                            TinyHouseId = (int)reader["tiny_house_id"],
-                            Rating = (int)reader["rating"],
-                            Comment = reader["comment"] == DBNull.Value ? null : reader["comment"].ToString(),
-                            ReviewDate = (DateTime)reader["review_date"]
-                        });
+                            reviews.Add(new Review
+                            {
+                                Id = (int)reader["id"],
+                                UserId = (int)reader["user_id"],
+                                TinyHouseId = (int)reader["tiny_house_id"],
+                                Rating = (int)reader["rating"],
+                                Comment = reader["comment"] == DBNull.Value ? null : reader["comment"].ToString(),
+                                ReviewDate = (DateTime)reader["review_date"]
+                            });
+                        }
                     }
                 }
             }
 
             return Ok(reviews);
         }
+
+        // TinyHouseId'ye göre yorumları getir
+        [HttpGet("tinyhouse/{tinyHouseId}")]
+        public IActionResult GetReviewsByTinyHouse(int tinyHouseId)
+        {
+            string connectionString = _configuration.GetConnectionString("DefaultConnection");
+            List<Review> reviews = new List<Review>();
+
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            {
+                conn.Open();
+                string query = "SELECT * FROM reviews WHERE tiny_house_id = @TinyHouseId";
+
+                using (SqlCommand cmd = new SqlCommand(query, conn))
+                {
+                    cmd.Parameters.AddWithValue("@TinyHouseId", tinyHouseId);
+
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            reviews.Add(new Review
+                            {
+                                Id = (int)reader["id"],
+                                UserId = (int)reader["user_id"],
+                                TinyHouseId = (int)reader["tiny_house_id"],
+                                Rating = (int)reader["rating"],
+                                Comment = reader["comment"] == DBNull.Value ? null : reader["comment"].ToString(),
+                                ReviewDate = (DateTime)reader["review_date"]
+                            });
+                        }
+                    }
+                }
+            }
+
+            return Ok(reviews);
+        }
+
 
         // 2. POST: api/reviews
         [HttpPost]
