@@ -1,4 +1,6 @@
 ﻿
+using System.Text.Json.Serialization;
+
 namespace Minik.Server.Models
 {
     public class Maintenance
@@ -7,6 +9,8 @@ namespace Minik.Server.Models
         public int TinyHouseId { get; set; }
         public string MaintenanceType { get; set; }
         public DateTime MaintenanceDate { get; set; }
-        public string Status { get; set; }
+        [JsonConverter(typeof(JsonStringEnumConverter))]
+        public MaintenanceStatus Status { get; set; }
+
     }
 }

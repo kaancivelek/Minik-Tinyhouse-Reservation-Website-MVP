@@ -1,9 +1,8 @@
-﻿
-
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using System.Data.SqlClient;
 using Minik.Server.Models;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace Minik.Server.Controllers
 {
@@ -41,7 +40,7 @@ namespace Minik.Server.Controllers
                             TinyHouseId = (int)reader["tiny_house_id"],
                             MaintenanceType = reader["maintenance_type"].ToString(),
                             MaintenanceDate = (DateTime)reader["maintenance_date"],
-                            Status = reader["status"].ToString()
+                            Status = Enum.Parse<MaintenanceStatus>(reader["status"].ToString(),true)
                         });
                     }
                 }
@@ -49,6 +48,7 @@ namespace Minik.Server.Controllers
 
             return Ok(maintenances);
         }
+
 
         // 2. GET: api/maintenance/{id}
         [HttpGet("{id}")]
@@ -76,7 +76,7 @@ namespace Minik.Server.Controllers
                                 TinyHouseId = (int)reader["tiny_house_id"],
                                 MaintenanceType = reader["maintenance_type"].ToString(),
                                 MaintenanceDate = (DateTime)reader["maintenance_date"],
-                                Status = reader["status"].ToString()
+                                Status = Enum.Parse<MaintenanceStatus>(reader["status"].ToString())
                             };
                         }
                     }
@@ -107,7 +107,7 @@ namespace Minik.Server.Controllers
                     cmd.Parameters.AddWithValue("@TinyHouseId", maintenance.TinyHouseId);
                     cmd.Parameters.AddWithValue("@MaintenanceType", maintenance.MaintenanceType);
                     cmd.Parameters.AddWithValue("@MaintenanceDate", maintenance.MaintenanceDate);
-                    cmd.Parameters.AddWithValue("@Status", maintenance.Status);
+                    cmd.Parameters.AddWithValue("@Status", maintenance.Status.ToString());
 
                     cmd.ExecuteNonQuery();
                 }
@@ -167,7 +167,7 @@ namespace Minik.Server.Controllers
                                 TinyHouseId = (int)reader["tiny_house_id"],
                                 MaintenanceType = reader["maintenance_type"].ToString(),
                                 MaintenanceDate = (DateTime)reader["maintenance_date"],
-                                Status = reader["status"].ToString()
+                                Status = Enum.Parse<MaintenanceStatus>(reader["status"].ToString())
                             };
                         }
                         else
@@ -179,7 +179,7 @@ namespace Minik.Server.Controllers
 
                 string newType = existing.MaintenanceType;
                 DateTime newDate = existing.MaintenanceDate;
-                string newStatus = existing.Status;
+                MaintenanceStatus newStatus = existing.Status;
 
                 if (updatedFields.TryGetProperty("maintenance_type", out var typeProp))
                     newType = typeProp.GetString();
@@ -188,7 +188,7 @@ namespace Minik.Server.Controllers
                     newDate = dateProp.GetDateTime();
 
                 if (updatedFields.TryGetProperty("status", out var statusProp))
-                    newStatus = statusProp.GetString();
+                    newStatus = Enum.Parse<MaintenanceStatus>(statusProp.GetString());
 
                 string updateQuery = @"
                     UPDATE maintenance
@@ -201,7 +201,7 @@ namespace Minik.Server.Controllers
                 {
                     updateCmd.Parameters.AddWithValue("@MaintenanceType", newType);
                     updateCmd.Parameters.AddWithValue("@MaintenanceDate", newDate);
-                    updateCmd.Parameters.AddWithValue("@Status", newStatus);
+                    updateCmd.Parameters.AddWithValue("@Status", newStatus.ToString());
                     updateCmd.Parameters.AddWithValue("@Id", id);
 
                     updateCmd.ExecuteNonQuery();
@@ -209,6 +209,45 @@ namespace Minik.Server.Controllers
             }
 
             return Ok("Bakım kaydı başarıyla güncellendi.");
+        }
+
+        // 6. GET: api/maintenance/tinyhouse/{tinyHouseId}
+        [HttpGet("tinyhouse/{tinyHouseId}")]
+        public IActionResult GetMaintenanceByTinyHouseId(int tinyHouseId)
+        {
+            string connectionString = _configuration.GetConnectionString("DefaultConnection");
+            List<Maintenance> maintenances = new List<Maintenance>();
+
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            {
+                conn.Open();
+                string query = "SELECT * FROM maintenance WHERE tiny_house_id = @TinyHouseId";
+
+                using (SqlCommand cmd = new SqlCommand(query, conn))
+                {
+                    cmd.Parameters.AddWithValue("@TinyHouseId", tinyHouseId);
+
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            maintenances.Add(new Maintenance
+                            {
+                                Id = (int)reader["id"],
+                                TinyHouseId = (int)reader["tiny_house_id"],
+                                MaintenanceType = reader["maintenance_type"].ToString(),
+                                MaintenanceDate = (DateTime)reader["maintenance_date"],
+                                Status = Enum.Parse<MaintenanceStatus>(reader["status"].ToString())
+                            });
+                        }
+                    }
+                }
+            }
+
+            if (maintenances.Count == 0)
+                return NotFound("Bu tiny house'a ait bakım kaydı bulunamadı.");
+
+            return Ok(maintenances);
         }
     }
 }
