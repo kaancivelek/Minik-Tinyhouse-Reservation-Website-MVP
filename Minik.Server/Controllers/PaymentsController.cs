@@ -47,6 +47,58 @@ public class PaymentsController : ControllerBase
         return Ok(payments);
     }
 
+
+    // 5. GET: Belirli bir rezervasyon ID'sine ait ödemeleri getir
+    [HttpGet("reservation/{reservationId}")]
+    public IActionResult GetPaymentsByReservationId(int reservationId)
+    {
+        var payments = new List<Payment>();
+        string connectionString = _configuration.GetConnectionString("DefaultConnection");
+
+        using (SqlConnection conn = new SqlConnection(connectionString))
+        {
+            string query = "SELECT * FROM payments WHERE reservation_id = @ReservationId";
+
+            using (SqlCommand cmd = new SqlCommand(query, conn))
+            {
+                cmd.Parameters.AddWithValue("@ReservationId", reservationId);
+                conn.Open();
+
+                using (SqlDataReader reader = cmd.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        payments.Add(new Payment
+                        {
+                            Id = (int)reader["id"],
+                            ReservationId = (int)reader["reservation_id"],
+                            Amount = (decimal)reader["amount"],
+                            PaymentMethod = reader["payment_method"].ToString(),
+                            PaymentDate = (DateTime)reader["payment_date"],
+                            PaymentStatus = reader["payment_status"].ToString()
+                        });
+                    }
+                }
+            }
+        }
+
+        if (payments.Count == 0)
+            return NotFound("Bu rezervasyon ID’sine ait ödeme bulunamadı.");
+
+        return Ok(payments);
+    }
+
+
+
+
+
+
+
+
+
+
+
+
     // 2. POST: Yeni ödeme ekle
     [HttpPost]
     public IActionResult AddPayment(Payment payment)
