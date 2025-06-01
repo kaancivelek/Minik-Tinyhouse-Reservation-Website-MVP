@@ -61,7 +61,10 @@ namespace Minik.Server.Controllers
             string connectionString = _configuration.GetConnectionString("DefaultConnection");
             List<Review> reviews = new List<Review>();
 
-            using (SqlConnection conn = new SqlConnection(connectionString))
+            using (SqlConnection conn = new SqlConnection(connectionString))        
+
+
+                
             {
                 conn.Open();
                 string query = "SELECT * FROM reviews WHERE tiny_house_id = @TinyHouseId";
