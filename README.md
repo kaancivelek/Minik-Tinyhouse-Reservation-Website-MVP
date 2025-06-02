@@ -1,10 +1,10 @@
 # Minik-Tiny-House-Reservation-Website
-A full-stack reservation and management system for Tiny House rentals with role-based access, developed using React, ASP.NET Core, and MSSQL.
-(MVP Rightnow)
+A full-stack reservation and management system for Tiny House rentals with role-based access
+developed using React, ASP.NET Core, and MSSQL. (MVP Rightnow)
 
 # 🏡 Tiny House Reservation and Management System
 
-An end-to-end reservation and management system for renting Tiny Houses, built as a university course project by students of the HFTTF Software Engineering Department.
+An end-to-end reservation and management system for renting Tiny Houses, built as a university course project by students of the Hasan Ferdi Turgutlu Technology Faculty, Software Engineering Department.
 
 ## 📅 Project Date
 
@@ -12,10 +12,10 @@ March 13, 2025
 
 ## 👨‍💻 Development Team
 
-- Naciye Kaya  
-- Nebi Çiftkaldıran  
-- Raif Mert İkier  
-- Kaan Civelek  
+- Naciye Kaya - Backend Controllers And Models  
+- Nebi Çiftkaldıran - Backend Controllers And Models
+- Raif Mert İkier - Database Structure And Model
+- Kaan Civelek - Full-Stack & Project Lead
 
 ## 🧾 Project Description
 
@@ -27,7 +27,7 @@ This system allows **tenants** to search and reserve Tiny Houses, **hosts** to m
 
 ### Backend
 - **Framework:** ASP.NET Core Web API
-- **ORM:** Entity Framework Core
+- **SQL SCRIPTS** ADO.NET
 - **Database:** Microsoft SQL Server (MSSQL)
 
 ### Frontend
@@ -74,28 +74,24 @@ This system allows **tenants** to search and reserve Tiny Houses, **hosts** to m
 
 ### 🔐 Database Setup
 
-1. Place `minikDB.bak` in the backup folder:  
-   `C:\Program Files\Microsoft SQL Server\MSSQL16.MSSQLSERVER\MSSQL\Backup`
 
-2. Open **SQL Server Management Studio (SSMS)**
+1. Open **SQL Server Management Studio (SSMS)**
 
-3. When connecting:
+2. When connecting:
    - Replace the **Server Name** with `localhost`
    - Click **Connect**
 
-4. Install the database:
-   - Paste script file into ur clean Database.
- 
-
+3. Execute SQL script `minikDB.sql' in root folder.
 ---
 
 ### ⚙️ Backend Setup (ASP.NET Core API)
 
-> ⚠️ Prerequisite: Visual Studio, Node.Js Installed
+> ⚠️ Prerequisite: Visual Studio, Node.Js Installed, SQL Server Version >15, SSMS Studio
 
 1. Navigate to the project’s backend folder
 2. Open the `.sln` file using Visual Studio
-3. Press `F5` to start the backend server
+3. Configure launch properties for launching multiple starting project.
+3. Press `F5` to start the server
 4. To stop the server, close the console window (black screen with white text)
 
 If not cloned yet:

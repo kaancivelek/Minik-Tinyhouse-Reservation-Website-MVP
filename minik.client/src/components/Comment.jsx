@@ -1,17 +1,15 @@
 ﻿import React, { useState, useEffect } from "react";
-import { getAllComments } from "../services/CommentService";
+import { getCommentsByTinyHouseId } from "../services/CommentService";
 import { addStars } from "../utils/countingStars";
 export default function Comment({ tinyHouseId }) {
   const [comments, setComments] = useState([]);
 
   const fetchTinyHouseComments = async () => {
     try {
-      const data = await getAllComments();
+      const data = await getCommentsByTinyHouseId(tinyHouseId);
       // tinyHouse.id ile eşleşenleri filtrele
-      const filtered = data.filter(
-        (comment) => comment.tinyHouseId === tinyHouseId
-      );
-      setComments(filtered);
+
+      setComments(data);
     } catch (err) {
       console.error(err);
     }
@@ -28,10 +26,10 @@ export default function Comment({ tinyHouseId }) {
         {comments.map((c) => (
           <div key={c.id} className="comment-card">
             <p>
-              <strong>{c.full_name}</strong>
+              <strong>{addStars(c.rating)}</strong>
             </p>
             <p>
-              <strong>{addStars(c.rating)}</strong>
+              <strong>{c.fullName}</strong>
             </p>
             <p>
               <strong>{c.comment}</strong>

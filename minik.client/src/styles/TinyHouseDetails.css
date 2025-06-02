@@ -19,12 +19,26 @@
   gap: 2rem;
   margin: 0;
   width: 100%;
+  align-items: flex-start;
 }
 
 .tinyhouse-section-card {
   padding: 1.2rem;
   min-width: 0;
   width: 100%;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* Specific styles for reservation section to prevent overflow */
+.tinyhouse-section-card:first-child {
+  flex: 1.2;
+  max-width: 60%;
+}
+
+.tinyhouse-section-card:last-child {
+  flex: 0.8;
+  max-width: 40%;
 }
 
 .tinyhouse-img-loading,
@@ -49,9 +63,11 @@
 /* Add new grid styles for comments */
 .comments-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 1.5rem;
+  grid-template-columns: 1fr;
+  gap: 1rem;
   width: 100%;
+  max-height: 120vh;
+  overflow-y: auto;
 }
 
 .comment-card {
@@ -60,11 +76,46 @@
   padding: 1rem;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   width: 100%;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  border: 1px solid #e9ecef;
+  transition: box-shadow 0.2s ease;
+}
+
+.comment-card:hover {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.comment-card p {
+  margin-bottom: 0.5rem;
+  line-height: 1.4;
+}
+
+.comment-card p:last-child {
+  margin-bottom: 0;
+  color: #6c757d;
+  font-size: 0.9em;
+}
+
+/* Comments header */
+.comments-section h5 {
+  text-align: center;
+  margin-bottom: 1.5rem;
+  color: #495057;
+  font-weight: 600;
 }
 
 @media (max-width: 1200px) {
   .tinyhouse-details-sections {
     gap: 1.5rem;
+  }
+  
+  .tinyhouse-section-card:first-child {
+    max-width: 58%;
+  }
+  
+  .tinyhouse-section-card:last-child {
+    max-width: 42%;
   }
 }
 
@@ -77,8 +128,19 @@
     padding: 0.8rem;
   }
   
+  .tinyhouse-section-card:first-child,
+  .tinyhouse-section-card:last-child {
+    max-width: none;
+    flex: 1;
+  }
+  
   .comments-grid {
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 0.8rem;
+  }
+  
+  .comment-card {
+    padding: 0.8rem;
+    font-size: 14px;
   }
 }
 
@@ -92,8 +154,25 @@
     padding: 1rem;
   }
   
+  .tinyhouse-details-sections {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .tinyhouse-section-card:first-child,
+  .tinyhouse-section-card:last-child {
+    max-width: none;
+    width: 100%;
+  }
+  
   .comments-grid {
     grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .comment-card {
+    padding: 1rem;
+    font-size: 16px;
   }
 }
 
