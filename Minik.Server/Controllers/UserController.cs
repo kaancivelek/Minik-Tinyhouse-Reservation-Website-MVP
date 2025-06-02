@@ -1,5 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using System.Data.SqlClient;
+using Microsoft.Data.SqlClient;
 using System.Text;
 using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Http;
@@ -20,7 +20,8 @@ namespace Minik.Server.Controllers
 
         public UserController(IConfiguration configuration)
         {
-            _connectionString = configuration.GetConnectionString("DefaultConnection");
+            _connectionString = configuration.GetConnectionString("DefaultConnection") 
+                                ?? throw new ArgumentNullException(nameof(configuration), "Connection string cannot be null.");
         }
 
 
@@ -505,6 +506,4 @@ namespace Minik.Server.Controllers
 
     }
 }
-
-    
 
