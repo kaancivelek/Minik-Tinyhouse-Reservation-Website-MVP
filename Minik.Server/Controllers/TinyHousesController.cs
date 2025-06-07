@@ -319,7 +319,6 @@ WHERE T.id = @id
                 SqlCommand cmd = new SqlCommand();
                 cmd.Connection = conn;
 
-                // Güncellenebilecek alanları kontrol et
                 if (update.Name != null)
                 {
                     setClauses.Add("name = @name");
@@ -330,10 +329,15 @@ WHERE T.id = @id
                     setClauses.Add("description = @description");
                     cmd.Parameters.AddWithValue("@description", update.Description);
                 }
-                if (update.LocationId.HasValue)
+                if (update.City != null)
                 {
-                    setClauses.Add("location_id = @location_id");
-                    cmd.Parameters.AddWithValue("@location_id", update.LocationId.Value);
+                    setClauses.Add("city = @city");
+                    cmd.Parameters.AddWithValue("@city", update.City);
+                }
+                if (update.Country != null)
+                {
+                    setClauses.Add("country = @country");
+                    cmd.Parameters.AddWithValue("@country", update.Country);
                 }
                 if (update.PricePerNight.HasValue)
                 {
@@ -356,17 +360,14 @@ WHERE T.id = @id
                     cmd.Parameters.AddWithValue("@amenities", update.Amenities);
                 }
 
-                // Eğer hiçbir alan belirtilmemişse hata dön
                 if (!setClauses.Any())
                 {
                     return BadRequest("Güncellenecek herhangi bir alan belirtilmedi.");
                 }
 
-                // SQL sorgusunu hazırla
                 cmd.CommandText = $"UPDATE tiny_houses SET {string.Join(", ", setClauses)} WHERE id = @id";
                 cmd.Parameters.AddWithValue("@id", id);
 
-                // Veritabanında güncellemeyi yap
                 int affected = cmd.ExecuteNonQuery();
                 if (affected == 0)
                 {
@@ -376,6 +377,7 @@ WHERE T.id = @id
 
             return Ok(new { Message = "Tiny house başarıyla güncellendi." });
         }
+
 
 
 
