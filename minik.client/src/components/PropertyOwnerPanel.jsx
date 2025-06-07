@@ -47,7 +47,9 @@ export default function PropertyOwnerPanel({ user }) {
     navigate(`/TinyHouseDetails/${tinyHouseId}`,{ state: { from: "PropertyOwnerPanel" } });
   
   };
-
+ const goInsertTinyHouse = () => {
+    navigate("/insertTinyHouse");
+  }
 
 
   // Örnek yorumlar (gerçek yorumlar için API'dan çekebilirsiniz)
@@ -69,6 +71,7 @@ export default function PropertyOwnerPanel({ user }) {
       {loading && <div>Yükleniyor...</div>}
       {error && <div style={{ color: "red" }}>Hata: {error}</div>}
       <h2>Ev Sahibi Paneli</h2>
+      <Button onClick={goInsertTinyHouse}>Ev Bilgisi Ekle</Button>
       <Row>
         {tinyHousesOfPropertyOwner.map((item) => (
           <Col
@@ -102,8 +105,7 @@ export default function PropertyOwnerPanel({ user }) {
                   </Button>
             
                 </div>
-                {/* 3. Yorumlar */}
-                {renderComments(item.comments)}
+       
               </CardBody>
             </Card>
           </Col>

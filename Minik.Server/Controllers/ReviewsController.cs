@@ -1,6 +1,6 @@
 ﻿
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Data.SqlClient;
+using System.Data.SqlClient;
 using Minik.Server.Models;
 
 namespace Minik.Server.Controllers
@@ -47,7 +47,7 @@ namespace Minik.Server.Controllers
                                 Rating = (int)reader["rating"],
                                 Comment = reader["comment"] == DBNull.Value ? null : reader["comment"].ToString(),
                                 ReviewDate = (DateTime)reader["review_date"],
-                                FullName = reader["full_name"].ToString()
+                              
                             });
                         }
                     }

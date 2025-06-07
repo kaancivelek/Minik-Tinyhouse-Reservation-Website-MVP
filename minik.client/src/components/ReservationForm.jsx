@@ -48,7 +48,7 @@ function ReservationForm({ reservationInfo, setReservationInfo, nightCount, tota
   return (
     <Card body>
       <CardBody>
-        <CardTitle tag="h5">Rezervasyon Yap</CardTitle>
+        <CardTitle style={{textAlign:"center"}} tag="h5">Rezervasyon Yap</CardTitle>
 
         {/* Calendar Component */}
         <ReservationCalendar 
@@ -65,7 +65,7 @@ function ReservationForm({ reservationInfo, setReservationInfo, nightCount, tota
             <span>{guestCount}</span>
             <Button size="sm" onClick={increaseGuests}>+</Button>
           </div>
-          <small className="text-muted">Maksimum {tinyHouse.maxGuests} kişi</small>
+          <small className="text-muted"><br></br>Maksimum  {tinyHouse.maxGuests} kişi</small>
         </div>
 
         {nightCount > 0 && (

@@ -105,6 +105,68 @@
   font-weight: 600;
 }
 
+/* Carousel (galeri) stilleri */
+.tinyhouse-img-carousel {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  margin-bottom: 1rem;
+}
+
+.carousel-btn {
+  background: transparent;
+  color: #fff;
+  
+border-right: 1px solid #fff;
+border-left: 1px solid #fff;
+  width: 38px;
+  height: 38px;
+  font-size: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
+  cursor: pointer;
+  transition: background 0.2s;
+  opacity: 0.85;
+}
+.carousel-btn-left {
+  left: 10px;
+}
+.carousel-btn-right {
+  right: 10px;
+}
+.carousel-btn:hover {
+  background: rgba(0, 0, 0, 0.20);
+  opacity: 1;
+}
+
+.carousel-indicator {
+  position: absolute;
+  bottom: 10px;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  z-index: 3;
+}
+.carousel-indicator span {
+  font-size: 1.2rem;
+  color: rgba(0, 0, 0, 0.20);
+  cursor: pointer;
+  transition: color 0.2s;
+  user-select: none;
+}
+.carousel-indicator span.active {
+  color: rgba(0, 0, 0, 0.50);
+}
+
 @media (max-width: 1200px) {
   .tinyhouse-details-sections {
     gap: 1.5rem;
@@ -173,6 +235,18 @@
   .comment-card {
     padding: 1rem;
     font-size: 16px;
+  }
+  
+  .tinyhouse-img-carousel {
+    min-height: 220px;
+  }
+  .carousel-btn {
+    width: 32px;
+    height: 32px;
+    font-size: 1.1rem;
+  }
+  .carousel-indicator span {
+    font-size: 1rem;
   }
 }
 

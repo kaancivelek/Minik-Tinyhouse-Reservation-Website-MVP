@@ -24,6 +24,7 @@ function TinyHouseDetails({ user }) {
   const [houseLoading, setHouseLoading] = useState(false);
   const [imagesLoading, setImagesLoading] = useState(false);
   const [error, setError] = useState("");
+  const [activeImageIdx, setActiveImageIdx] = useState(0);
 
   const location = useLocation();
   const routingFrom = location.state?.from;
@@ -70,6 +71,7 @@ const showComments = (routingFrom) => {
     try {
       const data = await getTinyHouseImagesByTinyHouseId(tinyHouseId);
       setHouseImages(data);
+      setActiveImageIdx(0);
     } catch (err) {
       console.error("Error loading images:", err);
       // Continue even if images fail to load
@@ -95,6 +97,20 @@ const showComments = (routingFrom) => {
     return `${url}${separator}w=600&h=400&fit=crop&auto=format`;
   };
 
+  // Carousel ileri/geri fonksiyonları
+  const handlePrevImage = (e) => {
+    e.stopPropagation();
+    setActiveImageIdx((prev) =>
+      prev === 0 ? houseImages.length - 1 : prev - 1
+    );
+  };
+  const handleNextImage = (e) => {
+    e.stopPropagation();
+    setActiveImageIdx((prev) =>
+      prev === houseImages.length - 1 ? 0 : prev + 1
+    );
+  };
+
   return (
     <Container className="my-5">
       <Row className="justify-content-center">
@@ -107,16 +123,40 @@ const showComments = (routingFrom) => {
                   <p>Resimler yükleniyor...</p>
                 </div>
               ) : houseImages.length > 0 ? (
-                <img
-                  alt={tinyHouse.name}
-                  src={getOptimizedImageUrl(houseImages[0].imageUrl)}
-                  className="tinyhouse-img"
-                  onError={(e) => {
-                    e.target.src =
-                      "https://via.placeholder.com/600x400?text=Resim+Yüklenemedi";
-                    e.target.onerror = null;
-                  }}
-                />
+                <div className="tinyhouse-img-carousel">
+                  <button
+                    className="carousel-btn carousel-btn-left"
+                    onClick={handlePrevImage}
+                    aria-label="Önceki fotoğraf"
+                  ></button>
+                  <img
+                    alt={tinyHouse.name}
+                    src={getOptimizedImageUrl(houseImages[activeImageIdx].imageUrl)}
+                    className="tinyhouse-img"
+                    onError={(e) => {
+                      e.target.src =
+                        "https://via.placeholder.com/600x400?text=Resim+Yüklenemedi";
+                      e.target.onerror = null;
+                    }}
+                  />
+                  <button
+                    className="carousel-btn carousel-btn-right"
+                    onClick={handleNextImage}
+                    aria-label="Sonraki fotoğraf"
+                  ></button>
+                  <div className="carousel-indicator">
+                    {houseImages.map((img, idx) => (
+                      <span
+                        key={idx}
+                        className={idx === activeImageIdx ? "active" : ""}
+                        onClick={() => setActiveImageIdx(idx)}
+                        aria-label={`Fotoğraf ${idx + 1}`}
+                      >
+                        ●
+                      </span>
+                    ))}
+                  </div>
+                </div>
               ) : (
                 <div className="tinyhouse-img-notfound">
                   <p>Resim bulunamadı</p>

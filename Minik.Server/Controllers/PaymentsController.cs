@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.Data.SqlClient;
+using System.Data.SqlClient;
 using System.Data;
+using Minik.Server.Models;
+
 
 [ApiController]
 [Route("api/[controller]")]

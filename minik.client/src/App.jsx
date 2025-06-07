@@ -13,6 +13,7 @@ import { Container } from "reactstrap";
 import { useState } from "react";
 import { Route, Routes } from "react-router-dom";
 import { ToastContainer, Slide } from "react-toastify";
+import TinyHouseAdding from "./pages/TinyHouseAdding";
 
 function App() {
   const [user, setUser] = useState(null);
@@ -60,6 +61,17 @@ function App() {
               <ListingPage filterText={filterText} sortOrder={sortOrder} />
             }
           />
+
+       <Route
+            path="/insertTinyHouse"
+            element={
+              <TinyHouseAdding
+                user={user}
+                setUser={setUser}
+                insertTinyHouse={insertTinyHouse}
+              
+            />}/>
+
           <Route path="/Logon" element={<Logon />} />
           <Route
             path="/Login"

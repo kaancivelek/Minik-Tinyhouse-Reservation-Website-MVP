@@ -28,7 +28,7 @@ import {
   getAvailabilityByTinyHouseId, 
   getMaintenancesByTinyHouseId, 
   getReservationsByTinyHouseId 
-} from '../services/availabity.js';
+} from '../services/availabilityService.js';
 
 /**
  * Fetches all availability data for a specific tiny house
@@ -43,10 +43,32 @@ export const fetchAvailabilityData = async (tinyHouseId) => {
       getReservationsByTinyHouseId(tinyHouseId)
     ]);
 
+    // Map availability fields
+    const mappedAvailability = availability.map(a => ({
+      ...a,
+      availabile_from: a.availableFrom,
+      availabile_to: a.availableTo,
+      is_available: a.isAvailable
+    }));
+
+    // Map maintenance fields
+    const mappedMaintenances = maintenances.map(m => ({
+      ...m,
+      maintenanceStatus: m.status
+    }));
+
+    // Map reservation fields
+    const mappedReservations = reservations.map(r => ({
+      ...r,
+      check_in: r.checkIn,
+      check_out: r.checkOut,
+      reservationStatus: r.status
+    }));
+
     return {
-      availability,
-      maintenances,
-      reservations
+      availability: mappedAvailability,
+      maintenances: mappedMaintenances,
+      reservations: mappedReservations
     };
   } catch (error) {
     console.error('Error fetching availability data:', error);
@@ -103,7 +125,7 @@ const getUnavailableDateRanges = (maintenances, reservations) => {
     if (reservation.reservationStatus === 'confirmed' || reservation.reservationStatus === 'pending') {
       unavailableRanges.push({
         start: toDate(reservation.check_in),
-        end: toDate(reservation.check_out),
+        end: new Date(toDate(reservation.check_out).getTime() - 24 * 60 * 60 * 1000),
         reason: 'reservation'
       });
     }
@@ -169,26 +191,34 @@ export const checkDateRangeAvailability = async (requestedStartDate, requestedEn
 /**
  * Gets all available date ranges for a tiny house
  * @param {number} tinyHouseId - The ID of the tiny house
- * @returns {Promise<Array>} Array of available date ranges
+ * @returns {Promise<Object>} Object with available ranges and unavailable days with reasons
  */
 export const getSelectableDateRanges = async (tinyHouseId) => {
   try {
     const { availability, maintenances, reservations } = await fetchAvailabilityData(tinyHouseId);
     
     if (!availability || availability.length === 0) {
-      return [];
+      return { selectableRanges: [], unavailableDays: {} };
     }
 
     const selectableRanges = [];
+    const unavailableRanges = getUnavailableDateRanges(maintenances, reservations);
+    // Tüm unavailable günleri, sebebiyle birlikte bir objede tut
+    const unavailableDays = {};
+    unavailableRanges.forEach(range => {
+      let current = new Date(range.start);
+      while (current <= range.end) {
+        const key = current.toISOString().split('T')[0];
+        unavailableDays[key] = range.reason;
+        current = new Date(current.getTime() + 24 * 60 * 60 * 1000);
+      }
+    });
     
     // Process each availability period
     for (const period of availability) {
       if (period.is_available) {
         const periodStart = toDate(period.availabile_from);
         const periodEnd = toDate(period.availabile_to);
-        
-        // Get unavailable ranges
-        const unavailableRanges = getUnavailableDateRanges(maintenances, reservations);
         
         // Sort unavailable ranges by start date
         unavailableRanges.sort((a, b) => a.start - b.start);
@@ -206,12 +236,12 @@ export const getSelectableDateRanges = async (tinyHouseId) => {
           if (currentStart < unavailable.start) {
             selectableRanges.push({
               start: new Date(currentStart),
-              end: new Date(unavailable.start.getTime() - 24 * 60 * 60 * 1000) // Day before unavailable starts
+              end: new Date(unavailable.start.getTime() - 24 * 60 * 60 * 1000)
             });
           }
           
           // Move current start to after the unavailable period
-          currentStart = new Date(unavailable.end.getTime() + 24 * 60 * 60 * 1000); // Day after unavailable ends
+          currentStart = new Date(unavailable.end.getTime() + 24 * 60 * 60 * 1000);
         }
         
         // If there's still time left in the period after all unavailable ranges
@@ -224,10 +254,10 @@ export const getSelectableDateRanges = async (tinyHouseId) => {
       }
     }
     
-    return selectableRanges;
+    return { selectableRanges, unavailableDays };
   } catch (error) {
     console.error('Error getting selectable date ranges:', error);
-    return [];
+    return { selectableRanges: [], unavailableDays: {} };
   }
 };
 

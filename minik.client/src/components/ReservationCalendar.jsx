@@ -1,111 +1,178 @@
-import React, { useEffect, useState } from "react";
-import DatePicker, { registerLocale } from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
-import { getSelectableDateRanges } from "../utils/availabilityUtils";
-import { addDays, isWithinInterval, format, isSameDay } from "date-fns";
-import { tr } from "date-fns/locale";
-import "../styles/ReservationCalendar.css";
+import React, { useState, useEffect } from 'react';
+import { getSelectableDateRanges } from '../utils/availabilityUtils';
+import '../styles/ReservationCalendar.css';
 
-// Register Turkish locale
-registerLocale("tr", tr);
-
-function ReservationCalendar({ tinyHouse, startDate, endDate, onDateChange }) {
-  const [selectableRanges, setSelectableRanges] = useState([]);
+const ReservationCalendar = ({ tinyHouse, startDate, endDate, onDateChange }) => {
+  const [currentMonth, setCurrentMonth] = useState(new Date().getMonth());
+  const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
+  const [unavailableDays, setUnavailableDays] = useState({});
+  const [availableRanges, setAvailableRanges] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [monthsToShow, setMonthsToShow] = useState(1);
+
+  const months = [
+    'Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran',
+    'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'
+  ];
+
+  const daysOfWeek = ['Paz', 'Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt'];
 
   useEffect(() => {
-    const handleResize = () => {
-      setMonthsToShow(window.innerWidth > 768 ? 2 : 1);
-    };
-
-    handleResize(); // Set initial value
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
-
-  useEffect(() => {
-    const fetchSelectableRanges = async () => {
-      setIsLoading(true);
-      try {
-        const ranges = await getSelectableDateRanges(tinyHouse.id);
-        setSelectableRanges(ranges);
-      } catch (error) {
-        console.error("Error fetching selectable ranges:", error);
-      } finally {
-        setIsLoading(false);
+    const fetchCalendarData = async () => {
+      if (tinyHouse?.id) {
+        setIsLoading(true);
+        try {
+          const { selectableRanges, unavailableDays: unavailable } = await getSelectableDateRanges(tinyHouse.id);
+          setAvailableRanges(selectableRanges);
+          setUnavailableDays(unavailable);
+        } catch (error) {
+          console.error('Error fetching calendar data:', error);
+        } finally {
+          setIsLoading(false);
+        }
       }
     };
 
-    fetchSelectableRanges();
-  }, [tinyHouse.id]);
+    fetchCalendarData();
+  }, [tinyHouse?.id]);
 
-  // Check if a date is available
-  const isDateAvailable = (date) => {
-    return selectableRanges.some(range => 
-      isWithinInterval(date, { start: range.start, end: range.end })
-    );
+  const formatDateKey = (date) => {
+    return date.toISOString().split('T')[0];
   };
 
-  // Get all dates between two dates
-  const getDatesInRange = (start, end) => {
-    const dates = [];
-    let currentDate = new Date(start);
-    
-    while (currentDate <= end) {
-      dates.push(new Date(currentDate));
-      currentDate = addDays(currentDate, 1);
+  const getDayStatus = (date) => {
+    const dateKey = formatDateKey(date);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const oneYearLater = new Date(today);
+    oneYearLater.setFullYear(oneYearLater.getFullYear() + 1);
+
+    if (date < today) return 'past';
+    if (date > oneYearLater) return 'future';
+
+    if (unavailableDays[dateKey] === 'maintenance') return 'maintenance';
+    if (unavailableDays[dateKey] === 'reservation') return 'reservation';
+
+    const isAvailable = availableRanges.some(range => {
+      const rangeStart = new Date(range.start);
+      const rangeEnd = new Date(range.end);
+      rangeStart.setHours(0, 0, 0, 0);
+      rangeEnd.setHours(0, 0, 0, 0);
+      return date >= rangeStart && date <= rangeEnd;
+    });
+
+    return isAvailable ? 'available' : 'unavailable';
+  };
+
+  const getDayClass = (date, status) => {
+    let baseClass = 'calendar-day';
+
+    const isStartDate = startDate && formatDateKey(date) === startDate;
+    const isEndDate = endDate && formatDateKey(date) === endDate;
+    const isInRange = startDate && endDate &&
+      date > new Date(startDate) && date < new Date(endDate);
+
+    if (isStartDate || isEndDate) {
+      baseClass += ' selected-date';
+    } else if (isInRange) {
+      baseClass += ' in-range';
     }
-    
-    return dates;
+
+    switch (status) {
+      case 'maintenance':
+        baseClass += ' maintenance-day'; // mavi
+        break;
+      case 'reservation':
+        baseClass += ' reservation-day'; // mor
+        break;
+      case 'available':
+        baseClass += ' available-day'; // yeşil
+        break;
+      default:
+        baseClass += ' unavailable-day'; // kırmızı
+    }
+
+    return baseClass;
   };
 
-  // Check if a date is in the current selection range
-  const isInSelectionRange = (date) => {
-    if (!startDate || !endDate) return false;
-    return isWithinInterval(date, { start: new Date(startDate), end: new Date(endDate) });
-  };
+  const handleDateClick = (date) => {
+    const status = getDayStatus(date);
+    if (status !== 'available') return;
 
-  // Custom day rendering for the calendar
-  const renderDayContents = (day, date) => {
-    const isAvailable = isDateAvailable(date);
-    const isSelected = (startDate && isSameDay(date, new Date(startDate))) || 
-                      (endDate && isSameDay(date, new Date(endDate)));
-    const isInRange = isInSelectionRange(date);
+    const clickedDateStr = formatDateKey(date);
 
-    return (
-      <div className={`custom-day ${!isAvailable ? 'unavailable' : ''} ${isSelected ? 'selected' : ''} ${isInRange ? 'in-range' : ''}`}>
-        {format(date, 'd')}
-      </div>
-    );
-  };
-
-  // Handle date selection
-  const handleDateChange = (dates) => {
-    const [start, end] = dates;
-    
-    // If selecting start date
-    if (start && !end) {
-      onDateChange('startDate', start.toISOString().split('T')[0]);
+    if (!startDate || (startDate && endDate)) {
+      onDateChange('startDate', clickedDateStr);
       onDateChange('endDate', '');
-      return;
-    }
-
-    // If selecting end date, check if entire range is available
-    if (start && end) {
-      const datesInRange = getDatesInRange(start, end);
-      const allDatesAvailable = datesInRange.every(date => isDateAvailable(date));
-      
-      if (allDatesAvailable) {
-        onDateChange('startDate', start.toISOString().split('T')[0]);
-        onDateChange('endDate', end.toISOString().split('T')[0]);
+    } else if (startDate && !endDate) {
+      const startDateObj = new Date(startDate);
+      if (date < startDateObj) {
+        onDateChange('startDate', clickedDateStr);
       } else {
-        // Show error or reset selection
-        alert('Seçilen tarih aralığında müsait olmayan günler var. Lütfen farklı tarihler seçin.');
-        onDateChange('startDate', '');
-        onDateChange('endDate', '');
+        onDateChange('endDate', clickedDateStr);
       }
     }
+  };
+
+  const navigateMonth = (direction) => {
+    let newMonth = currentMonth + direction;
+    let newYear = currentYear;
+
+    if (newMonth < 0) {
+      newMonth = 11;
+      newYear--;
+    } else if (newMonth > 11) {
+      newMonth = 0;
+      newYear++;
+    }
+
+    setCurrentMonth(newMonth);
+    setCurrentYear(newYear);
+  };
+
+  const renderCalendarDays = () => {
+    const firstDayOfMonth = new Date(currentYear, currentMonth, 1);
+    const lastDayOfMonth = new Date(currentYear, currentMonth + 1, 0);
+    const firstDayWeekday = firstDayOfMonth.getDay();
+    
+    const days = [];
+
+    for (let i = 0; i < firstDayWeekday; i++) {
+      const prevDate = new Date(currentYear, currentMonth, -firstDayWeekday + i + 1);
+      const status = getDayStatus(prevDate);
+      days.push(
+        <div
+          key={`prev-${i}`}
+          className={`${getDayClass(prevDate, status)} other-month`}
+          onClick={() => handleDateClick(prevDate)}
+          title="Geçmiş tarih"
+        >
+          {prevDate.getDate()}
+        </div>
+      );
+    }
+
+    for (let day = 1; day <= lastDayOfMonth.getDate(); day++) {
+      const currentDate = new Date(currentYear, currentMonth, day);
+      const status = getDayStatus(currentDate);
+      days.push(
+        <div
+          key={day}
+          className={getDayClass(currentDate, status)}
+          onClick={() => handleDateClick(currentDate)}
+          title={
+            status === 'maintenance' ? 'Bakım günü' :
+            status === 'reservation' ? 'Rezerve edilmiş' :
+            status === 'available' ? 'Müsait' :
+            'Müsait değil'
+          }
+        >
+          {day}
+        </div>
+      );
+    }
+
+    return days;
   };
 
   if (isLoading) {
@@ -114,49 +181,40 @@ function ReservationCalendar({ tinyHouse, startDate, endDate, onDateChange }) {
 
   return (
     <div className="reservation-calendar">
+      <div className="calendar-header">
+        <button className="nav-button" onClick={() => navigateMonth(-1)} type="button">‹</button>
+        <h3 className="month-year">{months[currentMonth]} {currentYear}</h3>
+        <button className="nav-button" onClick={() => navigateMonth(1)} type="button">›</button>
+      </div>
+
+      <div className="calendar-weekdays">
+        {daysOfWeek.map(day => (
+          <div key={day} className="weekday">{day}</div>
+        ))}
+      </div>
+
+      <div className="calendar-grid">{renderCalendarDays()}</div>
+
       <div className="calendar-legend">
         <div className="legend-item">
-          <span className="legend-color available"></span>
+          <span className="legend-color available-day"></span>
           <span>Müsait</span>
         </div>
         <div className="legend-item">
-          <span className="legend-color unavailable"></span>
-          <span>Müsait Değil</span>
+          <span className="legend-color reservation-day"></span>
+          <span>Rezerve</span>
         </div>
         <div className="legend-item">
-          <span className="legend-color selected"></span>
-          <span>Seçili</span>
+          <span className="legend-color maintenance-day"></span>
+          <span>Bakım</span>
         </div>
-      </div>
-
-      <DatePicker
-        selected={startDate ? new Date(startDate) : null}
-        onChange={handleDateChange}
-        startDate={startDate ? new Date(startDate) : null}
-        endDate={endDate ? new Date(endDate) : null}
-        selectsRange
-        inline
-        monthsShown={monthsToShow}
-        minDate={new Date()}
-        renderDayContents={renderDayContents}
-        dayClassName={(date) => isDateAvailable(date) ? 'available-date' : 'unavailable-date'}
-        locale="tr"
-        dateFormat="dd MMMM yyyy"
-      />
-
-      <div className="selected-dates-info">
-        {startDate && !endDate && (
-          <p>Çıkış tarihini seçin...</p>
-        )}
-        {startDate && endDate && (
-          <p>
-            <strong>Giriş:</strong> {format(new Date(startDate), 'dd MMMM yyyy', { locale: tr })} - 
-            <strong> Çıkış:</strong> {format(new Date(endDate), 'dd MMMM yyyy', { locale: tr })}
-          </p>
-        )}
+        <div className="legend-item">
+          <span className="legend-color unavailable-day"></span>
+          <span>Müsait Değil</span>
+        </div>
       </div>
     </div>
   );
-}
+};
 
-export default ReservationCalendar; 
+export default ReservationCalendar;
