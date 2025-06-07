@@ -15,11 +15,8 @@ namespace Minik.Server.Controllers
         {
             _configuration = configuration;
         }
-
-        // 1. GET: api/reviews
-        // Kullanıcıya göre yorumları getir
-        [HttpGet("user/{userId}")]
-        public IActionResult GetReviewsByUser(int userId)
+        [HttpGet("user/fullname/{fullName}")]
+        public IActionResult GetReviewsByFullName(string fullName)
         {
             string connectionString = _configuration.GetConnectionString("DefaultConnection");
             var reviews = new List<object>();
@@ -35,7 +32,7 @@ namespace Minik.Server.Controllers
 
                 using (SqlCommand cmd = new SqlCommand(query, conn))
                 {
-                    cmd.Parameters.AddWithValue("@UserId", userId);
+                    cmd.Parameters.AddWithValue("@FullName", fullName);
 
                     using (SqlDataReader reader = cmd.ExecuteReader())
                     {
@@ -49,7 +46,8 @@ namespace Minik.Server.Controllers
                                 TinyHouseId = (int)reader["tiny_house_id"],
                                 Rating = (int)reader["rating"],
                                 Comment = reader["comment"] == DBNull.Value ? null : reader["comment"].ToString(),
-                                ReviewDate = (DateTime)reader["review_date"]
+                                ReviewDate = (DateTime)reader["review_date"],
+                                FullName = reader["full_name"].ToString()
                             });
                         }
                     }
