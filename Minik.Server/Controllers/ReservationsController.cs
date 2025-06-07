@@ -18,6 +18,49 @@ namespace Minik.Server.Controllers
             _configuration = configuration;
         }
 
+        // GET api/reservations/tinyhouse/5
+        [HttpGet("tinyhouse/{tinyHouseId}")]
+        public IActionResult GetReservationsByTinyHouseId(int tinyHouseId)
+        {
+            string connectionString = _configuration.GetConnectionString("DefaultConnection");
+            List<Reservation> reservations = new List<Reservation>();
+
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            {
+                conn.Open();
+                string query = "SELECT * FROM reservations WHERE tiny_house_id = @TinyHouseId";
+
+                using (SqlCommand cmd = new SqlCommand(query, conn))
+                {
+                    cmd.Parameters.AddWithValue("@TinyHouseId", tinyHouseId);
+
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            Reservation reservation = new Reservation
+                            {
+                                UserId = (int)reader["user_id"],
+                                TinyHouseId = (int)reader["tiny_house_id"],
+                                TotalPrice = (decimal)reader["total_price"],
+                                Status = reader["status"].ToString(),
+                                CheckIn = (DateTime)reader["check_in"],
+                                CheckOut = (DateTime)reader["check_out"]
+                            };
+
+                            reservations.Add(reservation);
+                        }
+                    }
+                }
+            }
+
+            if (reservations.Count == 0)
+                return NotFound("Bu Tiny House'a ait rezervasyon bulunamadı.");
+
+            return Ok(reservations);
+        }
+
+
         // GET api/reservations/5
         [HttpGet("user/{userId}")]
         public IActionResult GetReservationsByUserId(int userId)
