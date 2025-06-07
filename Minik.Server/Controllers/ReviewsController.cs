@@ -15,36 +15,48 @@ namespace Minik.Server.Controllers
         {
             _configuration = configuration;
         }
-
-        // 1. GET: api/reviews
-        // Kullanıcıya göre yorumları getir
-        [HttpGet("user/{userId}")]
-        public IActionResult GetReviewsByUser(int userId)
+        [HttpGet("user/fullname/{fullName}")]
+        public IActionResult GetReviewsByFullName(string fullName)
         {
             string connectionString = _configuration.GetConnectionString("DefaultConnection");
-            List<Review> reviews = new List<Review>();
+            var reviews = new List<object>();
 
             using (SqlConnection conn = new SqlConnection(connectionString))
             {
                 conn.Open();
-                string query = "SELECT * FROM reviews WHERE user_id = @UserId";
+                string query = @"
+            SELECT 
+                r.id,
+                r.user_id,
+                r.tiny_house_id,
+                r.rating,
+                r.comment,
+                r.review_date,
+                u.full_name
+            FROM 
+                reviews r
+            JOIN 
+                users u ON r.user_id = u.id
+            WHERE 
+                u.full_name = @FullName";
 
                 using (SqlCommand cmd = new SqlCommand(query, conn))
                 {
-                    cmd.Parameters.AddWithValue("@UserId", userId);
+                    cmd.Parameters.AddWithValue("@FullName", fullName);
 
                     using (SqlDataReader reader = cmd.ExecuteReader())
                     {
                         while (reader.Read())
                         {
-                            reviews.Add(new Review
+                            reviews.Add(new
                             {
                                 Id = (int)reader["id"],
                                 UserId = (int)reader["user_id"],
                                 TinyHouseId = (int)reader["tiny_house_id"],
                                 Rating = (int)reader["rating"],
                                 Comment = reader["comment"] == DBNull.Value ? null : reader["comment"].ToString(),
-                                ReviewDate = (DateTime)reader["review_date"]
+                                ReviewDate = (DateTime)reader["review_date"],
+                                FullName = reader["full_name"].ToString()
                             });
                         }
                     }
@@ -53,6 +65,7 @@ namespace Minik.Server.Controllers
 
             return Ok(reviews);
         }
+
 
         // TinyHouseId'ye göre yorumları getir
         [HttpGet("tinyhouse/{tinyHouseId}")]
