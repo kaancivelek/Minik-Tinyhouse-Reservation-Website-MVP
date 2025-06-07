@@ -67,7 +67,10 @@ namespace Minik.Server.Controllers
             string connectionString = _configuration.GetConnectionString("DefaultConnection");
             var reviews = new List<object>();
 
-            using (SqlConnection conn = new SqlConnection(connectionString))
+            using (SqlConnection conn = new SqlConnection(connectionString))        
+
+
+                
             {
                 conn.Open();
                 string query = @"
