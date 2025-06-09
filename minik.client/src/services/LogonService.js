@@ -1,6 +1,6 @@
 import request from "./api";
 
-export const createNewUser = (data) => request('/Logon', 'POST', data);
+export const createNewUser = (data) => request('/Register/register', 'POST', data);
 export const updateUser = (email, data) => request(`/Logon/${email}`, 'PUT', data);
 export const getUserByEmail = (email) => request(`/User/users/${email}`);
 export const deleteUser = (email) => request(`/Logon/${email}`, 'DELETE');

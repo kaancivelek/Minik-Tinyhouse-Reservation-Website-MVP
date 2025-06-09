@@ -85,9 +85,9 @@ namespace Minik.Server.Controllers
             {
                 await conn.OpenAsync();
                 var cmd = new SqlCommand(@"
-                    SELECT l.* FROM locations l
-                    INNER JOIN tiny_houses t ON t.location_id = l.id
-                    WHERE t.property_owner_id = @property_owner_id", conn);
+                    SELECT L.* FROM locations L
+                    INNER JOIN users U ON U.id = L.user_id
+                    WHERE U.id = @property_owner_id", conn);
                 cmd.Parameters.AddWithValue("@property_owner_id", property_owner_id);
                 var reader = await cmd.ExecuteReaderAsync();
                 while (await reader.ReadAsync())
