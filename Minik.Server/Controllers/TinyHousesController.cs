@@ -130,8 +130,16 @@ namespace Minik.Server.Controllers
             {
                 await conn.OpenAsync();
 
+                // 1. Availability durumlarını güncelleyen stored procedure'ü çalıştır
+                using (var cmdUpdate = new SqlCommand("EXEC sp_UpdateAvailabilityStatus", conn))
+                {
+                    await cmdUpdate.ExecuteNonQueryAsync();
+                }
+
+                // 2. Paginated sorguyu çalıştır
                 string query = @"
-            SELECT T.*, L.country, L.city, (SELECT CEILING(AVG(rating)) FROM reviews WHERE T.id = reviews.tiny_house_id) AS average_rating
+            SELECT T.*, L.country, L.city, 
+                (SELECT CEILING(AVG(rating)) FROM reviews WHERE T.id = reviews.tiny_house_id) AS average_rating
             FROM tiny_houses T
             INNER JOIN locations L ON T.location_id = L.id
             WHERE T.id IS NOT NULL
@@ -168,6 +176,7 @@ namespace Minik.Server.Controllers
 
             return Ok(houses);
         }
+
 
 
         // GET: api/TinyHouses/

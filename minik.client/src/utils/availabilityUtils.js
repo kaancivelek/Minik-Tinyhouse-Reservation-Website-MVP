@@ -1,28 +1,4 @@
-/* This util creating ranges dates for availability by looking at the availability, reservations and maintenance dates
- and returns the ranges of dates that are available
- It takes the availability, reservations and maintenance dates as input and returns the ranges of dates that are available
 
-example usage 
-maintenance table
-id	tinyHouseId	maintenanceType	maintenanceDate	maintenanceStatus
-6	6	Yol Bakımı	2025-04-23	pending
-
-
-id tinyHouseId availabile_from  availabile_to is_available
-6	6	2025-05-01	2025-05-10	True
-
-
-id  userId tinyHouseId check_in check_out total_price reservationStatus
-4	4	6	2025-05-07	2025-05-10	4800,00	confirmed
-
-
-reservationStatus can be pending, confirmed, cancelled, completed
-
-maintenanceStatus can be pending, completed, cancelled
-
-so we need to return the ranges of dates that are available
-if maintenance is pending is_available is false rezervation status is confirmed then this cases house not availible
- */ 
 
 import { 
   getAvailabilityByTinyHouseId, 
@@ -32,18 +8,20 @@ import {
 
 /**
  * Fetches all availability data for a specific tiny house
- * @param {number} tinyHouseId - The ID of the tiny house
- * @returns {Promise<Object>} Object containing availability, maintenance, and reservation data
+
  */
 export const fetchAvailabilityData = async (tinyHouseId) => {
   try {
+    const availabilityPromise = getAvailabilityByTinyHouseId(tinyHouseId);
+    const maintenancesPromise = getMaintenancesByTinyHouseId(tinyHouseId).catch(() => []);
+    const reservationsPromise = getReservationsByTinyHouseId(tinyHouseId).catch(() => []);
+
     const [availability, maintenances, reservations] = await Promise.all([
-      getAvailabilityByTinyHouseId(tinyHouseId),
-      getMaintenancesByTinyHouseId(tinyHouseId),
-      getReservationsByTinyHouseId(tinyHouseId)
+      availabilityPromise,
+      maintenancesPromise,
+      reservationsPromise
     ]);
 
-    // Map availability fields
     const mappedAvailability = availability.map(a => ({
       ...a,
       availabile_from: a.availableFrom,
@@ -51,13 +29,11 @@ export const fetchAvailabilityData = async (tinyHouseId) => {
       is_available: a.isAvailable
     }));
 
-    // Map maintenance fields
     const mappedMaintenances = maintenances.map(m => ({
       ...m,
       maintenanceStatus: m.status
     }));
 
-    // Map reservation fields
     const mappedReservations = reservations.map(r => ({
       ...r,
       check_in: r.checkIn,
