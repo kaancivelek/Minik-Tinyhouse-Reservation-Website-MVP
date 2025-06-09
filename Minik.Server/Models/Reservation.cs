@@ -5,7 +5,7 @@ namespace Minik.Server.Models
     public class Reservation
     {
       
-        
+        public int Id { get; set; }
         public int UserId { get; set; }
         public int TinyHouseId { get; set; }
         public DateTime CheckIn { get; set; }

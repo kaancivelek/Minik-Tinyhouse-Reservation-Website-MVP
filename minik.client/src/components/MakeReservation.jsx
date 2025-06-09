@@ -57,7 +57,7 @@ function MakeReservation({ tinyHouse }) {
       checkIn: startDate,
       checkOut: endDate,
       totalPrice,
-      status: "confirmed",
+      status: "pending",
     };
 
     try {

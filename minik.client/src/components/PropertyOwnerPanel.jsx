@@ -11,7 +11,7 @@ import {
   Row,
 } from "reactstrap";
 import { useNavigate } from "react-router-dom";
-
+import "../styles/PropertyOwnerPanel.css"; // Assuming you have a CSS file for styles
 export default function PropertyOwnerPanel({ user }) {
   const [tinyHousesOfPropertyOwner, setTinyHouseOfUser] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -43,8 +43,8 @@ export default function PropertyOwnerPanel({ user }) {
     }
   }, [user]);
 
-  const goTinyHouseDetails = (tinyHouseId) => {
-    navigate(`/TinyHouseDetails/${tinyHouseId}`,{ state: { from: "PropertyOwnerPanel" } });
+  const goReservationList = (tinyHouseId) => {
+    navigate(`/ReservationList/${tinyHouseId}`,{ state: { from: "PropertyOwnerPanel" } });
   
   };
  const goInsertTinyHouse = () => {
@@ -52,20 +52,7 @@ export default function PropertyOwnerPanel({ user }) {
   }
 
 
-  // Örnek yorumlar (gerçek yorumlar için API'dan çekebilirsiniz)
-  const renderComments = (comments) => (
-    <div style={{ marginTop: "1rem", background: "#f8f9fa", borderRadius: "6px", padding: "8px" }}>
-      <strong>Yorumlar:</strong>
-      <ul style={{ margin: 0, paddingLeft: "1.2rem" }}>
-        {(comments && comments.length > 0) ? (
-          comments.map((c, i) => <li key={i} style={{ fontSize: "0.95em" }}>{c}</li>)
-        ) : (
-          <li>Henüz yorum yok.</li>
-        )}
-      </ul>
-    </div>
-  );
-
+ 
   return (
     <div className="listing-page" style={{ padding: "1rem" }}>
       {loading && <div>Yükleniyor...</div>}
@@ -83,7 +70,7 @@ export default function PropertyOwnerPanel({ user }) {
             className="mb-4 mx-auto d-flex"
             style={{ flexDirection: "column" }}
           >
-            <Card className="flex-fill" style={{ width: "100%", cursor:"pointer" }}  onClick={() => goTinyHouseDetails(item.id)}>
+            <Card className="flex-fill" style={{ width: "100%" }} >
               <CardBody style={{ display: "flex", flexDirection: "column", gap: "1.2rem" }}>
                 {/* 1. Ev Detayları */}
                 <div>
@@ -100,7 +87,7 @@ export default function PropertyOwnerPanel({ user }) {
                 </div>
                 {/* 2. Rezervasyon / Düzenleme */}
                 <div style={{ display: "flex", gap: "10px" }}>
-                  <Button color="success" size="sm">
+                  <Button color="success" size="sm"  onClick={() => goReservationList(item.id)}>
                     Rezervasyonlar
                   </Button>
             

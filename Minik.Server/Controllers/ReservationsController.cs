@@ -40,6 +40,7 @@ namespace Minik.Server.Controllers
                         {
                             Reservation reservation = new Reservation
                             {
+                                Id = (int)reader["id"],
                                 UserId = (int)reader["user_id"],
                                 TinyHouseId = (int)reader["tiny_house_id"],
                                 TotalPrice = (decimal)reader["total_price"],

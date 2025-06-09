@@ -129,6 +129,9 @@ export default function TinyHouseAdding({ user }) {
 
       {action === 'add-tinyhouse' && (
         <form onSubmit={handleTinyHouseSubmit}>
+          <p style={{ fontSize: '0.9rem', color: '#666', marginBottom: '8px' }}>
+  <strong>Not:</strong> Tiny House eklemeden önce bir lokasyon girmiş olmanız gerekmektedir.
+</p>
           <h1>Yeni Tiny House Ekle</h1>
           <input type="text" placeholder="İsim" name="name" required />
           <input type="text" placeholder="Açıklama" name="description" required />

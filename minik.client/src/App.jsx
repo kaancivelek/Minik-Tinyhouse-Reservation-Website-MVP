@@ -14,6 +14,7 @@ import { useState } from "react";
 import { Route, Routes } from "react-router-dom";
 import { ToastContainer, Slide } from "react-toastify";
 import TinyHouseAdding from "./pages/TinyHouseAdding";
+import ReservationList from "./pages/ReservationList";
 
 function App() {
   const [user, setUser] = useState(null);
@@ -101,6 +102,9 @@ function App() {
             path="/TinyHouseDetails/:tinyHouseId"
             element={<TinyHouseDetails user={user} />}
           />
+          <Route
+            path="/ReservationList/:tinyHouseId"
+            element={<ReservationList/>}></Route>
         </Routes>
       </div>
       <ToastContainer autoClose={2000} theme="dark" transition={Slide} />
