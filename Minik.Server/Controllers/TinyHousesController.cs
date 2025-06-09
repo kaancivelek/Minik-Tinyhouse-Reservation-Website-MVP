@@ -188,12 +188,9 @@ namespace Minik.Server.Controllers
             using (var conn = new SqlConnection(_connectionString))
             {
                 await conn.OpenAsync();
-                var cmd = new SqlCommand(@"SELECT T.*, L.city, L.country, 
-       (SELECT CEILING(AVG(rating)) FROM reviews WHERE T.id = reviews.tiny_house_id) AS average_rating
-FROM tiny_houses T
-JOIN locations L ON T.location_id = L.id
-WHERE T.id = @id
- ", conn);
+                var cmd = new SqlCommand(@"
+            SELECT * FROM dbo.GetTinyHouseDetailsById(@id)
+        ", conn);
 
                 cmd.Parameters.AddWithValue("@id", id);
 
@@ -203,26 +200,25 @@ WHERE T.id = @id
                 {
                     house = new TinyHouse
                     {
-                        Id = reader.GetInt32(0),
-                        Name = reader.GetString(1),
-                        Description = reader.IsDBNull(2) ? null : reader.GetString(2),
-                        LocationId = reader.GetInt32(3),
-                        PricePerNight = reader.GetDecimal(4),
-                        MaxGuests = reader.GetInt32(5),
-                        property_owner_id = reader.GetInt32(6),
-                        Amenities = reader.IsDBNull(7) ? null : reader.GetString(7),
-                        // Bu iki satır location bilgisi alır
-                        City = reader.GetString(8),
-                        Country = reader.GetString(9),
-                        Rating = reader.IsDBNull(10) ? 0 : reader.GetInt32(10)
-
+                        Id = Convert.ToInt32(reader["id"]),
+                        Name = reader["name"].ToString(),
+                        Description = reader["description"] == DBNull.Value ? null : reader["description"].ToString(),
+                        LocationId = Convert.ToInt32(reader["location_id"]),
+                        PricePerNight = Convert.ToDecimal(reader["price_per_night"]),
+                        MaxGuests = Convert.ToInt32(reader["max_guests"]),
+                        property_owner_id = Convert.ToInt32(reader["property_owner_id"]),
+                        Amenities = reader["amenities"] == DBNull.Value ? null : reader["amenities"].ToString(),
+                        City = reader["city"].ToString(),
+                        Country = reader["country"].ToString(),
+                        Rating = reader["average_rating"] == DBNull.Value
+                                 ? 0
+                                 : Convert.ToInt32(Math.Round(Convert.ToDouble(reader["average_rating"])))
                     };
                 }
             }
 
             return house == null ? NotFound() : Ok(house);
         }
-
 
 
         // GET: api/TinyHouses/

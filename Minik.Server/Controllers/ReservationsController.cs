@@ -71,11 +71,13 @@ namespace Minik.Server.Controllers
             using (SqlConnection conn = new SqlConnection(connectionString))
             {
                 conn.Open();
-                string query = "SELECT * FROM reservations WHERE user_id = @userId";
+
+                // SQL Function çağrısı
+                string query = "SELECT * FROM dbo.GetReservationsByUserIdFn(@UserId)";
 
                 using (SqlCommand cmd = new SqlCommand(query, conn))
                 {
-                    cmd.Parameters.AddWithValue("@userId", userId);
+                    cmd.Parameters.AddWithValue("@UserId", userId);
 
                     using (SqlDataReader reader = cmd.ExecuteReader())
                     {
@@ -83,14 +85,12 @@ namespace Minik.Server.Controllers
                         {
                             Reservation reservation = new Reservation
                             {
-                              
                                 UserId = (int)reader["user_id"],
                                 TinyHouseId = (int)reader["tiny_house_id"],
                                 TotalPrice = (decimal)reader["total_price"],
                                 Status = reader["status"].ToString(),
                                 CheckIn = (DateTime)reader["check_in"],
                                 CheckOut = (DateTime)reader["check_out"]
-                                
                             };
 
                             reservations.Add(reservation);
@@ -104,6 +104,7 @@ namespace Minik.Server.Controllers
 
             return Ok(reservations);
         }
+
 
 
         // POST api/reservations
