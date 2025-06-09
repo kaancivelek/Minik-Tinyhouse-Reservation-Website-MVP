@@ -4,6 +4,7 @@ using Microsoft.Extensions.Configuration;
 using Minik.Server.Models;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
+using System.Text.Json;
 
 namespace Minik.Server.Controllers
 {
@@ -43,12 +44,13 @@ namespace Minik.Server.Controllers
                 return BadRequest("RoleId yalnızca 0, 1 veya 2 olabilir.");
 
             string hashedPassword = BCrypt.Net.BCrypt.HashPassword(user.PasswordHash);
-
+            int newUserId = 0;
             using (SqlConnection conn = new SqlConnection(_connectionString))
             {
                 conn.Open();
                 string query = @"
                     INSERT INTO users (full_name, email, password_hash, role_id, phone_number)
+                    OUTPUT INSERTED.id
                     VALUES (@full_name, @email, @password_hash, @role_id, @phone_number)";
 
                 using (SqlCommand cmd = new SqlCommand(query, conn))
@@ -59,8 +61,31 @@ namespace Minik.Server.Controllers
                     cmd.Parameters.AddWithValue("@role_id", roleId);
                     cmd.Parameters.AddWithValue("@phone_number", user.PhoneNumber);
 
-                    cmd.ExecuteNonQuery();
+                    newUserId = (int)cmd.ExecuteScalar();
                 }
+            }
+
+            // Log ekle
+            using (var context = new Minik.Server.Data.ApplicationDbContext(new Microsoft.EntityFrameworkCore.DbContextOptions<Minik.Server.Data.ApplicationDbContext>()))
+            {
+                var log = new Minik.Server.Models.AuditLog
+                {
+                    UserId = null, // Giriş yapan adminin id'si eklenebilir
+                    Action = "Create",
+                    Entity = "User",
+                    EntityId = newUserId,
+                    OldValue = null,
+                    NewValue = JsonSerializer.Serialize(new {
+                        Id = newUserId,
+                        user.FullName,
+                        user.Email,
+                        RoleId = roleId,
+                        user.PhoneNumber
+                    }),
+                    Timestamp = DateTime.UtcNow
+                };
+                context.AuditLogs.Add(log);
+                context.SaveChanges();
             }
 
             return Ok(new { Message = "Kayıt başarılı." });

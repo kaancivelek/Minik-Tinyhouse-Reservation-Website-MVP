@@ -1,4 +1,4 @@
-﻿import React, { useEffect } from "react";
+﻿import React, { useEffect, lazy, Suspense } from "react";
 import Navi from "./components/Navbar";
 import Logon from "./pages/Logon";
 import Login from "./components/Login";
@@ -13,6 +13,8 @@ import { Container } from "reactstrap";
 import { useState } from "react";
 import { Route, Routes } from "react-router-dom";
 import { ToastContainer, Slide } from "react-toastify";
+
+const AdminApp = lazy(() => import("../../admin/src/App"));
 
 function App() {
   const [user, setUser] = useState(null);
@@ -88,6 +90,14 @@ function App() {
           <Route
             path="/TinyHouseDetails/:tinyHouseId"
             element={<TinyHouseDetails user={user} />}
+          />
+          <Route
+            path="/admin/*"
+            element={
+              <Suspense fallback={<div>Yükleniyor...</div>}>
+                <AdminApp />
+              </Suspense>
+            }
           />
         </Routes>
       </div>
