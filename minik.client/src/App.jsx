@@ -106,7 +106,16 @@ function App() {
           />
           <Route
             path="/ReservationList/:tinyHouseId"
-            element={<ReservationList/>}></Route>
+                      element={<ReservationList />}></Route>
+                  <Route
+                      path="/admin/*"
+                      element={
+                          <Suspense fallback={<div>Yükleniyor...</div>}>
+                              <AdminApp />
+                          </Suspense>
+                      }
+                  />
+
         </Routes>
       </div>
       <ToastContainer autoClose={2000} theme="dark" transition={Slide} />
