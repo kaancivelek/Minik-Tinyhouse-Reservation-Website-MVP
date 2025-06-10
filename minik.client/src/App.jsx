@@ -1,4 +1,4 @@
-﻿import React, { useEffect } from "react";
+﻿import React, { useEffect, lazy, Suspense } from "react";
 import Navi from "./components/Navbar";
 import Logon from "./pages/Logon";
 import Login from "./components/Login";
@@ -15,6 +15,8 @@ import { Route, Routes } from "react-router-dom";
 import { ToastContainer, Slide } from "react-toastify";
 import TinyHouseAdding from "./pages/TinyHouseAdding";
 import ReservationList from "./pages/ReservationList";
+
+const AdminApp = lazy(() => import("../../admin/src/App"));
 
 function App() {
   const [user, setUser] = useState(null);

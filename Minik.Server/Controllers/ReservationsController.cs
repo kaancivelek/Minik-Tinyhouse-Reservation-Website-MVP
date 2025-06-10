@@ -4,6 +4,7 @@ using Minik.Server.Models;
 using Microsoft.Extensions.Configuration;
 using Microsoft.CodeAnalysis;
 using System.ComponentModel.Design;
+using System.Text.Json;
 
 namespace Minik.Server.Controllers
 {
@@ -113,15 +114,15 @@ namespace Minik.Server.Controllers
         public IActionResult Post([FromBody] Reservation reservation)
         {
             string connectionString = "Server=localhost;Database=MinikDB;Trusted_Connection=True;";
-
+            int newReservationId = 0;
             using (SqlConnection connection = new SqlConnection(connectionString))
             {
                 string query = @"
-    INSERT INTO reservations 
-    (user_id, tiny_house_id, total_price, status, check_in, check_out)
-    VALUES 
-    (@UserId, @TinyHouseId, @TotalPrice, @Status, @CheckIn, @CheckOut)";
-
+INSERT INTO reservations 
+(user_id, tiny_house_id, total_price, status, check_in, check_out)
+OUTPUT INSERTED.id
+VALUES 
+(@UserId, @TinyHouseId, @TotalPrice, @Status, @CheckIn, @CheckOut)";
 
                 SqlCommand command = new SqlCommand(query, connection);
                 command.Parameters.AddWithValue("@UserId", reservation.UserId);
@@ -132,7 +133,32 @@ namespace Minik.Server.Controllers
                 command.Parameters.AddWithValue("@CheckOut", reservation.CheckOut);
 
                 connection.Open();
-                command.ExecuteNonQuery();
+                newReservationId = (int)command.ExecuteScalar();
+            }
+
+            // Log ekle
+            using (var context = new Minik.Server.Data.ApplicationDbContext(new Microsoft.EntityFrameworkCore.DbContextOptions<Minik.Server.Data.ApplicationDbContext>()))
+            {
+                var log = new Minik.Server.Models.AuditLog
+                {
+                    UserId = null, // Giriş yapan adminin id'si eklenebilir
+                    Action = "Create",
+                    Entity = "Reservation",
+                    EntityId = newReservationId,
+                    OldValue = null,
+                    NewValue = JsonSerializer.Serialize(new {
+                        Id = newReservationId,
+                        reservation.UserId,
+                        reservation.TinyHouseId,
+                        reservation.TotalPrice,
+                        reservation.Status,
+                        reservation.CheckIn,
+                        reservation.CheckOut
+                    }),
+                    Timestamp = DateTime.UtcNow
+                };
+                context.AuditLogs.Add(log);
+                context.SaveChanges();
             }
 
             return Ok("Rezervasyon başarıyla eklendi.");
@@ -143,6 +169,37 @@ namespace Minik.Server.Controllers
         public IActionResult Delete(int id)
         {
             string connectionString = "Server=localhost;Database=MinikDB;Trusted_Connection=True;";
+            object deletedReservation = null;
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+                // Silinmeden önceki rezervasyonu al
+                string selectQuery = "SELECT id, user_id, tiny_house_id, total_price, status, check_in, check_out FROM reservations WHERE id = @Id";
+                using (SqlCommand selectCmd = new SqlCommand(selectQuery, connection))
+                {
+                    selectCmd.Parameters.AddWithValue("@Id", id);
+                    using (SqlDataReader reader = selectCmd.ExecuteReader())
+                    {
+                        if (reader.Read())
+                        {
+                            deletedReservation = new
+                            {
+                                Id = reader.GetInt32(0),
+                                UserId = reader.GetInt32(1),
+                                TinyHouseId = reader.GetInt32(2),
+                                TotalPrice = reader.GetDecimal(3),
+                                Status = reader.GetString(4),
+                                CheckIn = reader.GetDateTime(5),
+                                CheckOut = reader.GetDateTime(6)
+                            };
+                        }
+                        else
+                        {
+                            return NotFound("Rezervasyon bulunamadı.");
+                        }
+                    }
+                }
+            }
 
             using (SqlConnection connection = new SqlConnection(connectionString))
             {
@@ -186,7 +243,6 @@ namespace Minik.Server.Controllers
                     }
 
                     transaction.Commit();
-                    return Ok("Tüm ilişkili kayıtlar başarıyla silindi.");
                 }
                 catch (Exception ex)
                 {
@@ -194,6 +250,25 @@ namespace Minik.Server.Controllers
                     return StatusCode(500, "Hata oluştu: " + ex.Message);
                 }
             }
+
+            // Log ekle
+            using (var context = new Minik.Server.Data.ApplicationDbContext(new Microsoft.EntityFrameworkCore.DbContextOptions<Minik.Server.Data.ApplicationDbContext>()))
+            {
+                var log = new Minik.Server.Models.AuditLog
+                {
+                    UserId = null, // Giriş yapan adminin id'si eklenebilir
+                    Action = "Delete",
+                    Entity = "Reservation",
+                    EntityId = id,
+                    OldValue = System.Text.Json.JsonSerializer.Serialize(deletedReservation),
+                    NewValue = null,
+                    Timestamp = DateTime.UtcNow
+                };
+                context.AuditLogs.Add(log);
+                context.SaveChanges();
+            }
+
+            return Ok("Tüm ilişkili kayıtlar başarıyla silindi.");
         }
 
 
@@ -201,18 +276,50 @@ namespace Minik.Server.Controllers
         public IActionResult UpdateReservation(int id, [FromBody] Reservation updatedReservation)
         {
             string connectionString = "Server=localhost;Database=MinikDB;Trusted_Connection=True;";
+            object oldReservation = null;
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+                // Güncellemeden önceki rezervasyonu al
+                string selectQuery = "SELECT id, user_id, tiny_house_id, total_price, status, check_in, check_out FROM reservations WHERE id = @Id";
+                using (SqlCommand selectCmd = new SqlCommand(selectQuery, connection))
+                {
+                    selectCmd.Parameters.AddWithValue("@Id", id);
+                    using (SqlDataReader reader = selectCmd.ExecuteReader())
+                    {
+                        if (reader.Read())
+                        {
+                            oldReservation = new
+                            {
+                                Id = reader.GetInt32(0),
+                                UserId = reader.GetInt32(1),
+                                TinyHouseId = reader.GetInt32(2),
+                                TotalPrice = reader.GetDecimal(3),
+                                Status = reader.GetString(4),
+                                CheckIn = reader.GetDateTime(5),
+                                CheckOut = reader.GetDateTime(6)
+                            };
+                        }
+                        else
+                        {
+                            return NotFound("Rezervasyon bulunamadı.");
+                        }
+                    }
+                }
+            }
+
             using (SqlConnection connection = new SqlConnection(connectionString))
             {
                 connection.Open();
                 string query = @"
-            UPDATE reservations 
-            SET  
-                tiny_house_id = @TinyHouseId, 
-                total_price = @TotalPrice, 
-                status = @Status,
-                check_in = @CheckIn,
-                check_out = @CheckOut
-            WHERE id = @Id";
+                UPDATE reservations 
+                SET  
+                    tiny_house_id = @TinyHouseId, 
+                    total_price = @TotalPrice, 
+                    status = @Status,
+                    check_in = @CheckIn,
+                    check_out = @CheckOut
+                WHERE id = @Id";
 
                 using (SqlCommand cmd = new SqlCommand(query, connection))
                 {
@@ -228,6 +335,51 @@ namespace Minik.Server.Controllers
                     if (affectedRows == 0)
                         return NotFound("Rezervasyon bulunamadı.");
                 }
+            }
+
+            // Güncellemeden sonraki rezervasyonu al
+            object newReservation = null;
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+                string selectQuery = "SELECT id, user_id, tiny_house_id, total_price, status, check_in, check_out FROM reservations WHERE id = @Id";
+                using (SqlCommand selectCmd = new SqlCommand(selectQuery, connection))
+                {
+                    selectCmd.Parameters.AddWithValue("@Id", id);
+                    using (SqlDataReader reader = selectCmd.ExecuteReader())
+                    {
+                        if (reader.Read())
+                        {
+                            newReservation = new
+                            {
+                                Id = reader.GetInt32(0),
+                                UserId = reader.GetInt32(1),
+                                TinyHouseId = reader.GetInt32(2),
+                                TotalPrice = reader.GetDecimal(3),
+                                Status = reader.GetString(4),
+                                CheckIn = reader.GetDateTime(5),
+                                CheckOut = reader.GetDateTime(6)
+                            };
+                        }
+                    }
+                }
+            }
+
+            // Log ekle
+            using (var context = new Minik.Server.Data.ApplicationDbContext(new Microsoft.EntityFrameworkCore.DbContextOptions<Minik.Server.Data.ApplicationDbContext>()))
+            {
+                var log = new Minik.Server.Models.AuditLog
+                {
+                    UserId = null, // Giriş yapan adminin id'si eklenebilir
+                    Action = "Update",
+                    Entity = "Reservation",
+                    EntityId = id,
+                    OldValue = System.Text.Json.JsonSerializer.Serialize(oldReservation),
+                    NewValue = System.Text.Json.JsonSerializer.Serialize(newReservation),
+                    Timestamp = DateTime.UtcNow
+                };
+                context.AuditLogs.Add(log);
+                context.SaveChanges();
             }
 
             return Ok("Rezervasyon başarıyla güncellendi.");
@@ -259,6 +411,47 @@ namespace Minik.Server.Controllers
             }
         }
 
+        [HttpGet("all")]
+        public IActionResult GetAllReservations()
+        {
+            string connectionString = _configuration.GetConnectionString("DefaultConnection");
+            List<object> reservations = new List<object>();
+
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            {
+                conn.Open();
+                string query = @"
+                    SELECT r.id, r.user_id, r.tiny_house_id, r.total_price, r.status, r.check_in, r.check_out,
+                           u.full_name AS user_name,
+                           t.name AS house_name
+                    FROM reservations r
+                    LEFT JOIN users u ON r.user_id = u.id
+                    LEFT JOIN tiny_houses t ON r.tiny_house_id = t.id
+                ";
+
+                using (SqlCommand cmd = new SqlCommand(query, conn))
+                using (SqlDataReader reader = cmd.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        reservations.Add(new
+                        {
+                            Id = reader.GetInt32(0),
+                            UserId = reader.GetInt32(1),
+                            TinyHouseId = reader.GetInt32(2),
+                            TotalPrice = reader.GetDecimal(3),
+                            Status = reader.GetString(4),
+                            CheckIn = reader.GetDateTime(5),
+                            CheckOut = reader.GetDateTime(6),
+                            UserName = reader.IsDBNull(7) ? null : reader.GetString(7),
+                            HouseName = reader.IsDBNull(8) ? null : reader.GetString(8)
+                        });
+                    }
+                }
+            }
+
+            return Ok(reservations);
+        }
 
     }
 }
