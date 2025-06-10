@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import {
-  Box,
   Button,
   Card,
   Form,
@@ -13,6 +12,7 @@ import {
   Modal,
   message,
   Popconfirm,
+  Flex,
 } from 'antd';
 import {
   PlusOutlined,
@@ -20,10 +20,12 @@ import {
   DeleteOutlined,
   SearchOutlined,
 } from '@ant-design/icons';
-import { supportTicketService, SupportTicket } from '../services/supportTicketService';
+import { supportTicketService } from '../services/supportTicketService';
+import type { SupportTicket } from '../services/supportTicketService';
 
 const { Option } = Select;
 const { TextArea } = Input;
+const { Title } = Typography;
 
 const SupportTickets: React.FC = () => {
   const [tickets, setTickets] = useState<SupportTicket[]>([]);
@@ -43,6 +45,7 @@ const SupportTickets: React.FC = () => {
       const data = await supportTicketService.getAllTickets();
       setTickets(data);
     } catch (error) {
+      console.error('Destek talepleri yüklenirken hata:', error);
       message.error('Destek talepleri yüklenirken bir hata oluştu.');
     } finally {
       setLoading(false);
@@ -78,6 +81,7 @@ const SupportTickets: React.FC = () => {
       message.success('Destek talebi başarıyla silindi.');
       fetchTickets();
     } catch (error) {
+      console.error('Destek talebi silinirken hata:', error);
       message.error('Destek talebi silinirken bir hata oluştu.');
     }
   };
@@ -94,6 +98,7 @@ const SupportTickets: React.FC = () => {
       setModalVisible(false);
       fetchTickets();
     } catch (error) {
+      console.error('İşlem sırasında hata:', error);
       message.error('İşlem sırasında bir hata oluştu.');
     }
   };
@@ -169,7 +174,7 @@ const SupportTickets: React.FC = () => {
       title: 'Atanan',
       dataIndex: 'assignedToEmail',
       key: 'assignedToEmail',
-      render: (email: string | null) => email || '-',
+      render: (email: string | null) => email ?? '-',
     },
     {
       title: 'Oluşturulma Tarihi',
@@ -213,10 +218,14 @@ const SupportTickets: React.FC = () => {
   });
 
   return (
-    <Box sx={{ p: 3 }}>
+    <div style={{ padding: 24 }}>
       <Card>
-        <Box sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <Typography variant="h4">Destek Talepleri</Typography>
+        <Flex 
+          justify="space-between" 
+          align="center" 
+          style={{ marginBottom: 24 }}
+        >
+          <Title level={2}>Destek Talepleri</Title>
           <Button
             type="primary"
             icon={<PlusOutlined />}
@@ -224,7 +233,7 @@ const SupportTickets: React.FC = () => {
           >
             Yeni Talep
           </Button>
-        </Box>
+        </Flex>
 
         <Space style={{ marginBottom: 16 }}>
           <Select
@@ -349,8 +358,8 @@ const SupportTickets: React.FC = () => {
           </Form.Item>
         </Form>
       </Modal>
-    </Box>
+    </div>
   );
 };
 
-export default SupportTickets; 
+export default SupportTickets;

@@ -1,4 +1,4 @@
-import { Routes, Route, Navigate, MemoryRouter } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import AdminLayout from './layouts/AdminLayout';
 import { ConfigProvider } from 'antd';
 import trTR from 'antd/locale/tr_TR';
@@ -26,7 +26,7 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
   const isAuthenticated = localStorage.getItem('adminToken');
   
   if (!isAuthenticated) {
-    return <Navigate to="login" replace />;
+    return <Navigate to="/admin/login" replace />;
   }
 
   return <>{children}</>;
@@ -36,50 +36,49 @@ function App() {
   return (
     <Provider store={store}>
       <ConfigProvider locale={trTR}>
-        <MemoryRouter>
-          <Routes>
-            <Route path="login" element={<Login />} />
-            <Route path="/" element={
-              <ProtectedRoute>
-                <AdminLayout />
-              </ProtectedRoute>
-            }>
-              <Route index element={<Navigate to="dashboard" replace />} />
-              <Route path="dashboard" element={
-                <React.Suspense fallback={<div>Yükleniyor...</div>}>
-                  <Dashboard />
-                </React.Suspense>
-              } />
-              <Route path="users" element={
-                <React.Suspense fallback={<div>Yükleniyor...</div>}>
-                  <Users />
-                </React.Suspense>
-              } />
-              <Route path="houses" element={
-                <React.Suspense fallback={<div>Yükleniyor...</div>}>
-                  <Houses />
-                </React.Suspense>
-              } />
-              <Route path="reservations" element={
-                <React.Suspense fallback={<div>Yükleniyor...</div>}>
-                  <Reservations />
-                </React.Suspense>
-              } />
-              <Route path="settings" element={
-                <React.Suspense fallback={<div>Yükleniyor...</div>}>
-                  <Settings />
-                </React.Suspense>
-              } />
-              <Route path="notifications" element={<Notifications />} />
-              <Route path="reports" element={<Reports />} />
-              <Route path="maintenance" element={<Maintenance />} />
-              <Route path="discounts" element={<Discounts />} />
-              <Route path="logs" element={<Logs />} />
-              <Route path="support-tickets" element={<SupportTickets />} />
-              <Route path="system-settings" element={<SystemSettings />} />
-            </Route>
-          </Routes>
-        </MemoryRouter>
+        {/* ✅ Removed MemoryRouter - let main app handle routing */}
+        <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route path="/" element={
+            <ProtectedRoute>
+              <AdminLayout />
+            </ProtectedRoute>
+          }>
+            <Route index element={<Navigate to="/admin/dashboard" replace />} />
+            <Route path="/dashboard" element={
+              <React.Suspense fallback={<div>Yükleniyor...</div>}>
+                <Dashboard />
+              </React.Suspense>
+            } />
+            <Route path="/users" element={
+              <React.Suspense fallback={<div>Yükleniyor...</div>}>
+                <Users />
+              </React.Suspense>
+            } />
+            <Route path="/houses" element={
+              <React.Suspense fallback={<div>Yükleniyor...</div>}>
+                <Houses />
+              </React.Suspense>
+            } />
+            <Route path="/reservations" element={
+              <React.Suspense fallback={<div>Yükleniyor...</div>}>
+                <Reservations />
+              </React.Suspense>
+            } />
+            <Route path="/settings" element={
+              <React.Suspense fallback={<div>Yükleniyor...</div>}>
+                <Settings />
+              </React.Suspense>
+            } />
+            <Route path="/notifications" element={<Notifications />} />
+            <Route path="/reports" element={<Reports />} />
+            <Route path="/maintenance" element={<Maintenance />} />
+            <Route path="/discounts" element={<Discounts />} />
+            <Route path="/logs" element={<Logs />} />
+            <Route path="/support-tickets" element={<SupportTickets />} />
+            <Route path="/system-settings" element={<SystemSettings />} />
+          </Route>
+        </Routes>
       </ConfigProvider>
     </Provider>
   );

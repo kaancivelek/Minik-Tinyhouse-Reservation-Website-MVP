@@ -4,11 +4,11 @@ import { UserOutlined, LockOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
+const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:7183/api';
 
 interface LoginForm {
   email: string;
-  password: string;
+  passwordHash: string;
 }
 
 const Login: React.FC = () => {
@@ -16,18 +16,19 @@ const Login: React.FC = () => {
   const [loading, setLoading] = useState(false);
 
   const onFinish = async (values: LoginForm) => {
+    console.log('Form Values:', values);
     try {
       setLoading(true);
       const response = await axios.post(`${API_BASE}/User/login`, {
         email: values.email,
-        password: values.password
+        passwordHash: values.passwordHash,
       });
 
       if (response.data.roleId === 0) { // Admin rolü kontrolü
         localStorage.setItem('adminToken', response.data.token);
         localStorage.setItem('adminUser', JSON.stringify(response.data));
         message.success('Giriş başarılı!');
-        navigate('dashboard');
+        navigate('/dashboard');
       } else {
         message.error('Bu sayfaya erişim yetkiniz yok!');
       }
@@ -68,7 +69,7 @@ const Login: React.FC = () => {
           </Form.Item>
 
           <Form.Item
-            name="password"
+            name="passwordHash"
             rules={[{ required: true, message: 'Lütfen şifrenizi girin!' }]}
           >
             <Input.Password
@@ -95,4 +96,4 @@ const Login: React.FC = () => {
   );
 };
 
-export default Login; 
+export default Login;

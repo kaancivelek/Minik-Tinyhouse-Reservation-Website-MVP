@@ -1,7 +1,7 @@
-﻿import React, { useEffect, useState } from "react";
-import AdminPanel from "../components/AdminPanel";
+﻿import { useEffect, useState } from "react";
 import CustomerPanel from "../components/CustomerPanel";
 import PropertyOwnerPanel from "../components/PropertyOwnerPanel";
+
 import { useNavigate } from "react-router-dom";
 import { Button } from "reactstrap";
 
@@ -20,6 +20,10 @@ export default function Profile({ user, setUser, insertTinyHouse }) {
   useEffect(() => {
     if (!isUserLoading && !user) {
       navigate("/");
+    }
+
+    if (!isUserLoading && user?.roleId === 3) {
+      navigate("/admin");
     }
   }, [user, isUserLoading, navigate]);
 
@@ -42,10 +46,13 @@ export default function Profile({ user, setUser, insertTinyHouse }) {
         return <CustomerPanel user={user} insertTinyHouse={insertTinyHouse} />;
       case 2:
         return (
-          <PropertyOwnerPanel user={user} insertTinyHouse={insertTinyHouse} />
+          <PropertyOwnerPanel
+            user={user}
+            insertTinyHouse={insertTinyHouse}
+          />
         );
       case 3:
-        return <AdminPanel />;
+        return null; // Admin yönlendirildiği için burada panel dönmüyoruz
       default:
         return <div>Panel bulunamadı</div>;
     }
@@ -86,10 +93,10 @@ export default function Profile({ user, setUser, insertTinyHouse }) {
         </p>
         <Button
           color="info"
-          style={{ background: "transparent", border: "1px solid #ccc" }}
+          style={{ background: "transparent", border: "1px solid #ccc", marginRight: "10px" }}
           onClick={() => {
             localStorage.removeItem("user");
-            setUser(null); // Kullanıcıyı sıfırla
+            setUser(null);
             navigate("/logout");
           }}
         >
@@ -98,11 +105,10 @@ export default function Profile({ user, setUser, insertTinyHouse }) {
         <Button
           color="info"
           style={{ background: "transparent", border: "1px solid #ccc" }}
-          onClick={() => {
-  
-            navigate("/EditProfile");
-          }}
-        > Bilgilerini Düzenle</Button>
+          onClick={() => navigate("/EditProfile")}
+        >
+          Bilgilerini Düzenle
+        </Button>
       </div>
 
       <div>{getPanelByRole(user.roleId)}</div>
