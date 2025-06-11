@@ -79,9 +79,7 @@ function ReservationForm({ reservationInfo, setReservationInfo, nightCount, tota
             Müsaitlik kontrol ediliyor...
           </div>
         )}
-{console.log("nightCount", nightCount)}
-{console.log("isDateRangeValid", isDateRangeValid)}
-{console.log("isCheckingAvailability", isCheckingAvailability)}
+
         <Button 
           disabled={nightCount === 0 || !isDateRangeValid || isCheckingAvailability} 
           onClick={() => setStep(1)}
