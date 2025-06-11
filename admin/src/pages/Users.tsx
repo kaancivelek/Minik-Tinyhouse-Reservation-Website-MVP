@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Table, Button, Space, Input, Spin, Alert, Modal, Form, message } from 'antd';
+import { Table, Button, Space, Input, Spin, Alert, Modal, Form, message, Select } from 'antd';
 import { SearchOutlined, EditOutlined, DeleteOutlined, PlusOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import { useDispatch, useSelector } from 'react-redux';
@@ -51,8 +51,9 @@ const Users: React.FC = () => {
     editForm.setFieldsValue({
       fullName: user.fullName,
       email: user.email,
-      phoneNumber: user.phoneNumber,
-      roleId: user.roleId,
+     roleId: user.roleId,
+      phoneNumber: user.phoneNumber
+      
     });
     setIsEditModalOpen(true);
   };
@@ -101,7 +102,14 @@ const Users: React.FC = () => {
       title: 'Rol',
       dataIndex: 'roleId',
       key: 'roleId',
-      render: (roleId: number | undefined) => (roleId === 0 ? 'Admin' : 'Kullanıcı'),
+      render: (roleId: number | undefined) => {
+        switch (roleId) {
+          case 1: return 'Customer';
+          case 2: return 'Property Owner';
+          case 3: return 'Admin';
+          default: return 'Bilinmeyen';
+        }
+      },
     },
     {
       title: 'İşlemler',
@@ -172,8 +180,12 @@ const Users: React.FC = () => {
           <Form.Item label="Telefon" name="phoneNumber">
             <Input />
           </Form.Item>
-          <Form.Item label="Rol" name="roleId" initialValue={2}>
-            <Input type="number" min={0} max={2} />
+          <Form.Item label="Rol" name="roleId" initialValue={1}>
+            <Select>
+              <Select.Option value={1}>Customer</Select.Option>
+              <Select.Option value={2}>Property Owner</Select.Option>
+              <Select.Option value={3}>Admin</Select.Option>
+            </Select>
           </Form.Item>
         </Form>
       </Modal>
@@ -205,7 +217,11 @@ const Users: React.FC = () => {
             <Input />
           </Form.Item>
           <Form.Item label="Rol" name="roleId">
-            <Input type="number" min={0} max={2} />
+            <Select>
+              <Select.Option value={1}>Customer</Select.Option>
+              <Select.Option value={2}>Property Owner</Select.Option>
+              <Select.Option value={3}>Admin</Select.Option>
+            </Select>
           </Form.Item>
         </Form>
       </Modal>

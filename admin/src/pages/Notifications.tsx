@@ -4,7 +4,7 @@ import axios from 'axios';
 
 const { Title } = Typography;
 const { Option } = Select;
-const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:7183/api';
+const API_BASE = import.meta.env.VITE_API_BASE_URL || 'https://localhost:7183/api';
 
 interface Notification {
   id: number;

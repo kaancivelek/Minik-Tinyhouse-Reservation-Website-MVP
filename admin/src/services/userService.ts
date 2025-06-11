@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:7183/api';
+const API_BASE = import.meta.env.VITE_API_BASE_URL || 'https://localhost:7183/api';
 
 export interface User {
   id: number;
@@ -47,6 +47,6 @@ export const deleteUser = async (id: number) => {
 };
 
 export const createUser = async (data: UserCreate) => {
-  const res = await axios.post(`${API_BASE}/User/register`, data);
+  const res = await axios.post(`${API_BASE}/Register/register`, data);
   return res.data;
 }; 

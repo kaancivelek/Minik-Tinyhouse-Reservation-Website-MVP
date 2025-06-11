@@ -292,9 +292,9 @@ namespace Minik.Server.Controllers
         [HttpPut("role/{id}")]
         public IActionResult UpdateUserRole(int id, [FromBody] int roleId)
         {
-            if (roleId < 0 || roleId > 2)
+            if (roleId < 1 || roleId > 3)
             {
-                return BadRequest("Role ID yalnızca 0, 1 veya 2 olabilir.");
+                return BadRequest("Role ID yalnızca 1 (Customer), 2 (Property Owner) veya 3 (Admin) olabilir.");
             }
 
             using (SqlConnection conn = new SqlConnection(_connectionString))
@@ -536,10 +536,10 @@ namespace Minik.Server.Controllers
                     }
                 }
 
-                // RoleId kontrolü (sadece 0, 1, 2 değerleri geçerli)
+                // RoleId kontrolü (1=Customer, 2=Property Owner, 3=Admin)
                 if (update.RoleId.HasValue)
                 {
-                    if (update.RoleId < 0 || update.RoleId > 2)
+                    if (update.RoleId < 1 || update.RoleId > 3)
                     {
                         skippedFields.Add("roleId");
                         // Geçersiz RoleId olduğu için bu alan güncellenmiyor

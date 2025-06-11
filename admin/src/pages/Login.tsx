@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { Form, Input, Button, Card, message } from 'antd';
+import { Form, Input, Button, Card, message, Alert } from 'antd';
 import { UserOutlined, LockOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:7183/api';
+const API_BASE = import.meta.env.VITE_API_BASE_URL || 'https://localhost:7183/api';
 
 interface LoginForm {
   email: string;
@@ -14,26 +14,41 @@ interface LoginForm {
 const Login: React.FC = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const onFinish = async (values: LoginForm) => {
-    console.log('Form Values:', values);
+    setErrorMessage(null); // Her giriş denemesinde önce hata mesajını temizle
     try {
       setLoading(true);
-      const response = await axios.post(`${API_BASE}/User/login`, {
+      console.log('Login attempt with:', values.email);
+      
+      const response = await axios.post(`${API_BASE}/Login/login`, {
         email: values.email,
         passwordHash: values.passwordHash,
       });
 
-      if (response.data.roleId === 0) { // Admin rolü kontrolü
+      console.log('Login response:', response.data);
+
+      if (response.data && response.data.roleId === 3) {
         localStorage.setItem('adminToken', response.data.token);
-        localStorage.setItem('adminUser', JSON.stringify(response.data));
+        localStorage.setItem('adminUser', JSON.stringify({
+          email: values.email,
+          roleId: response.data.roleId
+        }));
         message.success('Giriş başarılı!');
-        navigate('/dashboard');
+        navigate('/admin/dashboard');
+      } else if (response.data && response.data.roleId !== 3) {
+        setErrorMessage('Bu sayfaya erişim yetkiniz yok!');
       } else {
-        message.error('Bu sayfaya erişim yetkiniz yok!');
+        setErrorMessage('Bilinmeyen bir hata oluştu.');
       }
-    } catch (error) {
-      message.error('Giriş başarısız! Lütfen bilgilerinizi kontrol edin.');
+    } catch (error: any) {
+      console.error('Login error:', error);
+      if (error.response && error.response.status === 401) {
+        setErrorMessage('E-posta veya şifre hatalı!');
+      } else {
+        setErrorMessage('Giriş başarısız! Lütfen bilgilerinizi kontrol edin.');
+      }
     } finally {
       setLoading(false);
     }
@@ -49,6 +64,9 @@ const Login: React.FC = () => {
     }}>
       <Card style={{ width: 400, boxShadow: '0 4px 8px rgba(0,0,0,0.1)' }}>
         <h2 style={{ textAlign: 'center', marginBottom: 24 }}>Admin Panel</h2>
+        {errorMessage && (
+          <Alert message={errorMessage} type="error" showIcon style={{ marginBottom: 16 }} />
+        )}
         <Form
           name="login"
           onFinish={onFinish}

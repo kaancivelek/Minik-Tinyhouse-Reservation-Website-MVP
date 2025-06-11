@@ -39,7 +39,7 @@ const SystemSettings: React.FC = () => {
     setLoading(true);
     try {
       const data = await systemSettingService.getAllSettings();
-      setSettings(data);
+      setSettings(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error('Ayarlar yüklenirken hata:', error);
       message.error('Ayarlar yüklenirken bir hata oluştu.');
@@ -76,7 +76,7 @@ const SystemSettings: React.FC = () => {
   };
 
   const handleFormFinish = async (category: string, values: CategoryFormValues) => {
-    const categorySettings = settings.filter(s => s.category === category);
+    const categorySettings = Array.isArray(settings) ? settings.filter(s => s.category === category) : [];
     
     // Her ayarı ayrı ayrı güncelle
     for (const setting of categorySettings) {
@@ -117,7 +117,7 @@ const SystemSettings: React.FC = () => {
   };
 
   const getInitialValues = (category: string) => {
-    const categorySettings = settings.filter(s => s.category === category);
+    const categorySettings = Array.isArray(settings) ? settings.filter(s => s.category === category) : [];
     const initialValues: CategoryFormValues = {};
     
     categorySettings.forEach(setting => {
@@ -128,7 +128,7 @@ const SystemSettings: React.FC = () => {
   };
 
   const renderSettingsForm = (category: string) => {
-    const categorySettings = settings.filter(s => s.category === category);
+    const categorySettings = Array.isArray(settings) ? settings.filter(s => s.category === category) : [];
 
     if (categorySettings.length === 0) {
       return <div>Bu kategori için ayar bulunmuyor.</div>;

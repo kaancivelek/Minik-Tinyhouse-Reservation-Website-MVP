@@ -37,11 +37,11 @@ namespace Minik.Server.Controllers
             if (IsPhoneNumberAlreadyExists(user.PhoneNumber))
                 return BadRequest("Bu telefon numarası zaten kullanılıyor.");
 
-            // role_id doğrulaması: 0, 1, 2 dışında değer girilemez
-            int roleId = user.RoleId ?? 1; // null ise varsayılan olarak 1
+            // role_id doğrulaması: 1=Customer, 2=Property Owner, 3=Admin
+            int roleId = user.RoleId ?? 1; // null ise varsayılan olarak 1 (Customer)
 
-            if (roleId < 0 || roleId > 2)
-                return BadRequest("RoleId yalnızca 0, 1 veya 2 olabilir.");
+            if (roleId < 1 || roleId > 3)
+                return BadRequest("RoleId yalnızca 1 (Customer), 2 (Property Owner) veya 3 (Admin) olabilir.");
 
             string hashedPassword = BCrypt.Net.BCrypt.HashPassword(user.PasswordHash);
             int newUserId = 0;
