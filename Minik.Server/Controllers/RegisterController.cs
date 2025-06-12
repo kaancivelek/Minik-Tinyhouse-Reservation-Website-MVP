@@ -1,9 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.Data.SqlClient;
+using System.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 using Minik.Server.Models;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
+using System.Text.Json;
 
 namespace Minik.Server.Controllers
 {
@@ -36,19 +37,20 @@ namespace Minik.Server.Controllers
             if (IsPhoneNumberAlreadyExists(user.PhoneNumber))
                 return BadRequest("Bu telefon numarası zaten kullanılıyor.");
 
-            // role_id doğrulaması: 0, 1, 2 dışında değer girilemez
-            int roleId = user.RoleId ?? 1; // null ise varsayılan olarak 1
+            // role_id doğrulaması: 1=Customer, 2=Property Owner, 3=Admin
+            int roleId = user.RoleId ?? 1; // null ise varsayılan olarak 1 (Customer)
 
-            if (roleId < 0 || roleId > 2)
-                return BadRequest("RoleId yalnızca 0, 1 veya 2 olabilir.");
+            if (roleId < 1 || roleId > 3)
+                return BadRequest("RoleId yalnızca 1 (Customer), 2 (Property Owner) veya 3 (Admin) olabilir.");
 
             string hashedPassword = BCrypt.Net.BCrypt.HashPassword(user.PasswordHash);
-
+            int newUserId = 0;
             using (SqlConnection conn = new SqlConnection(_connectionString))
             {
                 conn.Open();
                 string query = @"
                     INSERT INTO users (full_name, email, password_hash, role_id, phone_number)
+                    OUTPUT INSERTED.id
                     VALUES (@full_name, @email, @password_hash, @role_id, @phone_number)";
 
                 using (SqlCommand cmd = new SqlCommand(query, conn))
@@ -59,8 +61,31 @@ namespace Minik.Server.Controllers
                     cmd.Parameters.AddWithValue("@role_id", roleId);
                     cmd.Parameters.AddWithValue("@phone_number", user.PhoneNumber);
 
-                    cmd.ExecuteNonQuery();
+                    newUserId = (int)cmd.ExecuteScalar();
                 }
+            }
+
+            // Log ekle
+            using (var context = new Minik.Server.Data.ApplicationDbContext(new Microsoft.EntityFrameworkCore.DbContextOptions<Minik.Server.Data.ApplicationDbContext>()))
+            {
+                var log = new Minik.Server.Models.AuditLog
+                {
+                    UserId = null, // Giriş yapan adminin id'si eklenebilir
+                    Action = "Create",
+                    Entity = "User",
+                    EntityId = newUserId,
+                    OldValue = null,
+                    NewValue = JsonSerializer.Serialize(new {
+                        Id = newUserId,
+                        user.FullName,
+                        user.Email,
+                        RoleId = roleId,
+                        user.PhoneNumber
+                    }),
+                    Timestamp = DateTime.UtcNow
+                };
+                context.AuditLogs.Add(log);
+                context.SaveChanges();
             }
 
             return Ok(new { Message = "Kayıt başarılı." });

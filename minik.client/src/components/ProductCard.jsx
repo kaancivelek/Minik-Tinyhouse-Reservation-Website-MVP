@@ -1,8 +1,8 @@
 import React from "react";
 import {useNavigate} from "react-router-dom";
+import { addStars } from "../utils/countingStars";
 export default function ProductCard({ house, imageUrl }) {
-const MAX_RATING = 5; // Max rating value
-const addStars = (rating) => {return "★".repeat(rating) + "☆".repeat(MAX_RATING - rating);}; 
+
   const navigate = useNavigate();    
   
       

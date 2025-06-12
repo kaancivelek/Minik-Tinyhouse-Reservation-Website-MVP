@@ -1,4 +1,5 @@
 ﻿import React, { useEffect, useState } from "react";
+import { addStars } from "../utils/countingStars";
 import { getTinyHouseById } from "../services/tinyHouseService";
 import {
   Container,
@@ -11,30 +12,45 @@ import {
   CardSubtitle,
 } from "reactstrap";
 import MakeReservation from "../components/MakeReservation";
+import TinyHouseEditing from "../components/TinyHouseEditing";
 import Comment from "../components/Comment";
 import { getTinyHouseImagesByTinyHouseId } from "../services/houseImages";
 import { useLocation, useParams } from "react-router-dom";
-
+import "../styles/TinyHouseDetails.css";
+import ReservationDetails from "../components/ReservationDetails";
 function TinyHouseDetails({ user }) {
   const [tinyHouse, setTinyHouse] = useState(null);
   const [houseImages, setHouseImages] = useState([]);
   const [houseLoading, setHouseLoading] = useState(false);
   const [imagesLoading, setImagesLoading] = useState(false);
   const [error, setError] = useState("");
+  const [activeImageIdx, setActiveImageIdx] = useState(0);
 
   const location = useLocation();
   const routingFrom = location.state?.from;
+  const reservationInfo = location.state?.reservationInfo || [];
   const { tinyHouseId } = useParams();
 
+const showComments = (routingFrom) => {
+  if(routingFrom !=="CustomerPanel"){
+    return tinyHouse && <Comment tinyHouseId={tinyHouse.id}></Comment>
+}}
 
-  function showPanel(user, routingFrom) {
+  const showTinyHouseEditing = (routingFrom) => {
+    if (routingFrom === "PropertyOwnerPanel") {
+      return tinyHouse && <TinyHouseEditing tinyHouse={tinyHouse} />;
+    }
+    return null;
+  };
+
+  function showMakeReservationPanel(user, routingFrom) {
     if (
       (user.roleId === 1 || user.roleId === 3) &&
-      routingFrom !== "customerPanel"
+      routingFrom !== "CustomerPanel"
     ) {
       return tinyHouse && <MakeReservation tinyHouse={tinyHouse} />;
     } else {
-      return <></>;
+      return null;
     }
   }
 
@@ -55,6 +71,7 @@ function TinyHouseDetails({ user }) {
     try {
       const data = await getTinyHouseImagesByTinyHouseId(tinyHouseId);
       setHouseImages(data);
+      setActiveImageIdx(0);
     } catch (err) {
       console.error("Error loading images:", err);
       // Continue even if images fail to load
@@ -65,7 +82,7 @@ function TinyHouseDetails({ user }) {
 
   useEffect(() => {
     fetchTinyHouseDetails();
-      fetchTinyHouseImages();
+    fetchTinyHouseImages();
   }, []);
 
   if (houseLoading) return <p>Konut bilgileri yükleniyor...</p>;
@@ -80,75 +97,112 @@ function TinyHouseDetails({ user }) {
     return `${url}${separator}w=600&h=400&fit=crop&auto=format`;
   };
 
+  // Carousel ileri/geri fonksiyonları
+  const handlePrevImage = (e) => {
+    e.stopPropagation();
+    setActiveImageIdx((prev) =>
+      prev === 0 ? houseImages.length - 1 : prev - 1
+    );
+  };
+  const handleNextImage = (e) => {
+    e.stopPropagation();
+    setActiveImageIdx((prev) =>
+      prev === houseImages.length - 1 ? 0 : prev + 1
+    );
+  };
+
   return (
     <Container className="my-5">
       <Row className="justify-content-center">
         <Col xs="12" md="8">
-          <Card className="p-3 shadow">
-            {/* Image section with fallbacks */}
-            {imagesLoading ? (
-              <div
-                className="card-img-top mb-3"
-                style={{
-                  height: "400px",
-                  backgroundColor: "#f5f5f5",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                <p>Resimler yükleniyor...</p>
-              </div>
-            ) : houseImages.length > 0 ? (
-              <img
-                alt={tinyHouse.name}
-                src={getOptimizedImageUrl(houseImages[0].imageUrl)}
-                className="card-img-top mb-3"
-                style={{ height: "400px", objectFit: "cover" }}
-                onError={(e) => {
-                  e.target.src =
-                    "https://via.placeholder.com/600x400?text=Resim+Yüklenemedi";
-                  e.target.onerror = null; // Prevent infinite loop
-                }}
-              />
-            ) : (
-              <div
-                className="card-img-top mb-3"
-                style={{
-                  height: "400px",
-                  backgroundColor: "#f5f5f5",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                <p>Resim bulunamadı</p>
-              </div>
-            )}
+          <div className="tinyhouse-details-flow">
+            {/* 1. Ev Detayları - Üstte büyük şekilde */}
+            <Card className="tinyhouse-card">
+              {imagesLoading ? (
+                <div className="tinyhouse-img-loading">
+                  <p>Resimler yükleniyor...</p>
+                </div>
+              ) : houseImages.length > 0 ? (
+                <div className="tinyhouse-img-carousel">
+                  <button
+                    className="carousel-btn carousel-btn-left"
+                    onClick={handlePrevImage}
+                    aria-label="Önceki fotoğraf"
+                  ></button>
+                  <img
+                    alt={tinyHouse.name}
+                    src={getOptimizedImageUrl(houseImages[activeImageIdx].imageUrl)}
+                    className="tinyhouse-img"
+                    onError={(e) => {
+                      e.target.src =
+                        "https://via.placeholder.com/600x400?text=Resim+Yüklenemedi";
+                      e.target.onerror = null;
+                    }}
+                  />
+                  <button
+                    className="carousel-btn carousel-btn-right"
+                    onClick={handleNextImage}
+                    aria-label="Sonraki fotoğraf"
+                  ></button>
+                  <div className="carousel-indicator">
+                    {houseImages.map((img, idx) => (
+                      <span
+                        key={idx}
+                        className={idx === activeImageIdx ? "active" : ""}
+                        onClick={() => setActiveImageIdx(idx)}
+                        aria-label={`Fotoğraf ${idx + 1}`}
+                      >
+                        ●
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <div className="tinyhouse-img-notfound">
+                  <p>Resim bulunamadı</p>
+                </div>
+              )}
 
-            <CardBody>
-              <CardTitle tag="h1" className="mb-3">
-                {tinyHouse.name}
-              </CardTitle>
-              <CardSubtitle className="mb-2 text-muted" style ={{textTransform: "capitalize"}}>
-                {tinyHouse.amenities}
-              </CardSubtitle>
-              <CardText className="mb-2">{tinyHouse.description}</CardText>
-              <CardText>
-                {tinyHouse.city},{tinyHouse.country}
-              </CardText>
-              <CardText>
-                <strong>Fiyat:</strong> {tinyHouse.pricePerNight} ₺ / gece
-              </CardText>
-              <CardText>
-                <strong>Maksimum Misafir:</strong> {tinyHouse.maxGuests} kişi
-              </CardText>
-            </CardBody>
-          </Card>
-        </Col>
-        <Col>
-          {user ? showPanel(user, routingFrom) : <></>}{" "}
-          {tinyHouse && <Comment tinyHouse={tinyHouse} />}
+              <CardBody>
+                <CardTitle tag="h1" className="mb-3">
+                  {tinyHouse.name} <br></br>
+                  {addStars(tinyHouse.rating)}
+                </CardTitle>
+                <CardSubtitle
+                  className="mb-2 text-muted"
+                  style={{ textTransform: "capitalize" }}
+                >
+                  {tinyHouse.amenities}
+                </CardSubtitle>
+                <CardText className="mb-2">{tinyHouse.description}</CardText>
+                <CardText>
+                  {tinyHouse.city}, {tinyHouse.country}
+                </CardText>
+                <CardText>
+                  <strong>Fiyat:</strong> {tinyHouse.pricePerNight} ₺ / gece
+                </CardText>
+                <CardText>
+                  <strong>Maksimum Misafir:</strong> {tinyHouse.maxGuests} kişi
+                </CardText>
+              </CardBody>
+            </Card>
+            {/* 2. Rezervasyon/Düzenleme ve Yorumlar yan yana */}
+            <div className="tinyhouse-details-sections">
+              <div className="tinyhouse-section-card">
+                {user && (
+                  <>
+                    {showTinyHouseEditing(routingFrom)}
+                    {showMakeReservationPanel(user, routingFrom)}
+                    <ReservationDetails reservationInfo={reservationInfo} />
+                  </>
+                )}
+              </div>
+              <div className="tinyhouse-section-card">
+                
+                {showComments(routingFrom)}
+              </div>
+            </div>
+          </div>
         </Col>
       </Row>
     </Container>

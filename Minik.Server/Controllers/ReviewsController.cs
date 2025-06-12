@@ -25,20 +25,10 @@ namespace Minik.Server.Controllers
             {
                 conn.Open();
                 string query = @"
-            SELECT 
-                r.id,
-                r.user_id,
-                r.tiny_house_id,
-                r.rating,
-                r.comment,
-                r.review_date,
-                u.full_name
-            FROM 
-                reviews r
-            JOIN 
-                users u ON r.user_id = u.id
-            WHERE 
-                u.full_name = @FullName";
+            SELECT r.id, r.user_id, r.tiny_house_id, r.rating, r.comment, r.review_date, u.full_name
+            FROM reviews r
+            INNER JOIN users u ON r.user_id = u.id
+            WHERE r.user_id = @UserId";
 
                 using (SqlCommand cmd = new SqlCommand(query, conn))
                 {
@@ -52,11 +42,12 @@ namespace Minik.Server.Controllers
                             {
                                 Id = (int)reader["id"],
                                 UserId = (int)reader["user_id"],
+                                FullName = reader["full_name"].ToString(),
                                 TinyHouseId = (int)reader["tiny_house_id"],
                                 Rating = (int)reader["rating"],
                                 Comment = reader["comment"] == DBNull.Value ? null : reader["comment"].ToString(),
                                 ReviewDate = (DateTime)reader["review_date"],
-                                FullName = reader["full_name"].ToString()
+                              
                             });
                         }
                     }
@@ -72,7 +63,7 @@ namespace Minik.Server.Controllers
         public IActionResult GetReviewsByTinyHouse(int tinyHouseId)
         {
             string connectionString = _configuration.GetConnectionString("DefaultConnection");
-            List<Review> reviews = new List<Review>();
+            var reviews = new List<object>();
 
             using (SqlConnection conn = new SqlConnection(connectionString))        
 
@@ -80,7 +71,11 @@ namespace Minik.Server.Controllers
                 
             {
                 conn.Open();
-                string query = "SELECT * FROM reviews WHERE tiny_house_id = @TinyHouseId";
+                string query = @"
+            SELECT r.id, r.user_id, r.tiny_house_id, r.rating, r.comment, r.review_date, u.full_name
+            FROM reviews r
+            INNER JOIN users u ON r.user_id = u.id
+            WHERE r.tiny_house_id = @TinyHouseId";
 
                 using (SqlCommand cmd = new SqlCommand(query, conn))
                 {
@@ -90,10 +85,11 @@ namespace Minik.Server.Controllers
                     {
                         while (reader.Read())
                         {
-                            reviews.Add(new Review
+                            reviews.Add(new
                             {
                                 Id = (int)reader["id"],
                                 UserId = (int)reader["user_id"],
+                                FullName = reader["full_name"].ToString(),
                                 TinyHouseId = (int)reader["tiny_house_id"],
                                 Rating = (int)reader["rating"],
                                 Comment = reader["comment"] == DBNull.Value ? null : reader["comment"].ToString(),
@@ -106,6 +102,7 @@ namespace Minik.Server.Controllers
 
             return Ok(reviews);
         }
+
 
 
         // 2. POST: api/reviews

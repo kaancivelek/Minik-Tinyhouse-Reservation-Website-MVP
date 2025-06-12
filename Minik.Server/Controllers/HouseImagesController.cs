@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Minik.Server.Models;
-using Microsoft.Data.SqlClient;
+using System.Data.SqlClient;
 
 namespace Minik.Server.Controllers
 {

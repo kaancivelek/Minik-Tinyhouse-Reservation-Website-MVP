@@ -1,13 +1,12 @@
-﻿
 using Microsoft.AspNetCore.Mvc;
-using Minik.Server.Models;
+using Minik.Server.Modeller;
 using System.Data.SqlClient;
 using System.Collections.Generic;
 
-namespace Minik.Server.Controllers
+namespace Minik.Sunucu.Denetleyiciler
 {
-    [Route("api/[controller]")]
     [ApiController]
+    [Route("api/[controller]")]
     public class DiscountsController : ControllerBase
     {
         private readonly IConfiguration _configuration;
@@ -19,7 +18,7 @@ namespace Minik.Server.Controllers
 
         private SqlConnection GetConnection()
         {
-            return new SqlConnection(_configuration.GetConnectionString("DefaultConnection"));
+            return new SqlConnection(_configuration.GetConnectionString("VarsayılanBağlantı"));
         }
 
         // GET: api/discounts
@@ -125,7 +124,7 @@ namespace Minik.Server.Controllers
             }
         }
 
-        // PATCH: api/discounts/5 (Sadece yüzde güncelle)
+        // PATCH: api/discounts/5 (Sadece oran güncellemesi)
         [HttpPatch("{id}")]
         public IActionResult PatchDiscountPercentage(int id, [FromBody] decimal newPercentage)
         {

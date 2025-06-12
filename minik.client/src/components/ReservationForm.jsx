@@ -1,8 +1,33 @@
 import { Card, CardBody, CardText, CardTitle, Button } from "reactstrap";
 import "../styles/MakeReservation.css";
+import { useEffect, useState } from "react";
+import { checkDateRangeAvailability } from "../utils/availabilityUtils";
+import ReservationCalendar from "./ReservationCalendar";
 
 function ReservationForm({ reservationInfo, setReservationInfo, nightCount, totalPrice, tinyHouse, setStep }) {
   const { startDate, endDate, guestCount } = reservationInfo;
+  const [isDateRangeValid, setIsDateRangeValid] = useState(true);
+  const [isCheckingAvailability, setIsCheckingAvailability] = useState(false);
+
+  // Check availability when dates change
+  useEffect(() => {
+    const checkAvailability = async () => {
+      if (startDate && endDate) {
+        setIsCheckingAvailability(true);
+        try {
+          const isAvailable = await checkDateRangeAvailability(startDate, endDate, tinyHouse.id);
+          setIsDateRangeValid(isAvailable === 1);
+        } catch (error) {
+          console.error("Error checking availability:", error);
+          setIsDateRangeValid(false);
+        } finally {
+          setIsCheckingAvailability(false);
+        }
+      }
+    };
+
+    checkAvailability();
+  }, [startDate, endDate, tinyHouse.id]);
 
   const updateField = (field, value) => {
     setReservationInfo((prev) => ({ ...prev, [field]: value }));
@@ -23,44 +48,43 @@ function ReservationForm({ reservationInfo, setReservationInfo, nightCount, tota
   return (
     <Card body>
       <CardBody>
-        <CardTitle tag="h5">Rezervasyon Yap</CardTitle>
+        <CardTitle style={{textAlign:"center"}} tag="h5">Rezervasyon Yap</CardTitle>
 
-        <div className="mb-2">
-          <label>Giriş Tarihi: &nbsp;</label>
-          <input
-            className="date-input"
-            type="date"
-            value={startDate}
-            onChange={(e) => updateField("startDate", e.target.value)}
-          />
-        </div>
+        {/* Calendar Component */}
+        <ReservationCalendar 
+          tinyHouse={tinyHouse}
+          startDate={startDate}
+          endDate={endDate}
+          onDateChange={updateField}
+        />
 
-        <div className="mb-3">
-          <label>Çıkış Tarihi:  &nbsp;</label>
-          <input
-            className="date-input"
-            type="date"
-            value={endDate}
-            onChange={(e) => updateField("endDate", e.target.value)}
-          />
-        </div>
-
-        <div className="mb-3">
+        <div className="mb-3 mt-3">
           <label>Kişi Sayısı: </label>
           <div className="guest-counter">
             <Button size="sm" onClick={decreaseGuests}>-</Button>
             <span>{guestCount}</span>
             <Button size="sm" onClick={increaseGuests}>+</Button>
           </div>
+          <small className="text-muted"><br></br>Maksimum  {tinyHouse.maxGuests} kişi</small>
         </div>
 
         {nightCount > 0 && (
-          <CardText>
+          <CardText className="price-summary">
             {nightCount} gece × {tinyHouse.pricePerNight} ₺ = <strong>{totalPrice} ₺</strong>
           </CardText>
         )}
 
-        <Button disabled={nightCount === 0} onClick={() => setStep(1)}>
+        {isCheckingAvailability && (
+          <div className="mb-3 text-info">
+            Müsaitlik kontrol ediliyor...
+          </div>
+        )}
+
+        <Button 
+          disabled={nightCount === 0 || !isDateRangeValid || isCheckingAvailability} 
+          onClick={() => setStep(1)}
+          className="reservation-confirm-btn"
+        >
           Rezervasyonu Onayla
         </Button>
       </CardBody>

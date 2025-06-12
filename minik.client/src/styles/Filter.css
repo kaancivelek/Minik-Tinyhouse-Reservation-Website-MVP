@@ -61,6 +61,11 @@ font-size: 12px;
     cursor: pointer;
     margin-right: 10px;
   }
+
+  .filter-toggle-btn:hover {
+    background-color: rgba(0, 0, 0, 0.1); /* Hover efekti */
+    border-radius: 5px; /* Köşe yuvarlama */
+  }
   
   .navbar input[type="text"],
   .navbar select {

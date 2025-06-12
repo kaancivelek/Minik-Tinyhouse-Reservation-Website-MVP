@@ -5,6 +5,7 @@ import ReservationForm from "./ReservationForm";
 import CheckoutForm from "./CheckoutForm";
 import "../styles/MakeReservation.css";
 import { toast, Slide } from "react-toastify";
+import { checkDateRangeAvailability } from "../utils/availabilityUtils";
 
 
 function MakeReservation({ tinyHouse }) {
@@ -36,13 +37,27 @@ function MakeReservation({ tinyHouse }) {
     const storedUser = JSON.parse(localStorage.getItem("user"));
     const { startDate, endDate } = reservationInfo;
 
+    // Check availability before creating reservation
+    const isAvailable = await checkDateRangeAvailability(startDate, endDate, tinyHouse.id);
+    
+    if (!isAvailable) {
+      toast.error("Seçilen tarihler müsait değil. Lütfen farklı tarihler seçin.", {
+        position: "top-center",
+        autoClose: 3000,
+        theme: "dark",
+        transition: Slide,
+      });
+      setStep(0); // Go back to date selection
+      return;
+    }
+
     const reservationData = {
       userId: storedUser.id,
       tinyHouseId: tinyHouse.id,
       checkIn: startDate,
       checkOut: endDate,
       totalPrice,
-      status: "confirmed",
+      status: "pending",
     };
 
     try {

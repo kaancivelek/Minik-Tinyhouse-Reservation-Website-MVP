@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.Data.SqlClient;
+using System.Data.SqlClient;
 using Minik.Server.Data;
 using Minik.Server.Models;
 
@@ -130,8 +130,16 @@ namespace Minik.Server.Controllers
             {
                 await conn.OpenAsync();
 
+                // 1. Availability durumlarını güncelleyen stored procedure'ü çalıştır
+                using (var cmdUpdate = new SqlCommand("EXEC sp_UpdateAvailabilityStatus", conn))
+                {
+                    await cmdUpdate.ExecuteNonQueryAsync();
+                }
+
+                // 2. Paginated sorguyu çalıştır
                 string query = @"
-            SELECT T.*, L.country, L.city
+            SELECT T.*, L.country, L.city, 
+                (SELECT CEILING(AVG(rating)) FROM reviews WHERE T.id = reviews.tiny_house_id) AS average_rating
             FROM tiny_houses T
             INNER JOIN locations L ON T.location_id = L.id
             WHERE T.id IS NOT NULL
@@ -158,7 +166,8 @@ namespace Minik.Server.Controllers
                                 property_owner_id = reader.GetInt32(6),
                                 Amenities = reader.IsDBNull(7) ? null : reader.GetString(7),
                                 Country = reader.GetString(8),
-                                City = reader.GetString(9)
+                                City = reader.GetString(9),
+                                Rating = reader.IsDBNull(10) ? 0 : reader.GetInt32(10)
                             });
                         }
                     }
@@ -167,6 +176,7 @@ namespace Minik.Server.Controllers
 
             return Ok(houses);
         }
+
 
 
         // GET: api/TinyHouses/
@@ -178,12 +188,9 @@ namespace Minik.Server.Controllers
             using (var conn = new SqlConnection(_connectionString))
             {
                 await conn.OpenAsync();
-                var cmd = new SqlCommand(@"SELECT T.*, L.city, L.country, 
-       (SELECT CEILING(AVG(rating)) FROM reviews WHERE T.id = reviews.tiny_house_id) AS average_rating
-FROM tiny_houses T
-JOIN locations L ON T.location_id = L.id
-WHERE T.id = @id
- ", conn);
+                var cmd = new SqlCommand(@"
+            SELECT * FROM dbo.GetTinyHouseDetailsById(@id)
+        ", conn);
 
                 cmd.Parameters.AddWithValue("@id", id);
 
@@ -193,26 +200,25 @@ WHERE T.id = @id
                 {
                     house = new TinyHouse
                     {
-                        Id = reader.GetInt32(0),
-                        Name = reader.GetString(1),
-                        Description = reader.IsDBNull(2) ? null : reader.GetString(2),
-                        LocationId = reader.GetInt32(3),
-                        PricePerNight = reader.GetDecimal(4),
-                        MaxGuests = reader.GetInt32(5),
-                        property_owner_id = reader.GetInt32(6),
-                        Amenities = reader.IsDBNull(7) ? null : reader.GetString(7),
-                        // Bu iki satır location bilgisi alır
-                        City = reader.GetString(8),
-                        Country = reader.GetString(9),
-                        Rating = reader.IsDBNull(10) ? 0 : reader.GetInt32(10)
-
+                        Id = Convert.ToInt32(reader["id"]),
+                        Name = reader["name"].ToString(),
+                        Description = reader["description"] == DBNull.Value ? null : reader["description"].ToString(),
+                        LocationId = Convert.ToInt32(reader["location_id"]),
+                        PricePerNight = Convert.ToDecimal(reader["price_per_night"]),
+                        MaxGuests = Convert.ToInt32(reader["max_guests"]),
+                        property_owner_id = Convert.ToInt32(reader["property_owner_id"]),
+                        Amenities = reader["amenities"] == DBNull.Value ? null : reader["amenities"].ToString(),
+                        City = reader["city"].ToString(),
+                        Country = reader["country"].ToString(),
+                        Rating = reader["average_rating"] == DBNull.Value
+                                 ? 0
+                                 : Convert.ToInt32(Math.Round(Convert.ToDouble(reader["average_rating"])))
                     };
                 }
             }
 
             return house == null ? NotFound() : Ok(house);
         }
-
 
 
         // GET: api/TinyHouses/
@@ -319,7 +325,6 @@ WHERE T.id = @id
                 SqlCommand cmd = new SqlCommand();
                 cmd.Connection = conn;
 
-                // Güncellenebilecek alanları kontrol et
                 if (update.Name != null)
                 {
                     setClauses.Add("name = @name");
@@ -330,10 +335,15 @@ WHERE T.id = @id
                     setClauses.Add("description = @description");
                     cmd.Parameters.AddWithValue("@description", update.Description);
                 }
-                if (update.LocationId.HasValue)
+                if (update.City != null)
                 {
-                    setClauses.Add("location_id = @location_id");
-                    cmd.Parameters.AddWithValue("@location_id", update.LocationId.Value);
+                    setClauses.Add("city = @city");
+                    cmd.Parameters.AddWithValue("@city", update.City);
+                }
+                if (update.Country != null)
+                {
+                    setClauses.Add("country = @country");
+                    cmd.Parameters.AddWithValue("@country", update.Country);
                 }
                 if (update.PricePerNight.HasValue)
                 {
@@ -356,17 +366,14 @@ WHERE T.id = @id
                     cmd.Parameters.AddWithValue("@amenities", update.Amenities);
                 }
 
-                // Eğer hiçbir alan belirtilmemişse hata dön
                 if (!setClauses.Any())
                 {
                     return BadRequest("Güncellenecek herhangi bir alan belirtilmedi.");
                 }
 
-                // SQL sorgusunu hazırla
                 cmd.CommandText = $"UPDATE tiny_houses SET {string.Join(", ", setClauses)} WHERE id = @id";
                 cmd.Parameters.AddWithValue("@id", id);
 
-                // Veritabanında güncellemeyi yap
                 int affected = cmd.ExecuteNonQuery();
                 if (affected == 0)
                 {
@@ -376,6 +383,7 @@ WHERE T.id = @id
 
             return Ok(new { Message = "Tiny house başarıyla güncellendi." });
         }
+
 
 
 

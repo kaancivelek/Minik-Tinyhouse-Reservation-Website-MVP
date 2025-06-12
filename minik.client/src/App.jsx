@@ -1,4 +1,4 @@
-﻿import React, { useEffect } from "react";
+﻿import React, { useEffect, lazy, Suspense } from "react";
 import Navi from "./components/Navbar";
 import Logon from "./pages/Logon";
 import Login from "./components/Login";
@@ -13,6 +13,10 @@ import { Container } from "reactstrap";
 import { useState } from "react";
 import { Route, Routes } from "react-router-dom";
 import { ToastContainer, Slide } from "react-toastify";
+import TinyHouseAdding from "./pages/TinyHouseAdding";
+import ReservationList from "./pages/ReservationList";
+
+const AdminApp = lazy(() => import("../../admin/src/App"));
 
 function App() {
   const [user, setUser] = useState(null);
@@ -60,6 +64,17 @@ function App() {
               <ListingPage filterText={filterText} sortOrder={sortOrder} />
             }
           />
+
+       <Route
+            path="/insertTinyHouse"
+            element={
+              <TinyHouseAdding
+                user={user}
+                setUser={setUser}
+                insertTinyHouse={insertTinyHouse}
+              
+            />}/>
+
           <Route path="/Logon" element={<Logon />} />
           <Route
             path="/Login"
@@ -89,6 +104,18 @@ function App() {
             path="/TinyHouseDetails/:tinyHouseId"
             element={<TinyHouseDetails user={user} />}
           />
+          <Route
+            path="/ReservationList/:tinyHouseId"
+                      element={<ReservationList />}></Route>
+                  <Route
+                      path="/admin/*"
+                      element={
+                          <Suspense fallback={<div>Yükleniyor...</div>}>
+                              <AdminApp />
+                          </Suspense>
+                      }
+                  />
+
         </Routes>
       </div>
       <ToastContainer autoClose={2000} theme="dark" transition={Slide} />

@@ -15,6 +15,7 @@ export default function Logon() {
             <button
               style={{
                 width: `20ch`,
+                color :"#333",
                 border: "none",
                 background: "transparent",
                 outline: "none",
@@ -32,6 +33,7 @@ export default function Logon() {
               style={{
                 width: `20ch`,
                 border: "none",
+                 color :"#333",
                 background: "transparent",
                 outline: "none",
                 fontSize: "16px",

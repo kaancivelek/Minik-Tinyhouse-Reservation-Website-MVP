@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using Minik.Server.Models;
+using System;
+using System.Text;
 
 namespace Minik.Server.Controllers
 {
@@ -23,12 +25,10 @@ namespace Minik.Server.Controllers
                 return BadRequest("E-posta ve şifre gereklidir.");
             }
 
-            string storedHash = null;
-
             using (SqlConnection conn = new SqlConnection(_connectionString))
             {
                 conn.Open();
-                string query = "SELECT password_hash FROM users WHERE email = @Email";
+                string query = "SELECT id, full_name, email, password_hash, role_id FROM users WHERE email = @Email";
                 using (SqlCommand cmd = new SqlCommand(query, conn))
                 {
                     cmd.Parameters.AddWithValue("@Email", loginRequest.Email);
@@ -37,7 +37,23 @@ namespace Minik.Server.Controllers
                     {
                         if (reader.Read())
                         {
-                            storedHash = reader["password_hash"].ToString();
+                            string storedHash = reader["password_hash"].ToString();
+                            int roleId = reader.IsDBNull(reader.GetOrdinal("role_id")) ? 1 : reader.GetInt32(reader.GetOrdinal("role_id"));
+
+                            bool isPasswordValid = BCrypt.Net.BCrypt.Verify(loginRequest.PasswordHash, storedHash);
+                            if (!isPasswordValid)
+                            {
+                                return Unauthorized("Şifre hatalı.");
+                            }
+
+                            // Token üret
+                            string token = Convert.ToBase64String(Guid.NewGuid().ToByteArray());
+
+                            return Ok(new
+                            {
+                                token,
+                                roleId
+                            });
                         }
                         else
                         {
@@ -46,14 +62,6 @@ namespace Minik.Server.Controllers
                     }
                 }
             }
-
-            bool isPasswordValid = BCrypt.Net.BCrypt.Verify(loginRequest.PasswordHash, storedHash);
-            if (!isPasswordValid)
-            {
-                return Unauthorized("Şifre hatalı.");
-            }
-
-            return Ok("Giriş başarılı.");
         }
     }
 }

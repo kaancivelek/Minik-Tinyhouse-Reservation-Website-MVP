@@ -20,7 +20,8 @@ namespace Minik.Server.Controllers
 
         public UserController(IConfiguration configuration)
         {
-            _connectionString = configuration.GetConnectionString("DefaultConnection");
+            _connectionString = configuration.GetConnectionString("DefaultConnection") 
+                                ?? throw new ArgumentNullException(nameof(configuration), "Connection string cannot be null.");
         }
 
 
@@ -149,6 +150,36 @@ namespace Minik.Server.Controllers
                 }
             }
 
+            // Güncellemeden önceki kullanıcıyı al
+            object oldUser = null;
+            using (SqlConnection conn = new SqlConnection(_connectionString))
+            {
+                conn.Open();
+                string selectQuery = "SELECT id, full_name, email, role_id, phone_number FROM users WHERE id = @id";
+                using (SqlCommand selectCmd = new SqlCommand(selectQuery, conn))
+                {
+                    selectCmd.Parameters.AddWithValue("@id", id);
+                    using (SqlDataReader reader = selectCmd.ExecuteReader())
+                    {
+                        if (reader.Read())
+                        {
+                            oldUser = new
+                            {
+                                Id = reader.GetInt32(0),
+                                FullName = reader.GetString(1),
+                                Email = reader.GetString(2),
+                                RoleId = reader.IsDBNull(3) ? (int?)null : reader.GetInt32(3),
+                                PhoneNumber = reader.IsDBNull(4) ? null : reader.GetString(4)
+                            };
+                        }
+                        else
+                        {
+                            return NotFound($"ID {id} olan kullanıcı bulunamadı.");
+                        }
+                    }
+                }
+            }
+
             // Şifreyi hashle
             string hashedPassword = BCrypt.Net.BCrypt.HashPassword(updatedUser.PasswordHash);
 
@@ -156,25 +187,15 @@ namespace Minik.Server.Controllers
             {
                 conn.Open();
 
-                // Kullanıcı var mı kontrol et
-                string checkQuery = "SELECT COUNT(*) FROM users WHERE id = @id";
-                using (SqlCommand checkCmd = new SqlCommand(checkQuery, conn))
-                {
-                    checkCmd.Parameters.AddWithValue("@id", id);
-                    int exists = (int)checkCmd.ExecuteScalar();
-                    if (exists == 0)
-                        return NotFound($"ID {id} olan kullanıcı bulunamadı.");
-                }
-
                 // Güncelleme sorgusu
                 string updateQuery = @"
-            UPDATE users
-            SET full_name = @full_name,
-                email = @email,
-                password_hash = @password_hash,
-                role_id = @role_id,
-                phone_number = @phone_number
-            WHERE id = @id";
+    UPDATE users
+    SET full_name = @full_name,
+        email = @email,
+        password_hash = @password_hash,
+        role_id = @role_id,
+        phone_number = @phone_number
+    WHERE id = @id";
 
                 using (SqlCommand cmd = new SqlCommand(updateQuery, conn))
                 {
@@ -187,6 +208,49 @@ namespace Minik.Server.Controllers
 
                     cmd.ExecuteNonQuery();
                 }
+            }
+
+            // Güncellemeden sonraki kullanıcıyı al
+            object newUser = null;
+            using (SqlConnection conn = new SqlConnection(_connectionString))
+            {
+                conn.Open();
+                string selectQuery = "SELECT id, full_name, email, role_id, phone_number FROM users WHERE id = @id";
+                using (SqlCommand selectCmd = new SqlCommand(selectQuery, conn))
+                {
+                    selectCmd.Parameters.AddWithValue("@id", id);
+                    using (SqlDataReader reader = selectCmd.ExecuteReader())
+                    {
+                        if (reader.Read())
+                        {
+                            newUser = new
+                            {
+                                Id = reader.GetInt32(0),
+                                FullName = reader.GetString(1),
+                                Email = reader.GetString(2),
+                                RoleId = reader.IsDBNull(3) ? (int?)null : reader.GetInt32(3),
+                                PhoneNumber = reader.IsDBNull(4) ? null : reader.GetString(4)
+                            };
+                        }
+                    }
+                }
+            }
+
+            // Log ekle
+            using (var context = new Minik.Server.Data.ApplicationDbContext(new Microsoft.EntityFrameworkCore.DbContextOptions<Minik.Server.Data.ApplicationDbContext>()))
+            {
+                var log = new Minik.Server.Models.AuditLog
+                {
+                    UserId = null, // Giriş yapan adminin id'si eklenebilir
+                    Action = "Update",
+                    Entity = "User",
+                    EntityId = id,
+                    OldValue = System.Text.Json.JsonSerializer.Serialize(oldUser),
+                    NewValue = System.Text.Json.JsonSerializer.Serialize(newUser),
+                    Timestamp = DateTime.UtcNow
+                };
+                context.AuditLogs.Add(log);
+                context.SaveChanges();
             }
 
             return Ok(new { Message = "Kullanıcı başarıyla güncellendi." });
@@ -228,9 +292,9 @@ namespace Minik.Server.Controllers
         [HttpPut("role/{id}")]
         public IActionResult UpdateUserRole(int id, [FromBody] int roleId)
         {
-            if (roleId < 0 || roleId > 2)
+            if (roleId < 1 || roleId > 3)
             {
-                return BadRequest("Role ID yalnızca 0, 1 veya 2 olabilir.");
+                return BadRequest("Role ID yalnızca 1 (Customer), 2 (Property Owner) veya 3 (Admin) olabilir.");
             }
 
             using (SqlConnection conn = new SqlConnection(_connectionString))
@@ -270,32 +334,68 @@ namespace Minik.Server.Controllers
         [HttpDelete("{id}")]
         public IActionResult DeleteUser(int id)
         {
-            // Kullanıcı ID'si geçerli mi kontrol et
             if (id <= 0)
             {
                 return BadRequest("Geçersiz kullanıcı ID.");
             }
 
-            // Kullanıcıyı kontrol et
+            // Silinecek kullanıcıyı bul
+            object deletedUser = null;
             using (SqlConnection conn = new SqlConnection(_connectionString))
             {
                 conn.Open();
-                string checkQuery = "SELECT COUNT(*) FROM users WHERE id = @id";
-                using (SqlCommand checkCmd = new SqlCommand(checkQuery, conn))
+                string selectQuery = "SELECT id, full_name, email, role_id, phone_number FROM users WHERE id = @id";
+                using (SqlCommand selectCmd = new SqlCommand(selectQuery, conn))
                 {
-                    checkCmd.Parameters.AddWithValue("@id", id);
-                    int exists = (int)checkCmd.ExecuteScalar();
-                    if (exists == 0)
-                        return NotFound("Kullanıcı bulunamadı.");
+                    selectCmd.Parameters.AddWithValue("@id", id);
+                    using (SqlDataReader reader = selectCmd.ExecuteReader())
+                    {
+                        if (reader.Read())
+                        {
+                            deletedUser = new
+                            {
+                                Id = reader.GetInt32(0),
+                                FullName = reader.GetString(1),
+                                Email = reader.GetString(2),
+                                RoleId = reader.IsDBNull(3) ? (int?)null : reader.GetInt32(3),
+                                PhoneNumber = reader.IsDBNull(4) ? null : reader.GetString(4)
+                            };
+                        }
+                        else
+                        {
+                            return NotFound("Kullanıcı bulunamadı.");
+                        }
+                    }
                 }
+            }
 
-                // Kullanıcıyı sil
+            // Kullanıcıyı sil
+            using (SqlConnection conn = new SqlConnection(_connectionString))
+            {
+                conn.Open();
                 string deleteQuery = "DELETE FROM users WHERE id = @id";
                 using (SqlCommand deleteCmd = new SqlCommand(deleteQuery, conn))
                 {
                     deleteCmd.Parameters.AddWithValue("@id", id);
                     deleteCmd.ExecuteNonQuery();
                 }
+            }
+
+            // Log ekle
+            using (var context = new Minik.Server.Data.ApplicationDbContext(new Microsoft.EntityFrameworkCore.DbContextOptions<Minik.Server.Data.ApplicationDbContext>()))
+            {
+                var log = new Minik.Server.Models.AuditLog
+                {
+                    UserId = null, // Giriş yapan adminin id'si eklenebilir
+                    Action = "Delete",
+                    Entity = "User",
+                    EntityId = id,
+                    OldValue = System.Text.Json.JsonSerializer.Serialize(deletedUser),
+                    NewValue = null,
+                    Timestamp = DateTime.UtcNow
+                };
+                context.AuditLogs.Add(log);
+                context.SaveChanges();
             }
 
             return Ok(new { Message = "Kullanıcı başarıyla silindi." });
@@ -436,10 +536,10 @@ namespace Minik.Server.Controllers
                     }
                 }
 
-                // RoleId kontrolü (sadece 0, 1, 2 değerleri geçerli)
+                // RoleId kontrolü (1=Customer, 2=Property Owner, 3=Admin)
                 if (update.RoleId.HasValue)
                 {
-                    if (update.RoleId < 0 || update.RoleId > 2)
+                    if (update.RoleId < 1 || update.RoleId > 3)
                     {
                         skippedFields.Add("roleId");
                         // Geçersiz RoleId olduğu için bu alan güncellenmiyor
@@ -497,6 +597,58 @@ namespace Minik.Server.Controllers
             }
         }
 
+        [HttpPost("login")]
+        public IActionResult Login([FromBody] Login loginRequest)
+        {
+            if (string.IsNullOrWhiteSpace(loginRequest.Email) || string.IsNullOrWhiteSpace(loginRequest.PasswordHash))
+            {
+                return BadRequest("E-posta ve şifre gereklidir.");
+            }
+
+            using (SqlConnection conn = new SqlConnection(_connectionString))
+            {
+                conn.Open();
+                string query = "SELECT id, full_name, email, password_hash, role_id FROM users WHERE email = @Email";
+                using (SqlCommand cmd = new SqlCommand(query, conn))
+                {
+                    cmd.Parameters.AddWithValue("@Email", loginRequest.Email);
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        if (reader.Read())
+                        {
+                            int id = reader.GetInt32(0);
+                            string fullName = reader.GetString(1);
+                            string email = reader.GetString(2);
+                            string storedHash = reader.GetString(3);
+                            int? roleId = reader.IsDBNull(4) ? (int?)null : reader.GetInt32(4);
+
+                            bool isPasswordValid = BCrypt.Net.BCrypt.Verify(loginRequest.PasswordHash, storedHash);
+                            if (!isPasswordValid)
+                            {
+                                return Unauthorized("Şifre hatalı.");
+                            }
+
+                            // Sahte bir token üretiyoruz (gerçek projede JWT önerilir)
+                            string token = Convert.ToBase64String(Guid.NewGuid().ToByteArray());
+
+                            return Ok(new
+                            {
+                                id,
+                                fullName,
+                                email,
+                                roleId,
+                                token
+                            });
+                        }
+                        else
+                        {
+                            return Unauthorized("Kullanıcı bulunamadı.");
+                        }
+                    }
+                }
+            }
+        }
+
 
 
 
@@ -505,6 +657,4 @@ namespace Minik.Server.Controllers
 
     }
 }
-
-    
 
