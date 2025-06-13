@@ -1,8 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Data.SqlClient;
-using Minik.Server.Models;
+using Minik.Server.Modeller;
+using System.Data.SqlClient;
+using System.Collections.Generic;
 
-namespace Minik.Server.Controllers
+namespace Minik.Sunucu.Denetleyiciler
 {
     [ApiController]
     [Route("api/[controller]")]
@@ -15,134 +16,145 @@ namespace Minik.Server.Controllers
             _configuration = configuration;
         }
 
+        private SqlConnection GetConnection()
+        {
+            return new SqlConnection(_configuration.GetConnectionString("VarsayılanBağlantı"));
+        }
+
         // GET: api/discounts
         [HttpGet]
         public IActionResult GetAllDiscounts()
         {
-            string connectionString = _configuration.GetConnectionString("DefaultConnection");
-            var discounts = new List<object>();
-
-            using (SqlConnection conn = new SqlConnection(connectionString))
+            var discounts = new List<Discount>();
+            using (var conn = GetConnection())
             {
                 conn.Open();
-                string query = "SELECT * FROM discounts";
-                using (SqlCommand cmd = new SqlCommand(query, conn))
-                using (SqlDataReader reader = cmd.ExecuteReader())
+                var query = "SELECT * FROM discounts";
+                var cmd = new SqlCommand(query, conn);
+                var reader = cmd.ExecuteReader();
+
+                while (reader.Read())
                 {
-                    while (reader.Read())
+                    discounts.Add(new Discount
                     {
-                        discounts.Add(new
-                        {
-                            Id = reader.GetInt32(0),
-                            TinyHouseId = reader.GetInt32(1),
-                            DiscountPercentage = reader.GetInt32(2),
-                            ValidFrom = reader.GetDateTime(3),
-                            ValidUntil = reader.GetDateTime(4)
-                        });
-                    }
+                        Id = (int)reader["id"],
+                        TinyHouseId = (int)reader["tiny_house_id"],
+                        DiscountPercentage = (decimal)reader["discount_percentage"],
+                        ValidFrom = (DateTime)reader["valid_from"],
+                        ValidUntil = (DateTime)reader["valid_until"]
+                    });
                 }
             }
+
             return Ok(discounts);
         }
 
-        // GET: api/discounts/{id}
+        // GET: api/discounts/5
         [HttpGet("{id}")]
         public IActionResult GetDiscountById(int id)
         {
-            string connectionString = _configuration.GetConnectionString("DefaultConnection");
-            object discount = null;
-            using (SqlConnection conn = new SqlConnection(connectionString))
+            Discount discount = null;
+
+            using (var conn = GetConnection())
             {
                 conn.Open();
-                string query = "SELECT * FROM discounts WHERE id = @Id";
-                using (SqlCommand cmd = new SqlCommand(query, conn))
+                var query = "SELECT * FROM discounts WHERE id = @Id";
+                var cmd = new SqlCommand(query, conn);
+                cmd.Parameters.AddWithValue("@Id", id);
+
+                var reader = cmd.ExecuteReader();
+                if (reader.Read())
                 {
-                    cmd.Parameters.AddWithValue("@Id", id);
-                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    discount = new Discount
                     {
-                        if (reader.Read())
-                        {
-                            discount = new
-                            {
-                                Id = reader.GetInt32(0),
-                                TinyHouseId = reader.GetInt32(1),
-                                DiscountPercentage = reader.GetInt32(2),
-                                ValidFrom = reader.GetDateTime(3),
-                                ValidUntil = reader.GetDateTime(4)
-                            };
-                        }
-                    }
+                        Id = (int)reader["id"],
+                        TinyHouseId = (int)reader["tiny_house_id"],
+                        DiscountPercentage = (decimal)reader["discount_percentage"],
+                        ValidFrom = (DateTime)reader["valid_from"],
+                        ValidUntil = (DateTime)reader["valid_until"]
+                    };
                 }
             }
-            if (discount == null)
-                return NotFound("İndirim kaydı bulunamadı.");
-            return Ok(discount);
+
+            return discount != null ? Ok(discount) : NotFound("İndirim bulunamadı.");
         }
 
         // POST: api/discounts
         [HttpPost]
         public IActionResult AddDiscount([FromBody] Discount discount)
         {
-            string connectionString = _configuration.GetConnectionString("DefaultConnection");
-            using (SqlConnection conn = new SqlConnection(connectionString))
+            using (var conn = GetConnection())
             {
                 conn.Open();
-                string query = @"INSERT INTO discounts (tiny_house_id, discount_percentage, valid_from, valid_until)
-                                 VALUES (@TinyHouseId, @DiscountPercentage, @ValidFrom, @ValidUntil)";
-                using (SqlCommand cmd = new SqlCommand(query, conn))
-                {
-                    cmd.Parameters.AddWithValue("@TinyHouseId", discount.TinyHouseId);
-                    cmd.Parameters.AddWithValue("@DiscountPercentage", discount.DiscountPercentage);
-                    cmd.Parameters.AddWithValue("@ValidFrom", discount.ValidFrom);
-                    cmd.Parameters.AddWithValue("@ValidUntil", discount.ValidUntil);
-                    cmd.ExecuteNonQuery();
-                }
+                var query = @"INSERT INTO discounts (tiny_house_id, discount_percentage, valid_from, valid_until)
+                              VALUES (@TinyHouseId, @DiscountPercentage, @ValidFrom, @ValidUntil)";
+                var cmd = new SqlCommand(query, conn);
+                cmd.Parameters.AddWithValue("@TinyHouseId", discount.TinyHouseId);
+                cmd.Parameters.AddWithValue("@DiscountPercentage", discount.DiscountPercentage);
+                cmd.Parameters.AddWithValue("@ValidFrom", discount.ValidFrom);
+                cmd.Parameters.AddWithValue("@ValidUntil", discount.ValidUntil);
+
+                var result = cmd.ExecuteNonQuery();
+                return result > 0 ? Ok("İndirim başarıyla eklendi.") : BadRequest("Ekleme başarısız.");
             }
-            return Ok("İndirim kaydı başarıyla eklendi.");
         }
 
-        // PATCH: api/discounts/{id}
-        [HttpPatch("{id}")]
-        public IActionResult UpdateDiscount(int id, [FromBody] Discount update)
+        // PUT: api/discounts/5 (Tam güncelleme)
+        [HttpPut("{id}")]
+        public IActionResult UpdateDiscount(int id, [FromBody] Discount discount)
         {
-            string connectionString = _configuration.GetConnectionString("DefaultConnection");
-            using (SqlConnection conn = new SqlConnection(connectionString))
+            using (var conn = GetConnection())
             {
                 conn.Open();
-                string query = @"UPDATE discounts SET tiny_house_id = @TinyHouseId, discount_percentage = @DiscountPercentage, valid_from = @ValidFrom, valid_until = @ValidUntil WHERE id = @Id";
-                using (SqlCommand cmd = new SqlCommand(query, conn))
-                {
-                    cmd.Parameters.AddWithValue("@Id", id);
-                    cmd.Parameters.AddWithValue("@TinyHouseId", update.TinyHouseId);
-                    cmd.Parameters.AddWithValue("@DiscountPercentage", update.DiscountPercentage);
-                    cmd.Parameters.AddWithValue("@ValidFrom", update.ValidFrom);
-                    cmd.Parameters.AddWithValue("@ValidUntil", update.ValidUntil);
-                    int affected = cmd.ExecuteNonQuery();
-                    if (affected == 0)
-                        return NotFound("Güncellenecek indirim kaydı bulunamadı.");
-                }
+                var query = @"UPDATE discounts SET
+                              tiny_house_id = @TinyHouseId,
+                              discount_percentage = @DiscountPercentage,
+                              valid_from = @ValidFrom,
+                              valid_until = @ValidUntil
+                              WHERE id = @Id";
+                var cmd = new SqlCommand(query, conn);
+                cmd.Parameters.AddWithValue("@Id", id);
+                cmd.Parameters.AddWithValue("@TinyHouseId", discount.TinyHouseId);
+                cmd.Parameters.AddWithValue("@DiscountPercentage", discount.DiscountPercentage);
+                cmd.Parameters.AddWithValue("@ValidFrom", discount.ValidFrom);
+                cmd.Parameters.AddWithValue("@ValidUntil", discount.ValidUntil);
+
+                var result = cmd.ExecuteNonQuery();
+                return result > 0 ? Ok("İndirim güncellendi.") : NotFound("İndirim bulunamadı.");
             }
-            return Ok("İndirim kaydı başarıyla güncellendi.");
         }
 
-        // DELETE: api/discounts/{id}
+        // PATCH: api/discounts/5 (Sadece oran güncellemesi)
+        [HttpPatch("{id}")]
+        public IActionResult PatchDiscountPercentage(int id, [FromBody] decimal newPercentage)
+        {
+            using (var conn = GetConnection())
+            {
+                conn.Open();
+                var query = @"UPDATE discounts SET discount_percentage = @DiscountPercentage WHERE id = @Id";
+                var cmd = new SqlCommand(query, conn);
+                cmd.Parameters.AddWithValue("@Id", id);
+                cmd.Parameters.AddWithValue("@DiscountPercentage", newPercentage);
+
+                var result = cmd.ExecuteNonQuery();
+                return result > 0 ? Ok("İndirim oranı güncellendi.") : NotFound("İndirim bulunamadı.");
+            }
+        }
+
+        // DELETE: api/discounts/5
         [HttpDelete("{id}")]
         public IActionResult DeleteDiscount(int id)
         {
-            string connectionString = _configuration.GetConnectionString("DefaultConnection");
-            using (SqlConnection conn = new SqlConnection(connectionString))
+            using (var conn = GetConnection())
             {
                 conn.Open();
-                string query = "DELETE FROM discounts WHERE id = @Id";
-                using (SqlCommand cmd = new SqlCommand(query, conn))
-                {
-                    cmd.Parameters.AddWithValue("@Id", id);
-                    int affected = cmd.ExecuteNonQuery();
-                    if (affected == 0)
-                        return NotFound("Silinecek indirim kaydı bulunamadı.");
-                }
+                var query = "DELETE FROM discounts WHERE id = @Id";
+                var cmd = new SqlCommand(query, conn);
+                cmd.Parameters.AddWithValue("@Id", id);
+
+                var result = cmd.ExecuteNonQuery();
+                return result > 0 ? Ok("İndirim silindi.") : NotFound("İndirim bulunamadı.");
             }
-            return Ok("İndirim kaydı başarıyla silindi.");
         }
     }
-} 
+}
