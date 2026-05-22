@@ -1,105 +1,151 @@
-# 🏡 Tiny House Reservation and Management System
+# Tiny House Reservation and Management System
 
-A full-stack reservation and management system for Tiny House rentals with role-based access, developed using React, ASP.NET Core, and MSSQL. This project is currently in MVP (Minimum Viable Product) stage.
+Full-stack reservation and management system for Tiny House rentals. Built as a university project to explore REST APIs, database-driven design, and team collaboration. This repository represents my early growth phase and is now being polished for a public portfolio.
 
-## 📅 Project Date
+## Development Team
 
-March 13, 2025
+- Kaan Civelek - Full-stack and project lead
+- Naciye Kaya - Backend controllers and models
+- Nebi Ciftkaldiran - Backend controllers and models
+- Raif Mert Ikier - Database structure and admin panel
 
-## 👨‍💻 Development Team
+## Project Overview
 
-- **Kaan Civelek** - Full-Stack & Project Lead
-- **Naciye Kaya** - Backend Controllers And Models
-- **Nebi Çiftkaldıran** - Backend Controllers And Models 
-- **Raif Mert İkier** - Database Structure And Model && Admin Panel
+The system allows tenants to search and reserve Tiny Houses, hosts to manage listings and bookings, and administrators to moderate the platform. It includes payments, reviews, user management, and reporting features with an MSSQL-driven schema.
 
-## 🧾 Project Description
+## Tech Stack
 
-This system allows **tenants** to search and reserve Tiny Houses, **hosts** to manage listings and bookings, and **administrators** to moderate and supervise the platform's overall activity. It includes functionality for payments, reviews, user management, and statistical reporting. The project emphasizes database-driven development with real-world software engineering practices.
+Backend
+- ASP.NET Core Web API
+- ADO.NET
+- Microsoft SQL Server
 
-## 🔧 Tech Stack
+Frontend
+- React
+- Reactstrap, React Router DOM, Ant Design, Axios, Toastify
 
-### Backend
-- **Framework:** ASP.NET Core Web API
-- **Database Access:** ADO.NET
-- **Database:** Microsoft SQL Server (MSSQL)
+## Features by Role
 
-### Frontend
-- **Framework:** React.js
-- **Libraries:** Reactstrap, React Router DOM, Ant Design, Axios, Reactstrap, Toastify
-
-## 🚀 Features by User Role
-
-### 🏠 Tenant
-- Register/login
-- Browse and filter Tiny Houses
-- Make/cancel bookings
-- Make online payments
+Tenant
+- Register and login
+- Browse, filter, and reserve Tiny Houses
+- Manage reservations
+- Make payments
 - Submit reviews and ratings
 
-### 👨‍🌾 Host
-- Create, edit, and manage listings
-- Accept/reject reservation requests
-- View booking history and tenant reviews
+Host
+- Create and manage listings
+- Approve or reject reservations
+- View booking history and tenant feedback
 - Track payments and income
 
-### 🛠️ Admin
-- Manage user accounts
+Admin
+- Manage users
 - Cancel bookings
 - Moderate listings
 - Monitor transactions
 - View system statistics and reports
 
-## 📁 Database Features
+## Database Highlights
 
-- Stored Procedures (e.g., reservation creation)
-- Functions (e.g., booking cost calculation)
-- Triggers (e.g., log reservation status changes)
-- Full ER Diagram with normalized schema
-- Constraints (Primary, Foreign, Unique, Not Null, Check)
+- Stored procedures (reservation creation, availability updates)
+- Functions (cost calculation)
+- Triggers (audit logging)
+- Normalized schema with constraints
 
-## 🖥️ Installation & Running the Project
+## Architecture
 
-### Prerequisites
+- Backend API: ASP.NET Core Web API with ADO.NET data access
+- Frontend app: React SPA for tenants and hosts
+- Admin app: React + Ant Design admin panel
+- Database: MSSQL with stored procedures and triggers
+
+## Setup
+
+Prerequisites
 - Visual Studio 2022 or later
-- Node.js (LTS version)
+- Node.js (LTS)
 - SQL Server 2019 or later
 - SQL Server Management Studio (SSMS)
 
-### 🔐 Database Setup
+Database
+1. Open SSMS and connect to localhost with Windows Authentication.
+2. Run the script in [db.sql](db.sql).
 
-1. Open **SQL Server Management Studio (SSMS)**
-2. Connect to your local SQL Server instance:
-   - Server Name: `localhost`
-   - Authentication: Windows Authentication
-3. Execute the `db.sql` script located in the root folder
+Backend (ASP.NET Core API)
+1. Open [backend/backend.sln](backend/backend.sln) in Visual Studio.
+2. Verify the connection string in [backend/appsettings.json](backend/appsettings.json).
+3. Start the API with F5.
 
-### ⚙️ Backend Setup (ASP.NET Core API)
+Frontend (main app)
+1. In a terminal, run the following commands:
 
-1. Navigate to the `backend` folder
-2. Open the `.sln` file using Visual Studio
-3. Configure launch properties for launching multiple starting projects
-4. Press `F5` to start the server
-5. To stop the server, close the console window
+```bash
+cd frontend
+npm install
+npm run dev
+```
 
-### 🎨 Frontend Setup (React)
+Admin panel
+1. In a new terminal, run the following commands:
 
-1. Navigate to the `frontend` folder
-2. Open terminal and run:
-   ```bash
-   npm install
-   npm run dev
-   ```
-3. The application will open in your default browser at `http://localhost:5173`
+```bash
+cd frontend/admin
+npm install
+npm run dev
+```
 
-### 🚀 Quick Start
+Quick start
+- Use [start-project.bat](start-project.bat) to run frontend and backend together.
 
-You can use the provided `start-project.bat` script to start both frontend and backend services simultaneously.
+## Configuration
 
-## 📝 License
+- API base URL for admin is configured in [frontend/admin/src/services/api.ts](frontend/admin/src/services/api.ts). It defaults to https://localhost:7183/api unless VITE_API_BASE_URL is set.
+- Backend connection string is configured in [backend/appsettings.json](backend/appsettings.json).
 
-This project is licensed under the terms included in the LICENSE file.
+## API Notes
 
-## 🤝 Contributing
+Auth endpoints
+- POST /api/Login/login returns a success string when credentials are valid.
+- POST /api/User/login returns user data plus a mock token (used by admin login).
+- POST /api/Register/register creates a new user.
 
-This is a university course project developed by students of the Hasan Ferdi Turgutlu Technology Faculty, Software Engineering Department. For any questions or contributions, please contact the project lead.
+Roles
+- role_id: 1 = Customer, 2 = Property Owner, 3 = Admin
+
+Pagination
+- GET /api/TinyHouses/paged uses offset and limit (used by the main app with a "Load More" button).
+- GET /api/TinyHouses/catalog uses page-based paging and is currently unused by the main app.
+
+## Auth Status (Current Behavior)
+
+- Main app stores user data in localStorage after login.
+- Admin panel stores a mock token from /api/User/login in localStorage.
+- API endpoints are not protected with JWT or authorization middleware.
+
+Recommended upgrade path
+- Replace mock token with JWT.
+- Add [Authorize] guards on sensitive endpoints.
+- Use role-based checks for admin-only actions.
+
+## Known Limitations
+
+- Authentication is minimal and not production grade.
+- Authorization is not enforced at the API level.
+- Pagination endpoints are inconsistent (page vs offset).
+- Some UI state is passed via props instead of shared state/context.
+
+## Roadmap
+- Restrating project from zero to hero
+- JWT-based auth with role guards
+- Unified pagination strategy and reusable UI component
+- Centralized auth state (context or Redux) for main app
+- Seperated repos handling
+- Deployment
+## License
+
+See [LICENSE](LICENSE).
+
+## Contributing
+
+This is a university course project developed by students of Hasan Ferdi Turgutlu Technology Faculty, Software Engineering Department. For questions or contributions, please contact the project lead.
